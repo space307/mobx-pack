@@ -1,6 +1,6 @@
 {
   "name": "mobx-pack",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Library for creating application based on Mobx",
   "main": "index.js",
   "author": "Space307",
