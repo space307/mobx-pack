@@ -257,5 +257,5 @@ export default Connector(
 <img src="docs/shema.png" align="center" width="611" height="657" title="scheme" alt="scheme" />
 
 ##Links
-- <a href="https://github.com/alexander812/mobx-pack-starter" target="_blank">Boilerplate project</a>
-- <a href="https://opencollective.com/mobx/sponsor/0/website" target="_blank">Mobx</a>
+- <a href="https://github.com/space307/mobx-pack-demo" target="_blank">Boilerplate project</a>
+- <a href="https://github.com/mobxjs/mobx" target="_blank">Mobx</a>
