@@ -38,7 +38,11 @@ export default class BaseStore {
     }
   }
 
-  start(initiatorId) {
+  start(initiatorId, context) {
+    if (context) {
+      this.binder = context.binder;
+      this.serviceStarter = context.serviceStarter;
+    }
     const waitFor = this.serviceStarter.waitFor(this);
 
     return waitFor
@@ -46,7 +50,7 @@ export default class BaseStore {
       new Promise((resolve, reject) => waitFor.then(() => {
         this.startDo(initiatorId, this.serviceStarter)
           .then(() => resolve())
-          .catch((error) => reject(error));
+          .catch(error => reject(error));
       }))
       :
       this.startDo(initiatorId, this.serviceStarter);
