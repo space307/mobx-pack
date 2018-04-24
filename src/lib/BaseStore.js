@@ -39,9 +39,9 @@ export default class BaseStore {
     }
   }
 
-  static getInstance() {
+  static getInstance(context) {
     if (!this.instance) {
-      this.instance = new this();
+      this.instance = new this(context);
     }
     return this.instance;
   }
