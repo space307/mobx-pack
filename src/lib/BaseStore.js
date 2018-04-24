@@ -30,12 +30,20 @@ export default class BaseStore {
   alreadyStarting = false;
   alreadyStopping = false;
   initiators = [];
+  static instance = null;
 
   constructor(context) {
     if (context) {
       this.binder = context.binder;
       this.serviceStarter = context.serviceStarter;
     }
+  }
+
+  static getInstance() {
+    if (!this.instance) {
+      this.instance = new this();
+    }
+    return this.instance;
   }
 
   start(initiatorId, context) {
