@@ -320,6 +320,10 @@ export default class BaseStore {
       obsr();
     });
     this.unbindApp();
+
+    if (this.constructor.instance) {
+      this.constructor.instance = null;
+    }
   }
 }
 
