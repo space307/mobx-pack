@@ -30,12 +30,20 @@ export default class BaseStore {
   alreadyStarting = false;
   alreadyStopping = false;
   initiators = [];
+  static instance = null;
 
   constructor(context) {
     if (context) {
       this.binder = context.binder;
       this.serviceStarter = context.serviceStarter;
     }
+  }
+
+  static getInstance(context) {
+    if (!this.instance) {
+      this.instance = new this(context);
+    }
+    return this.instance;
   }
 
   start(initiatorId, context) {
@@ -312,6 +320,10 @@ export default class BaseStore {
       obsr();
     });
     this.unbindApp();
+
+    if (this.constructor.instance) {
+      this.constructor.instance = null;
+    }
   }
 }
 
