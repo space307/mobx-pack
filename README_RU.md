@@ -254,6 +254,6 @@ export default Connector(
 ## Схема потока дынных
 <img src="docs/shema.png" align="center" width="611" height="657" title="Shema" alt="Shema" />
 
-##Ссылки
+## Ссылки
 - <a href="https://github.com/alexander812/mobx-pack-starter" target="_blank">Boilerplate project</a>
 - <a href="https://opencollective.com/mobx/sponsor/0/website" target="_blank">Mobx</a>

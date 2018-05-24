@@ -256,6 +256,6 @@ export default Connector(
 ## Data flow scheme
 <img src="docs/shema.png" align="center" width="611" height="657" title="scheme" alt="scheme" />
 
-##Links
+## Links
 - <a href="https://github.com/space307/mobx-pack-demo" target="_blank">Boilerplate project</a>
 - <a href="https://github.com/mobxjs/mobx" target="_blank">Mobx</a>
