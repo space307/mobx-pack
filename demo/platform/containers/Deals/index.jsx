@@ -1,4 +1,4 @@
-import { Connector } from 'mobx-pack';
+import { Connector } from 'index.js';
 import { observer } from 'mobx-react';
 
 import dealService from 'demo/platform/services/DealService/index.js';

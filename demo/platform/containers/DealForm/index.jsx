@@ -1,5 +1,5 @@
 import React from 'react';
-import { Connector } from 'mobx-pack';
+import { Connector } from 'index.js';
 import context from 'demo/platform/helper/context.js';
 
 import DealFormStore from 'demo/platform/containers/DealForm/store/DealFormStore.js';
@@ -13,6 +13,7 @@ import Typography from "material-ui/Typography";
 import paperStyle from 'demo/platform/style/paperBlock.json';
 import dibiderStyle from 'demo/platform/style/headerDivider.json';
 
+//
 const Form = () => (
   <Paper style={paperStyle}>
     <Typography variant="headline" component="h3">

@@ -1,4 +1,4 @@
-import { Connector } from 'mobx-pack';
+import { Connector } from 'index.js';
 import Timer from 'demo/platform/components/Timer/index.jsx';
 
 export default Connector(

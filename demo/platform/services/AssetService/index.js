@@ -1,6 +1,6 @@
 import { find } from 'lodash';
 import { observable, action, computed } from 'mobx';
-import { BaseStore } from 'mobx-pack';
+import { BaseStore } from 'index.js';
 import { ASSET_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
 import { fetchAssets } from 'demo/platform/services/AssetService/client.js';

@@ -26,12 +26,13 @@ class RechargeForm extends React.Component {
     if (nextProps.amount !== this.props.amount) {
       this.setState({ amount: nextProps.amount });
     }
-    if (nextProps.inFocus !== this.props.inFocus && !!nextProps.inFocus) {
+    // TODO починить фокус
+/*    if (nextProps.inFocus !== this.props.inFocus && !!nextProps.inFocus) {
       setTimeout(() => {
         this.input.focus();
         this.input.select();
       });
-    }
+    }*/
   }
   onChange(e) {
     this.setState({ amount: e.currentTarget.value });
@@ -51,7 +52,8 @@ class RechargeForm extends React.Component {
         <Divider style={dibiderStyle} />
         <div>
           <Input
-            ref={(node) => { this.input = node; }}
+            ref={(node) => {
+              this.input = node; }}
             type="text"
             value={this.state.amount}
             onChange={this.onChange}

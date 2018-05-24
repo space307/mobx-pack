@@ -1,4 +1,4 @@
-import { Connector } from 'mobx-pack';
+import { Connector } from 'index.js';
 import CurrentPrice from 'demo/platform/components/CurrentPrice/index.jsx';
 import PriceService from 'demo/platform/services/PriceService/index.js';
 import AssetService from 'demo/platform/services/AssetService/index.js';

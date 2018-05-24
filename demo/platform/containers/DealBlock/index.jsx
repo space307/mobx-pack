@@ -1,4 +1,4 @@
-import { Connector } from 'mobx-pack';
+import { Connector } from 'index.js';
 import DealBlock from 'demo/platform/components/DealBlock/index.jsx';
 
 

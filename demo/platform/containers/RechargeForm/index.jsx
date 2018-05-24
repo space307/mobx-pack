@@ -1,4 +1,4 @@
-import { Connector } from 'mobx-pack';
+import { Connector } from 'index.js';
 import context from 'demo/platform/helper/context.js';
 import RechargeFormStore from 'demo/platform/containers/RechargeForm/store/RechargeFormStore.js';
 import rechargeService from 'demo/platform/services/RechargeService/index.js';

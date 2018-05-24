@@ -1,4 +1,4 @@
-import {Binder, ServiceStarter} from 'mobx-pack';
+import {Binder, ServiceStarter} from 'index.js';
 
 
 export default {

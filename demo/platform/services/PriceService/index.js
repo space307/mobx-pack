@@ -1,5 +1,5 @@
-import { BaseStore } from 'mobx-pack';
-import { observable, action, computed, reaction, runInAction } from 'mobx';
+import { BaseStore } from 'index.js';
+import { observable, action, reaction } from 'mobx';
 import { PRICE_SERVICE, ASSET_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
 

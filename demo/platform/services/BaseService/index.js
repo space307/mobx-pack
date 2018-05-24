@@ -1,4 +1,4 @@
-import { BaseStore } from 'mobx-pack';
+import { BaseStore } from 'index.js';
 import { BASE_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
 

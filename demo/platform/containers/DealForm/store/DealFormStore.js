@@ -1,5 +1,5 @@
 import { observable, action, runInAction, computed, toJS } from 'mobx';
-import { BaseStore } from 'mobx-pack';
+import { BaseStore } from 'index.js';
 import {
   ASSET_SERVICE, BASE_SERVICE, DEAL_SERVICE, BALANCE_SERVICE, PRICE_SERVICE,
   RECHARGE_SERVICE, RECHARGE_FORM_STORE,

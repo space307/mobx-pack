@@ -1,4 +1,4 @@
-import { Connector } from 'mobx-pack';
+import { Connector } from 'index.js';
 import { observer } from 'mobx-react';
 import context from 'demo/platform/helper/context.js';
 import balanceService from 'demo/platform/services/BalanceService/index.js';

@@ -1,4 +1,4 @@
-import { BaseStore } from 'mobx-pack';
+import { BaseStore } from 'index.js';
 import { observable, action } from 'mobx';
 import { RECHARGE_SERVICE, BALANCE_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import { ASSET_NAMES } from 'demo/platform/constants/common.js';
