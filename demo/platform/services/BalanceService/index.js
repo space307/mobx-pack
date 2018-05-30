@@ -3,7 +3,7 @@ import { observable, action } from 'mobx';
 import { BALANCE_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
 import { ASSET_NAMES } from 'demo/platform/constants/common.js';
-
+import serviceConnector from 'demo/platform/helper/serviceConnector.js';
 
 function validateBalanceChange(balance, data) {
   let result = true;
@@ -55,4 +55,4 @@ export class BalanceService extends BaseStore {
 }
 
 
-export default new BalanceService(context);
+export default serviceConnector(new BalanceService(), {bindAs:BALANCE_SERVICE , context});

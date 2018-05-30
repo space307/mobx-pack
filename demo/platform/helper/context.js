@@ -1,4 +1,5 @@
-import {Binder, ServiceStarter} from 'index.js';
+import {ServiceStarter} from 'index.js';
+import Binder from 'demo/platform/helper/binder.js'
 
 
 export default {
