@@ -1,14 +1,14 @@
 
 
 
-export default function serviceConnector(service, {bindAs, context, services}){
+export default function serviceConnector(service, options){
 
   console.log(['serviceConnector', context.binder]);
 
 
   service.start = function(){
 
-    context.binder.bind(service, {bindAs, services})
+    context.binder.bind(service, options)
 
   }
 

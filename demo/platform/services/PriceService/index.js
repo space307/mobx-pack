@@ -1,9 +1,8 @@
 import { BaseStore } from 'index.js';
 import { observable, action, reaction } from 'mobx';
-import { PRICE_SERVICE, ASSET_SERVICE, BALANCE_SERVICE } from 'demo/platform/constants/moduleNames.js';
+import { PRICE_SERVICE, ASSET_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
-import serviceConnector from 'demo/platform/helper/serviceConnector.js';
-import {BalanceService} from "../BalanceService";
+
 function randNumber(min, max) {
   return Math.floor(Math.random() * (max - (min + 1))) + min;
 }
@@ -56,5 +55,4 @@ export class PriceService extends BaseStore {
 }
 
 
-
-export default serviceConnector(new PriceService(), {bindAs:BALANCE_SERVICE, context, services:[BALANCE_SERVICE]});
+export default new PriceService(context);

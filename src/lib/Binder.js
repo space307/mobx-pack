@@ -5,9 +5,8 @@ import { protoName } from './util';
 class Binder {
   stores = {};
 
-  bind(store) {
-    const config = store.getConfig();
-    const bindAs = config.bindAs;
+  bind(store, options) {
+    const bindAs = options.bindAs;
 
     if (typeof bindAs !== 'string' || !bindAs.length) {
       this.showMessage(`Store "${protoName(store)}" has not valid "bindAs" id "${bindAs}".`, 'error');
@@ -19,7 +18,7 @@ class Binder {
       return;
     }
 
-    this.addStore(store);
+    this.addStore(store, options);
 
     if (this.isDebug(bindAs)) {
       this.showMessage(`"${bindAs}" bind.`);
@@ -43,12 +42,11 @@ class Binder {
     this.notifyOnBind(this.getStore(bindAs));
   }
 
-  addStore(store) {
-    const config = store.getConfig();
-    const bindAs = config.bindAs;
+  addStore(store, options) {
+    const bindAs = options.bindAs;
     const bindHash = {};
-    if (config.onBind) {
-      config.onBind.forEach((arr) => {
+    if (options.onBind) {
+      options.onBind.forEach((arr) => {
         arr.forEach((storeName) => {
           if (typeof storeName !== 'function') {
             bindHash[storeName] = 1;
@@ -61,8 +59,7 @@ class Binder {
       bindAs,
       store,
       bindHash,
-      onBind: _.cloneDeep(config.onBind),
-      importData: Object.assign({}, config.importData || {}),
+      options: _.cloneDeep(options),
       disposers: {
         list: [],
         services: {},
@@ -81,8 +78,8 @@ class Binder {
   }
 
   notifyOnBind(store) {
-    if (store.onBind) {
-      store.onBind.forEach((onBindItem) => {
+    if (store.options.onBind) {
+      store.options.onBind.forEach((onBindItem) => {
         let bindCnt = 0;
         const cb = onBindItem[onBindItem.length - 1];
         onBindItem.forEach((storeName) => {
@@ -100,15 +97,16 @@ class Binder {
   }
 
   isDebug(bindAs) {
-    const s = this.getStore(bindAs).store;
-    return s && s.config ? s.config.debug : false;
+    const s = this.getStore(bindAs);
+    return s && s.options ? s.options.debug : false;
   }
 
   processStore(from, to) {
-    if (from.bindAs !== to.bindAs) {
-      const importData = to.importData;
 
-      if (importData[from.bindAs]) {
+    if (from.bindAs !== to.bindAs) {
+      const importData = to.options.importData;
+
+      if (importData && importData[from.bindAs]) {
         _.each(importData[from.bindAs], (toVarName, fromVarName) => {
           if (!(fromVarName in from.store)) {
             this.showMessage(`Variable "${fromVarName}" required for "${to.bindAs}" 
@@ -171,9 +169,8 @@ class Binder {
     return this.stores[bindAs] || {};
   }
 
-  unbind(store) {
-    const config = store.getConfig();
-    const bindAs = config.bindAs;
+  unbind(bindAs) {
+
     const storeSettings = this.getStore(bindAs);
 
     if (_.isEmpty(storeSettings)) {
@@ -184,8 +181,7 @@ class Binder {
     // unbind data exporting to other stores
     _.each(this.stores, (item) => {
       if (item) {
-        const importData = item.importData[bindAs];
-        // console.log([importData]);
+        const importData = item.options.importData && item.options.importData[bindAs];
         if (importData) {
           // console.log(['unbind data exporting to other stores', item.bindAs, importData]);
           this.unbindData(item.bindAs, importData);
@@ -194,9 +190,11 @@ class Binder {
     });
 
     // unbind data importing from other stores
-    _.each(storeSettings.importData, (importData) => {
-      this.unbindData(bindAs, importData);
-    });
+    if(storeSettings.options.importData){
+      _.each(storeSettings.options.importData, (importData) => {
+        this.unbindData(bindAs, importData);
+      });
+    }
 
     // unbind disposers in this store
     storeSettings.disposers.list.forEach((disposer) => {
@@ -255,16 +253,16 @@ class Binder {
     let exportData;
 
     if (s && s.store) {
-      exportData = store.getConfig().exportData;
+      exportData = s.options.exportData;
 
       if (exportData && !exportData[varName]) {
         console.warn(`Warnning! Impossible import variable "${varName}" of 
-        "${store.getConfig().bindAs}" for "${initiator}" because variable is not included to config.exportData.`);
+        "${s.bindAs}" for "${initiator}" because variable is not included to config.exportData.`);
         return;
       }
 
       val = store[varName];
-      if (store.getConfig().debug) {
+      if (s.debug) {
         console.log(`Binder. "${initiator}" import variable "${varName}" from "${storeName}".`, val);
       }
       return raw ? val : toJS(val); // eslint-disable-line
@@ -293,7 +291,7 @@ class Binder {
     if (s && s.store) {
       storeInst = s.store;
 
-      if (s.store.getConfig().debug) {
+      if (s.options.debug) {
         console.log(`Binder callApi. "${initiator}" calls method "${actionName}" from "${storeName}".`, arg);
       }
 

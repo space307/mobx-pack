@@ -10,7 +10,7 @@ import balanceService from 'demo/platform/services/BalanceService/index.js';
 import Platform from 'demo/platform/layouts/Platform/index.jsx';
 
 
-/*document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
   Promise.all([
     priceService.start('entry'),
     assetService.start('entry'),
@@ -20,5 +20,5 @@ import Platform from 'demo/platform/layouts/Platform/index.jsx';
   ]).then(() => {
     ReactDOM.render(React.createElement(Platform), document.querySelector('#root'));
   });
-});*/
+});
 
