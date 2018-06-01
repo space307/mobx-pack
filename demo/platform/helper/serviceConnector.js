@@ -1,16 +1,61 @@
+function startOk(service, options){
 
+  options.context.binder.bind(service, options.config);
+  service.__started = true;
+}
 
+function stopOk(service, options){
 
+  options.context.binder.unbind(options.config.bindAs);
+  service.__started = false;
+
+}
 export default function serviceConnector(service, options){
 
-  console.log(['serviceConnector', context.binder]);
+  if(typeof service.start !== 'function' && !service.__started){
+    service.start = function(){
 
+      return new Promise((resolve, reject)=>{
 
-  service.start = function(){
+        const onStart = options.onStart || service.onStart;
 
-    context.binder.bind(service, options)
+        if(typeof onStart === 'function'){
+
+          let onStartResult = onStart.call(service);
+
+          if (onStartResult instanceof Promise) {
+            onStartResult.then(()=>{
+              startOk(service, options);
+              resolve();
+            }).catch((err)=>{
+              reject(err);
+            });
+          } else if(onStartResult !== false){
+            startOk(service, options);
+            resolve();
+          } else {
+            reject(`Service ${options.config.bindAs} onStart return "false"`);
+          }
+
+        } else {
+          startOk(service, options);
+          resolve();
+        }
+      });
+    };
+
+    service.stop = function(){
+      const onStop = options.onStop || service.onStop;
+
+      if(typeof onStop === 'function'){
+        onStop.call(service);
+        stopOk(service, options);
+      }
+
+    }
 
   }
 
+  return service;
 
 }

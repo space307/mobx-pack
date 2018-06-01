@@ -1,20 +1,12 @@
 import { find } from 'lodash';
 import { observable, action, computed } from 'mobx';
-import { BaseStore } from 'index.js';
 import { ASSET_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
 import { fetchAssets } from 'demo/platform/services/AssetService/client.js';
+import serviceConnector from 'demo/platform/helper/serviceConnector.js';
 
 
-export class AssetService extends BaseStore {
-  config = {
-    bindAs: ASSET_SERVICE,
-    exportData: {
-      assetCollection: 1,
-      selectedAsset: 1,
-      selectedAssetData: 1,
-    },
-  };
+export class AssetService {
 
   api = {
     selectAsset: this.selectAsset,
@@ -44,4 +36,8 @@ export class AssetService extends BaseStore {
   }
 }
 
-export default new AssetService(context);
+
+export default serviceConnector(new AssetService(), {
+  context,
+  config: {bindAs:ASSET_SERVICE}
+});

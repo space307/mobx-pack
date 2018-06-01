@@ -81,16 +81,18 @@ class Binder {
     if (store.options.onBind) {
       store.options.onBind.forEach((onBindItem) => {
         let bindCnt = 0;
+        const storeList = [];
         const cb = onBindItem[onBindItem.length - 1];
         onBindItem.forEach((storeName) => {
           if (typeof storeName !== 'function') {
             if (this.getStore(storeName).store) {
               bindCnt++;
+              storeList.push(this.getStore(storeName).store);
             }
           }
         });
         if (bindCnt === onBindItem.length - 1 && typeof cb === 'function') {
-          cb.call(store.store);
+          cb.apply(store.store, storeList);
         }
       });
     }

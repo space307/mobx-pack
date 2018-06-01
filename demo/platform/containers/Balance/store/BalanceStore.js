@@ -30,8 +30,16 @@ export default class BalanceStore extends BaseStore {
 
   @action recharge() {
     if (this.isRecharge) {
-      this.callApi(RECHARGE_SERVICE, 'recharge', this.defaultAmount);
+      //this.callApi(RECHARGE_SERVICE, 'recharge', this.defaultAmount);
     }
   }
+  /*
+
+   @action recharge() {
+    if (this.rechargeService) {
+      this.rechargeService.recharge(this.rechargeService.defaultAmount)
+    }
+  }
+   */
 }
 
