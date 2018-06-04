@@ -1,6 +1,6 @@
 // @flow
 import { observable, action, reaction } from 'mobx';
-import { serviceConnector } from 'index.js';
+import { ServiceConnector } from 'index.js';
 import { PRICE_SERVICE, ASSET_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
 import type { PriceServiceInterface } from 'demo/platform/services/PriceService/typing/interfaces.js';
@@ -46,16 +46,16 @@ export class PriceService implements PriceServiceInterface {
 }
 
 
-const priceService = new PriceService();
+//const priceService = new PriceService();
 
-export default serviceConnector(
-  priceService,
+export default ServiceConnector(
+  new PriceService(),
   {
-    context,
+    binder: context.binder,
     config: {
       bindAs: PRICE_SERVICE,
       onBind: [
-        [ASSET_SERVICE, priceService.onBind],
+        [ASSET_SERVICE, 'onBind'],
       ],
     },
 

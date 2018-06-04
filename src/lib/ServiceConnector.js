@@ -1,15 +1,19 @@
-function startOk(service, options) {
-  options.context.binder.bind(service, options.config);
+// @flow
+import type { ServiceConnectorOptionsTypes } from 'src/lib/typing/ServiceConnectorTypes.js';
+
+
+function startOk(service: *, options: ServiceConnectorOptionsTypes) {
+  options.binder.bind(service, options.config);
   service.__serviceOptions.started = true;
 }
 
-function stopOk(service, options) {
-  options.context.binder.unbind(options.config.bindAs);
+function stopOk(service: *, options: ServiceConnectorOptionsTypes) {
+  options.binder.unbind(options.config.bindAs);
   service.__serviceOptions.started = false;
 }
 
 
-export default function serviceConnector(service, options) {
+export default function ServiceConnector(service: *, options: ServiceConnectorOptionsTypes): * {
   if (!service.__serviceOptions) {
     service.__serviceOptions = {
       started: false,
@@ -17,9 +21,12 @@ export default function serviceConnector(service, options) {
   }
 
   if (typeof service.start !== 'function' && !service.__serviceOptions.started) {
-    service.start = function () {
+    service.start = function (): Promise<*> {
       return new Promise((resolve, reject) => {
-        const onStart = options.onStart || service.onStart;
+        let onStart = options.onStart || service.onStart;
+        if (typeof onStart === 'string' && typeof service[onStart] === 'function') {
+          onStart = service[onStart];
+        }
 
         if (typeof onStart === 'function') {
           const onStartResult = onStart.call(service);
@@ -45,7 +52,10 @@ export default function serviceConnector(service, options) {
     };
 
     service.stop = function () {
-      const onStop = options.onStop || service.onStop;
+      let onStop = options.onStop || service.onStop;
+      if (typeof onStop === 'string' && typeof service[onStop] === 'function') {
+        onStop = service[onStop];
+      }
 
       if (typeof onStop === 'function') {
         onStop.call(service);

@@ -91,8 +91,12 @@ class Binder {
             }
           }
         });
-        if (bindCnt === onBindItem.length - 1 && typeof cb === 'function') {
-          cb.apply(store.store, storeList);
+        if (bindCnt === onBindItem.length - 1) {
+          let onBindCb = cb;
+          if (typeof onBindCb === 'string' && typeof store.store[onBindCb] === 'function') {
+            onBindCb = store.store[onBindCb];
+          }
+          onBindCb.apply(store.store, storeList);
         }
       });
     }
@@ -104,7 +108,6 @@ class Binder {
   }
 
   processStore(from, to) {
-
     if (from.bindAs !== to.bindAs) {
       const importData = to.options.importData;
 
@@ -122,15 +125,16 @@ class Binder {
             return;
           }
 
-          Object.defineProperty(to.store, toVarName, { get: () => {
-            if (this.isDebug(to.bindAs)) {
-              this.showMessage(`Variable "${fromVarName}" from "${from.bindAs}" 
+          Object.defineProperty(to.store, toVarName, {
+            get: () => {
+              if (this.isDebug(to.bindAs)) {
+                this.showMessage(`Variable "${fromVarName}" from "${from.bindAs}" 
               was taken by "${to.bindAs}" with name "${toVarName}"`);
-            }
+              }
 
-            return from.store[fromVarName];
-          },
-          configurable: true,
+              return from.store[fromVarName];
+            },
+            configurable: true,
           });
         });
       }
@@ -172,7 +176,6 @@ class Binder {
   }
 
   unbind(bindAs) {
-
     const storeSettings = this.getStore(bindAs);
 
     if (_.isEmpty(storeSettings)) {
@@ -192,7 +195,7 @@ class Binder {
     });
 
     // unbind data importing from other stores
-    if(storeSettings.options.importData){
+    if (storeSettings.options.importData) {
       _.each(storeSettings.options.importData, (importData) => {
         this.unbindData(bindAs, importData);
       });

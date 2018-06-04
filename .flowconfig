@@ -29,3 +29,4 @@ module.name_mapper.extension='scss' -> 'empty/object'
 # aliases
 module.name_mapper='^demo' -> '<PROJECT_ROOT>/demo/'
 module.name_mapper='^index.js' -> '<PROJECT_ROOT>/index.js'
+module.name_mapper='^src' -> '<PROJECT_ROOT>/src/'
