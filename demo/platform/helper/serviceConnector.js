@@ -1,18 +1,26 @@
 function startOk(service, options){
 
   options.context.binder.bind(service, options.config);
-  service.__started = true;
+  service.__serviceOptions.started = true;
 }
 
 function stopOk(service, options){
 
   options.context.binder.unbind(options.config.bindAs);
-  service.__started = false;
+  service.__serviceOptions.started = false;
 
 }
+
+
 export default function serviceConnector(service, options){
 
-  if(typeof service.start !== 'function' && !service.__started){
+  if(!service.__serviceOptions){
+    service.__serviceOptions = {
+      started: false,
+    }
+  }
+
+  if(typeof service.start !== 'function' && !service.__serviceOptions.started){
     service.start = function(){
 
       return new Promise((resolve, reject)=>{
