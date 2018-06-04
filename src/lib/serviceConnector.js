@@ -1,50 +1,42 @@
-function startOk(service, options){
-
+function startOk(service, options) {
   options.context.binder.bind(service, options.config);
   service.__serviceOptions.started = true;
 }
 
-function stopOk(service, options){
-
+function stopOk(service, options) {
   options.context.binder.unbind(options.config.bindAs);
   service.__serviceOptions.started = false;
-
 }
 
 
-export default function serviceConnector(service, options){
-
-  if(!service.__serviceOptions){
+export default function serviceConnector(service, options) {
+  if (!service.__serviceOptions) {
     service.__serviceOptions = {
       started: false,
-    }
+    };
   }
 
-  if(typeof service.start !== 'function' && !service.__serviceOptions.started){
-    service.start = function(){
-
-      return new Promise((resolve, reject)=>{
-
+  if (typeof service.start !== 'function' && !service.__serviceOptions.started) {
+    service.start = function () {
+      return new Promise((resolve, reject) => {
         const onStart = options.onStart || service.onStart;
 
-        if(typeof onStart === 'function'){
-
-          let onStartResult = onStart.call(service);
+        if (typeof onStart === 'function') {
+          const onStartResult = onStart.call(service);
 
           if (onStartResult instanceof Promise) {
-            onStartResult.then(()=>{
+            onStartResult.then(() => {
               startOk(service, options);
               resolve();
-            }).catch((err)=>{
+            }).catch((err) => {
               reject(err);
             });
-          } else if(onStartResult !== false){
+          } else if (onStartResult !== false) {
             startOk(service, options);
             resolve();
           } else {
-            reject(`Service ${options.config.bindAs} onStart return "false"`);
+            reject(`Service ${options.config.bindAs} onStart return "false"`); // eslint-disable-line prefer-promise-reject-errors, max-len
           }
-
         } else {
           startOk(service, options);
           resolve();
@@ -52,18 +44,15 @@ export default function serviceConnector(service, options){
       });
     };
 
-    service.stop = function(){
+    service.stop = function () {
       const onStop = options.onStop || service.onStop;
 
-      if(typeof onStop === 'function'){
+      if (typeof onStop === 'function') {
         onStop.call(service);
         stopOk(service, options);
       }
-
-    }
-
+    };
   }
 
   return service;
-
 }

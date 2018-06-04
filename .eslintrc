@@ -6,6 +6,7 @@
     "jest": true
   },
   "rules": {
+    "react/prop-types": "off",
     "react/prefer-stateless-function": "warn",
     "react/no-array-index-key": "warn",
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
@@ -25,6 +26,7 @@
     "no-param-reassign": "warn",
     "no-plusplus": "warn",
     "class-methods-use-this": "warn",
+    "no-underscore-dangle": "off",
     "max-len": [
       "error",
       120

@@ -1,14 +1,15 @@
-import { BaseStore } from 'index.js';
+// @flow
 import { observable, action } from 'mobx';
 import { BALANCE_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
 import { ASSET_NAMES } from 'demo/platform/constants/common.js';
-import {PriceService} from "../PriceService";
-import serviceConnector from "../../helper/serviceConnector";
-import {ASSET_SERVICE, PRICE_SERVICE} from "../../constants/moduleNames";
+import { serviceConnector } from 'index.js';
 
 
-function validateBalanceChange(balance, data) {
+function validateBalanceChange(
+  balance: {[key: string]: number},
+  data: {[key: string]: number},
+): boolean | string {
   let result = true;
 
   Object.keys(data).forEach((asset) => {
@@ -27,18 +28,17 @@ function validateBalanceChange(balance, data) {
 }
 
 export class BalanceService {
-
   api = {
     changeBalance: this.changeBalance,
   };
 
-  @observable balance = {
+  @observable balance: {[key: string]: number} = {
     [ASSET_NAMES.USD]: 1000,
     [ASSET_NAMES.GOLD]: 0,
     [ASSET_NAMES.OIL]: 0,
   };
 
-  @action changeBalance(data) {
+  @action changeBalance(data: {[key: string]: number}): boolean | string {
     const result = validateBalanceChange(this.balance, data);
 
     if (result === true) {
@@ -51,11 +51,12 @@ export class BalanceService {
 }
 
 
-export default serviceConnector(new BalanceService(),
+export default serviceConnector(
+  new BalanceService(),
   {
     context,
-    config:{
-      bindAs:BALANCE_SERVICE,
-    }
-  }
+    config: {
+      bindAs: BALANCE_SERVICE,
+    },
+  },
 );
