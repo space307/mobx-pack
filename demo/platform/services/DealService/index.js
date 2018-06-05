@@ -1,5 +1,5 @@
 // @flow
-import { BaseStore } from 'index.js';
+import { BaseStore } from 'sources.js';
 import { observable, action } from 'mobx';
 import { DEAL_SERVICE, BALANCE_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import { DEAL_TYPE, ASSET_NAMES } from 'demo/platform/constants/common.js';

@@ -1,6 +1,6 @@
 // @flow
 import { observable, action, reaction } from 'mobx';
-import { ServiceConnector } from 'index.js';
+import { ServiceConnector } from 'sources.js';
 import { PRICE_SERVICE, ASSET_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
 import type { PriceServiceInterface } from 'demo/platform/services/PriceService/typing/interfaces.js';

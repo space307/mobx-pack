@@ -1,5 +1,5 @@
 import { observable, action } from 'mobx';
-import { BaseStore } from 'index.js';
+import { BaseStore } from 'sources.js';
 import { RECHARGE_SERVICE }
   from 'demo/platform/constants/moduleNames.js';
 
