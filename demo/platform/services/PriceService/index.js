@@ -19,6 +19,9 @@ export class PriceService implements PriceServiceInterface {
   assetService: AssetServiceInterface;
 
 
+  init(){
+
+  }
   onBind(assetService: AssetServiceInterface) {
     this.assetService = assetService;
 
@@ -52,6 +55,7 @@ export default ServiceConnector(
   new PriceService(),
   {
     binder: context.binder,
+    onStart: 'init',
     config: {
       bindAs: PRICE_SERVICE,
       onBind: [
