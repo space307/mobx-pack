@@ -49,7 +49,6 @@ export class PriceService implements PriceServiceInterface {
 }
 
 
-//const priceService = new PriceService();
 
 export default ServiceConnector(
   new PriceService(),
