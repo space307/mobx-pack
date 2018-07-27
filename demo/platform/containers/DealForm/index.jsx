@@ -1,5 +1,5 @@
 import React from 'react';
-import { Connector } from 'index.js';
+import { Connector } from 'sources.js';
 import context from 'demo/platform/helper/context.js';
 
 import DealFormStore from 'demo/platform/containers/DealForm/store/DealFormStore.js';

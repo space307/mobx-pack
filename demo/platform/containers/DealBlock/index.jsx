@@ -1,4 +1,4 @@
-import { Connector } from 'index.js';
+import { Connector } from 'sources.js';
 import DealBlock from 'demo/platform/components/DealBlock/index.jsx';
 
 

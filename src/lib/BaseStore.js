@@ -221,6 +221,7 @@ export default class BaseStore {
 
   addObserve(obsr, key, services) {
     let result;
+    //TODO придумать как выпилить this.getConfig()
     if (!services || !this.binder.addDisposer(this.getConfig().bindAs, services, obsr)) {
       this.disposers.push(obsr);
 
@@ -268,7 +269,7 @@ export default class BaseStore {
    */
   bindApp() {
     if (Object.prototype.hasOwnProperty.call(this.getConfig(), 'bindAs')) {
-      this.binder.bind(this, this.getConfig().importData);
+      this.binder.bind(this, this.getConfig());
     } else {
       console.warn(`Base Store. ${protoName(this)} has no bindAs in config`);
     }
@@ -279,7 +280,7 @@ export default class BaseStore {
    */
   unbindApp() {
     if (this.getConfig().bindAs) {
-      this.binder.unbind(this);
+      this.binder.unbind(this.getConfig().bindAs);
     }
   }
   callApi(from, methodName, ...arg) {

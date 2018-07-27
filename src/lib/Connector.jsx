@@ -100,7 +100,7 @@ function ConnectorF(Component, opt = {}) {
       const api = {};
       const componentId = this.componentId;
 
-      if (store && store.api) {
+      if (store && store.api && store.binder) {
         each(store.api, (value, key) => {
           if (typeof value === 'function') {
             api[key] = function (...arg) {

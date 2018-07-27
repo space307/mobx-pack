@@ -1,47 +1,45 @@
+// @flow
 import { find } from 'lodash';
 import { observable, action, computed } from 'mobx';
-import { BaseStore } from 'index.js';
 import { ASSET_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
 import { fetchAssets } from 'demo/platform/services/AssetService/client.js';
+import { ServiceConnector } from 'sources.js';
+import type { AssetType } from 'demo/platform/services/AssetService/typing/types.js';
+import type { AssetServiceInterface } from 'demo/platform/services/AssetService/typing/interfaces.js';
 
 
-export class AssetService extends BaseStore {
-  config = {
-    bindAs: ASSET_SERVICE,
-    exportData: {
-      assetCollection: 1,
-      selectedAsset: 1,
-      selectedAssetData: 1,
-    },
-  };
-
+export class AssetService implements AssetServiceInterface {
   api = {
     selectAsset: this.selectAsset,
   };
 
-  @observable assetCollection = [];
+  @observable assetCollection: Array<AssetType> = [];
 
-  @observable selectedAsset = 'gold';
+  @observable selectedAsset: string = 'gold';
 
-  @computed get selectedAssetData() {
+  @computed get selectedAssetData(): ? AssetType {
     return find(this.assetCollection, item => (item.id === this.selectedAsset));
   }
 
 
-  onStart() {
-    return fetchAssets().then((data) => {
+  onStart(): Promise<*> {
+    return fetchAssets().then((data: Array<AssetType>): void => {
       this.resetAssetCollection(data);
     });
   }
 
-  @action resetAssetCollection(data) {
+  @action resetAssetCollection(data: Array<AssetType>) {
     this.assetCollection = data;
   }
 
-  @action selectAsset(id) {
+  @action selectAsset(id: string) {
     this.selectedAsset = id;
   }
 }
 
-export default new AssetService(context);
+
+export default ServiceConnector(new AssetService(), {
+  binder: context.binder,
+  config: { bindAs: ASSET_SERVICE },
+});

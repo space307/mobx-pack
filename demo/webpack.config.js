@@ -66,6 +66,7 @@ const makeAppConfig = () => ({
   },
   devServer: {
     open: true,
+    port: 9000
   },
 });
 

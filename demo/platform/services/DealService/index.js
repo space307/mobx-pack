@@ -1,11 +1,14 @@
-import { BaseStore } from 'index.js';
+// @flow
+import { BaseStore } from 'sources.js';
 import { observable, action } from 'mobx';
 import { DEAL_SERVICE, BALANCE_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import { DEAL_TYPE, ASSET_NAMES } from 'demo/platform/constants/common.js';
 import context from 'demo/platform/helper/context.js';
+import type { DealType } from 'demo/platform/services/DealService/typing/types.js';
+import type { DealServiceInterface } from 'demo/platform/services/DealService/typing/interfaces.js';
 
 
-export class PriceService extends BaseStore {
+export class PriceService extends BaseStore implements DealServiceInterface{
   config = {
     bindAs: DEAL_SERVICE,
     importData: {
@@ -22,14 +25,14 @@ export class PriceService extends BaseStore {
     makeDeal: this.makeDeal,
   };
 
-  @observable deals = [];
+  @observable deals: Array<DealType> = [];
 
 
   onStart() {
     return true;
   }
 
-  @action makeDeal(data) {
+  @action makeDeal(data: *): boolean {
     const deal = { ...{ id: this.deals.length }, ...data };
     let result = true;
     const {

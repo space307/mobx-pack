@@ -45,7 +45,7 @@ class RechargeForm extends React.Component {
 
   render() {
     return (
-      <form onSubmit={this.onSubmit}>
+      <form>
         <Typography variant="headline" component="h3">
           Fund
         </Typography>
@@ -69,6 +69,7 @@ class RechargeForm extends React.Component {
             style={{
               marginTop: 15,
             }}
+            onClick={this.onSubmit}
           >
             Fund
           </Button>
