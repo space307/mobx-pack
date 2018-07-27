@@ -60,6 +60,7 @@ class Binder {
       store,
       bindHash,
       options: _.cloneDeep(options),
+      notifyOnBind: {},
       disposers: {
         list: [],
         services: {},
@@ -79,7 +80,7 @@ class Binder {
 
   notifyOnBind(store) {
     if (store.options.onBind) {
-      store.options.onBind.forEach((onBindItem) => {
+      store.options.onBind.forEach((onBindItem, index) => {
         let bindCnt = 0;
         const storeList = [];
         const cb = onBindItem[onBindItem.length - 1];
@@ -91,12 +92,13 @@ class Binder {
             }
           }
         });
-        if (bindCnt === onBindItem.length - 1) {
+        if (bindCnt === onBindItem.length - 1 && !store.notifyOnBind[index]) {
           let onBindCb = cb;
           if (typeof onBindCb === 'string' && typeof store.store[onBindCb] === 'function') {
             onBindCb = store.store[onBindCb];
           }
           onBindCb.apply(store.store, storeList);
+          store.notifyOnBind[index] = true;
         }
       });
     }
