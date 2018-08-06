@@ -101,11 +101,11 @@ function ConnectorF(Component, opt = {}) {
       const componentId = this.componentId;
 
       if (store && store.api && store.binder) {
-        each(store.api, (value, key) => {
-          if (typeof value === 'function') {
-            api[key] = function (...arg) {
+        each(store.api, (apiMethod, key) => {
+          if (typeof apiMethod === 'function') {
+            api[key] = store.callApi ? function (...arg) {
               return store.binder.callApi(store.getConfig().bindAs, key, componentId, ...arg);
-            };
+            } : apiMethod.bind(store);
           } else {
             console.warn(`Connector. For "${Component.name}" api 
             function "${key}" not found in store "${protoName(store)}"`);
