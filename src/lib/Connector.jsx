@@ -36,9 +36,7 @@ function ConnectorF(Component, opt = {}) {
       this.componentId = `${Component.name}_${getUid()}`;
 
       if (this.options.services.length) {
-        Promise.all(
-          this.options.services.map(service => service.start(this.componentId)),
-        ).then(() => {
+        Promise.all(this.options.services.map(service => service.start(this.componentId))).then(() => {
           this.initComponent();
 
           if (this.options.wairForServices) {
@@ -98,9 +96,9 @@ function ConnectorF(Component, opt = {}) {
 
     resolveApi(store) {
       const api = {};
-      const componentId = this.componentId;
+      const { componentId } = this;
 
-      if (store && store.api && store.binder) {
+      if (store && store.api) {
         each(store.api, (apiMethod, key) => {
           if (typeof apiMethod === 'function') {
             api[key] = store.callApi ? function (...arg) {

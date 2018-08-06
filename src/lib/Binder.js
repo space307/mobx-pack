@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { isEmpty, each, cloneDeep } from 'lodash';
 import { toJS } from 'mobx';
 import { protoName } from './util';
 
@@ -6,7 +6,7 @@ class Binder {
   stores = {};
 
   bind(store, options) {
-    const bindAs = options.bindAs;
+    const { bindAs } = options;
 
     if (typeof bindAs !== 'string' || !bindAs.length) {
       this.showMessage(`Store "${protoName(store)}" has not valid "bindAs" id "${bindAs}".`, 'error');
@@ -24,14 +24,14 @@ class Binder {
       this.showMessage(`"${bindAs}" bind.`);
     }
 
-    _.each(this.stores, (item) => {
+    each(this.stores, (item) => {
       if (item) {
         this.processStore(item, this.getStore(bindAs));
         this.processStore(this.getStore(bindAs), item);
       }
     });
 
-    _.each(this.stores, (item) => {
+    each(this.stores, (item) => {
       if (item) {
         if (item.bindHash && item.bindHash[bindAs]) {
           this.notifyOnBind(item);
@@ -43,7 +43,7 @@ class Binder {
   }
 
   addStore(store, options) {
-    const bindAs = options.bindAs;
+    const { bindAs } = options;
     const bindHash = {};
     if (options.onBind) {
       options.onBind.forEach((arr) => {
@@ -59,7 +59,7 @@ class Binder {
       bindAs,
       store,
       bindHash,
-      options: _.cloneDeep(options),
+      options: cloneDeep(options),
       notifyOnBind: {},
       disposers: {
         list: [],
@@ -111,10 +111,10 @@ class Binder {
 
   processStore(from, to) {
     if (from.bindAs !== to.bindAs) {
-      const importData = to.options.importData;
+      const { importData } = to.options;
 
       if (importData && importData[from.bindAs]) {
-        _.each(importData[from.bindAs], (toVarName, fromVarName) => {
+        each(importData[from.bindAs], (toVarName, fromVarName) => {
           if (!(fromVarName in from.store)) {
             this.showMessage(`Variable "${fromVarName}" required for "${to.bindAs}" 
             not found in "${from.bindAs}"`, 'warn');
@@ -180,13 +180,13 @@ class Binder {
   unbind(bindAs) {
     const storeSettings = this.getStore(bindAs);
 
-    if (_.isEmpty(storeSettings)) {
+    if (isEmpty(storeSettings)) {
       this.showMessage(`Not binded store "${bindAs}" try to unbind!`, 'warn');
       return;
     }
 
     // unbind data exporting to other stores
-    _.each(this.stores, (item) => {
+    each(this.stores, (item) => {
       if (item) {
         const importData = item.options.importData && item.options.importData[bindAs];
         if (importData) {
@@ -198,7 +198,7 @@ class Binder {
 
     // unbind data importing from other stores
     if (storeSettings.options.importData) {
-      _.each(storeSettings.options.importData, (importData) => {
+      each(storeSettings.options.importData, (importData) => {
         this.unbindData(bindAs, importData);
       });
     }
@@ -222,8 +222,8 @@ class Binder {
   }
 
   unbindData(bindAs, importData) {
-    const store = this.getStore(bindAs).store;
-    _.each(importData, (toVarName) => {
+    const { store } = this.getStore(bindAs);
+    each(importData, (toVarName) => {
       if (toVarName in store) {
         Object.defineProperty(store, toVarName, { value: undefined });
       }
@@ -231,7 +231,7 @@ class Binder {
   }
 
   unbindDisposers(bindAs) {
-    _.each(this.stores, (store) => {
+    each(this.stores, (store) => {
       if (store && store.disposers.services[bindAs]) {
         store.disposers.services[bindAs].forEach((disposer) => {
           if (typeof store.disposers.list[disposer] === 'function') {
