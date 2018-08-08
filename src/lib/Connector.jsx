@@ -71,7 +71,8 @@ function ConnectorF(Component, opt = {}) {
     initComponent() {
       this.servicesLoaded = true;
       this.apiResolved = null;
-      this.storeInitializator = this.options.store && typeof this.options.store === 'function';
+
+      this.storeInitializator = (this.options.store && typeof this.options.store === 'function') || this.props.store;
       this.store = this.resolveStore(this.options.store || this.props.store); // eslint-disable-line
 
       if (this.store && this.storeInitializator) {
