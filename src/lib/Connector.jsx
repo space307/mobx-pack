@@ -51,9 +51,13 @@ function ConnectorF(Component, opt = {}) {
     }
 
     componentWillUnmount() {
-      if (this.store && this.store.destroy && this.storeInitializator) {
-        this.store.destroy();
+      if (this.store && this.storeInitializator) {
+        if(typeof this.store.destroy === 'function'){
+          this.store.destroy();
+        }
+        this.store.stop(this.componentId);
       }
+
 
       if (this.options.services) {
         this.options.services.forEach((service) => {
