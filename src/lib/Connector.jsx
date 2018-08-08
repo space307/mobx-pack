@@ -70,7 +70,7 @@ function ConnectorF(Component, opt = {}) {
       this.storeInitializator = this.options.store && typeof this.options.store === 'function';
       this.store = this.resolveStore(this.options.store || this.props.store); // eslint-disable-line
 
-      if (this.store && this.store.start) {
+      if (this.store && this.storeInitializator) {
         this.store.start(this.componentId);
       }
       this.resolveApi(this.store);
