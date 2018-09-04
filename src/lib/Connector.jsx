@@ -7,6 +7,7 @@ import { getUid, protoName } from './util.js';
 
 function ConnectorF(Component, opt = {}) {
   const options = Object.assign({
+    preLoader: null,
     wairForServices: true,
     services: [],
     test: 0,
@@ -52,7 +53,7 @@ function ConnectorF(Component, opt = {}) {
 
     componentWillUnmount() {
       if (this.store && this.storeInitializator) {
-        if(typeof this.store.destroy === 'function'){
+        if (typeof this.store.destroy === 'function') {
           this.store.destroy();
         }
         this.store.stop(this.componentId);
@@ -61,7 +62,7 @@ function ConnectorF(Component, opt = {}) {
 
       if (this.options.services) {
         this.options.services.forEach((service) => {
-          if (!service.config.unstoppable) {
+          if (!service.config || !service.config.unstoppable) {
             service.stop(this.componentId);
           }
         });
@@ -151,7 +152,7 @@ function ConnectorF(Component, opt = {}) {
 
     render() {
       if (this.options.wairForServices && !this.servicesLoaded) {
-        return null;
+        return typeof this.options.preLoader === 'function' ? <this.options.preLoader /> : this.options.preLoader;
       }
 
       const props = this.composeProps();
