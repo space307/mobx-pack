@@ -8,7 +8,7 @@ import type { DealType } from 'demo/platform/services/DealService/typing/types.j
 import type { DealServiceInterface } from 'demo/platform/services/DealService/typing/interfaces.js';
 
 
-export class PriceService extends BaseStore implements DealServiceInterface{
+export class DealService extends BaseStore implements DealServiceInterface{
   config = {
     bindAs: DEAL_SERVICE,
     importData: {
@@ -59,4 +59,4 @@ export class PriceService extends BaseStore implements DealServiceInterface{
 }
 
 
-export default new PriceService(context);
+export default new DealService(context);

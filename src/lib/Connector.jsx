@@ -7,6 +7,7 @@ import { getUid, protoName } from './util.js';
 
 function ConnectorF(Component, opt = {}) {
   const options = Object.assign({
+    preLoader: null,
     wairForServices: true,
     services: [],
     test: 0,
@@ -36,9 +37,7 @@ function ConnectorF(Component, opt = {}) {
       this.componentId = `${Component.name}_${getUid()}`;
 
       if (this.options.services.length) {
-        Promise.all(
-          this.options.services.map(service => service.start(this.componentId)),
-        ).then(() => {
+        Promise.all(this.options.services.map(service => service.start(this.componentId))).then(() => {
           this.initComponent();
 
           if (this.options.wairForServices) {
@@ -53,13 +52,17 @@ function ConnectorF(Component, opt = {}) {
     }
 
     componentWillUnmount() {
-      if (this.store && this.store.destroy && this.storeInitializator) {
-        this.store.destroy();
+      if (this.store && this.storeInitializator) {
+        if (typeof this.store.destroy === 'function') {
+          this.store.destroy();
+        }
+        this.store.stop(this.componentId);
       }
+
 
       if (this.options.services) {
         this.options.services.forEach((service) => {
-          if (!service.config.unstoppable) {
+          if (!service.config || !service.config.unstoppable) {
             service.stop(this.componentId);
           }
         });
@@ -69,10 +72,11 @@ function ConnectorF(Component, opt = {}) {
     initComponent() {
       this.servicesLoaded = true;
       this.apiResolved = null;
-      this.storeInitializator = this.options.store && typeof this.options.store === 'function';
+
+      this.storeInitializator = (this.options.store && typeof this.options.store === 'function') || this.props.store;
       this.store = this.resolveStore(this.options.store || this.props.store); // eslint-disable-line
 
-      if (this.store && this.store.start) {
+      if (this.store && this.storeInitializator) {
         this.store.start(this.componentId);
       }
       this.resolveApi(this.store);
@@ -98,14 +102,14 @@ function ConnectorF(Component, opt = {}) {
 
     resolveApi(store) {
       const api = {};
-      const componentId = this.componentId;
+      const { componentId } = this;
 
-      if (store && store.api && store.binder) {
-        each(store.api, (value, key) => {
-          if (typeof value === 'function') {
-            api[key] = function (...arg) {
+      if (store && store.api) {
+        each(store.api, (apiMethod, key) => {
+          if (typeof apiMethod === 'function') {
+            api[key] = store.callApi ? function (...arg) {
               return store.binder.callApi(store.getConfig().bindAs, key, componentId, ...arg);
-            };
+            } : apiMethod.bind(store);
           } else {
             console.warn(`Connector. For "${Component.name}" api 
             function "${key}" not found in store "${protoName(store)}"`);
@@ -148,7 +152,7 @@ function ConnectorF(Component, opt = {}) {
 
     render() {
       if (this.options.wairForServices && !this.servicesLoaded) {
-        return null;
+        return typeof this.options.preLoader === 'function' ? <this.options.preLoader /> : this.options.preLoader;
       }
 
       const props = this.composeProps();
