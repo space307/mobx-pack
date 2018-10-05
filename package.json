@@ -13,10 +13,10 @@
     "object-assign": "^4.1.1",
     "promise": "^8.0.1",
     "prop-types": "^15.5.10",
-    "react": "^16.0.0",
-    "react-dom": "^16.0.0",
-    "mobx": "^3.1.7",
-    "mobx-react": "^4.1.5",
+    "react": "16.5.2",
+    "react-dom": "16.5.2",
+    "mobx": "4.5.0",
+    "mobx-react": "5.2.8",
     "lodash": "^4.17.2"
   },
   "repository": {
