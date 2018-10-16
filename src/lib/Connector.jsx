@@ -73,7 +73,8 @@ function ConnectorF(Component, opt = {}) {
       this.servicesLoaded = true;
       this.apiResolved = null;
 
-      this.storeInitializator = (this.options.store && typeof this.options.store === 'function') || this.props.store;
+      this.storeInitializator = (this.options.store && typeof this.options.store === 'function') ||
+        (this.props.store && typeof this.props.store === 'function');
       this.store = this.resolveStore(this.options.store || this.props.store); // eslint-disable-line
 
       if (this.store && this.storeInitializator) {
@@ -163,6 +164,8 @@ function ConnectorF(Component, opt = {}) {
           props.api = this.apiResolved;
         }
         comp = <Component{...props} />;
+      } else {
+        return typeof this.options.preLoader === 'function' ? <this.options.preLoader /> : this.options.preLoader;
       }
 
       return comp;
