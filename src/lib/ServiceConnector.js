@@ -59,8 +59,9 @@ export default function ServiceConnector(service: *, options: ServiceConnectorOp
 
       if (typeof onStop === 'function') {
         onStop.call(service);
-        stopOk(service, options);
       }
+
+      stopOk(service, options);
     };
   }
 
