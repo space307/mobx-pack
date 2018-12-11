@@ -8,6 +8,9 @@ import dealService from 'demo/platform/services/DealService/index.js';
 import balanceService from 'demo/platform/services/BalanceService/index.js';
 import Platform from 'demo/platform/layouts/Platform/index.jsx';
 
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
   Promise.all([
     priceService.start('entry'),
@@ -16,9 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dealService.start('entry'),
     balanceService.start('entry'),
   ]).then(() => {
-    ReactDOM.render(
-      React.createElement(Platform),
-      document.querySelector('#root'),
-    );
+    ReactDOM.render(React.createElement(Platform), document.querySelector('#root'));
   });
 });
+
