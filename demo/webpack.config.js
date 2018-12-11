@@ -61,7 +61,7 @@ const makeAppConfig = () => ({
                   },
                 ],
                 '@babel/plugin-proposal-nullish-coalescing-operator',
-                '@babel/plugin-proposal-do-expressions'
+                '@babel/plugin-proposal-do-expressions',
               ],
             },
           },
