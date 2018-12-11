@@ -1,7 +1,7 @@
 import React from 'react';
 import Loadable from 'react-loadable';
-import Button from 'material-ui/Button';
-import Paper from "material-ui/Paper";
+import Button from '@material-ui/core/Button';
+import Paper from '@material-ui/core/Paper';
 import paperStyle from 'demo/platform/style/paperBlock.json';
 
 const Preloader = () => <div>Loading...</div>;

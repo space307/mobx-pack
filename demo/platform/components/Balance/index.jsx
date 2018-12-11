@@ -1,8 +1,8 @@
 import React from 'react';
-import Button from 'material-ui/Button';
-import Divider from 'material-ui/Divider';
-import Paper from "material-ui/Paper";
-import Typography from "material-ui/Typography";
+import Button from '@material-ui/core/Button';
+import Divider from '@material-ui/core/Divider';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
 import paperStyle from 'demo/platform/style/paperBlock.json';
 import dibiderStyle from 'demo/platform/style/headerDivider.json';
 

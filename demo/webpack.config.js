@@ -3,34 +3,24 @@
 const webpack = require('webpack');
 const path = require('path');
 
-
 const makeAppConfig = () => ({
   mode: 'development',
-  //context: path.resolve(__dirname),
-
   entry: {
     main: ['./platform/index.js'],
   },
   output: {
-    path: __dirname,
+    path: path.resolve(__dirname, 'dist'),
     filename: 'main.js',
     publicPath: '/dist/',
   },
   watchOptions: {
     aggregateTimeout: 100,
   },
-  plugins: [
-    new webpack.IgnorePlugin(/\.\/locale/),
-  ],
+  plugins: [new webpack.IgnorePlugin(/\.\/locale/)],
   module: {
     rules: [
       {
-        test: /\.jsx$/,
-        exclude: /node_modules/,
-        use: ['babel-loader'],
-      },
-      {
-        test: /\.js$/,
+        test: /\.jsx?$/,
         exclude: /node_modules/,
         use: ['babel-loader'],
       },
@@ -53,20 +43,16 @@ const makeAppConfig = () => ({
           },
         ],
       },
-
     ],
   },
   resolve: {
-    modules: [
-      path.resolve('../'),
-      'node_modules',
-    ],
+    modules: [path.resolve('../'), 'node_modules'],
     alias: {},
     extensions: ['.js', '.jsx'],
   },
   devServer: {
     open: true,
-    port: 9000
+    port: 9000,
   },
 });
 

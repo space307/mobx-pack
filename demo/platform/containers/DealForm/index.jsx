@@ -7,9 +7,9 @@ import DealFormStore from 'demo/platform/containers/DealForm/store/DealFormStore
 import AssetSelector from 'demo/platform/containers/AssetSelector/index.jsx';
 import DealBlock from 'demo/platform/containers/DealBlock/index.jsx';
 
-import Divider from 'material-ui/Divider';
-import Paper from "material-ui/Paper";
-import Typography from "material-ui/Typography";
+import Divider from '@material-ui/core/Divider';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
 import paperStyle from 'demo/platform/style/paperBlock.json';
 import dibiderStyle from 'demo/platform/style/headerDivider.json';
 

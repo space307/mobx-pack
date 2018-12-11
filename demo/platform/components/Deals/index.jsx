@@ -1,5 +1,5 @@
 import React from 'react';
-import Paper from 'material-ui/Paper';
+import Paper from '@material-ui/core/Paper';
 import paperStyle from 'demo/platform/style/paperBlock.json';
 
 function Deals({ deals }) {

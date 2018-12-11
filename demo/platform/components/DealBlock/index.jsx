@@ -1,6 +1,6 @@
 import React from 'react';
-import Button from 'material-ui/Button';
-import Input from 'material-ui/Input';
+import Button from '@material-ui/core/Button';
+import Input from '@material-ui/core/Input';
 import inputStyle from 'demo/platform/style/input.json';
 
 const DealBlock = ({ api, quantity, isRecharge }) => (
