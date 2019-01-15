@@ -1,9 +1,9 @@
 import React from 'react';
 import { ASSET_NAMES } from 'demo/platform/constants/common.js';
-import Button from 'material-ui/Button';
-import Input from 'material-ui/Input';
-import Divider from 'material-ui/Divider';
-import Typography from "material-ui/Typography";
+import Button from '@material-ui/core/Button';
+import Input from '@material-ui/core/Input';
+import Divider from '@material-ui/core/Divider';
+import Typography from '@material-ui/core/Typography';
 import inputStyle from 'demo/platform/style/input.json';
 import dibiderStyle from 'demo/platform/style/headerDivider.json';
 
