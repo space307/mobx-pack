@@ -4,6 +4,7 @@ import { protoName } from './util';
 
 class Binder {
   stores = {};
+  storeWaiter = {};
 
   bind(store, options) {
     const { bindAs } = options;
@@ -13,7 +14,7 @@ class Binder {
       return;
     }
 
-    if (this.isBinded(bindAs)) {
+    if (this.isBind(bindAs)) {
       this.showMessage(`Store "${bindAs}" was already bind.`, 'warn');
       return;
     }
@@ -26,8 +27,8 @@ class Binder {
 
     each(this.stores, (item) => {
       if (item) {
-        this.processStore(item, this.getStore(bindAs));
-        this.processStore(this.getStore(bindAs), item);
+        this.processStore(item, this.getStoreSettings(bindAs));
+        this.processStore(this.getStoreSettings(bindAs), item);
       }
     });
 
@@ -39,7 +40,8 @@ class Binder {
       }
     });
 
-    this.notifyOnBind(this.getStore(bindAs));
+    this.notifyOnBind(this.getStoreSettings(bindAs));
+    this.resolveWaiterPromises(bindAs);
   }
 
   addStore(store, options) {
@@ -86,9 +88,9 @@ class Binder {
         const cb = onBindItem[onBindItem.length - 1];
         onBindItem.forEach((storeName) => {
           if (typeof storeName !== 'function') {
-            if (this.getStore(storeName).store) {
+            if (this.getStore(storeName)) {
               bindCnt++;
-              storeList.push(this.getStore(storeName).store);
+              storeList.push(this.getStore(storeName));
             }
           }
         });
@@ -105,7 +107,7 @@ class Binder {
   }
 
   isDebug(bindAs) {
-    const s = this.getStore(bindAs);
+    const s = this.getStoreSettings(bindAs);
     return s && s.options ? s.options.debug : false;
   }
 
@@ -144,11 +146,11 @@ class Binder {
   }
 
   addDisposer(bindAs, services, obsr) {
-    const storeSettings = this.getStore(bindAs);
+    const storeSettings = this.getStoreSettings(bindAs);
     let pass = true;
 
     services.forEach((serviceName) => {
-      if (!this.isBinded(serviceName)) {
+      if (!this.isBind(serviceName)) {
         this.showMessage(`Imposible add disposer for not bind service "${bindAs}".`, 'warn');
         pass = false;
       }
@@ -169,16 +171,16 @@ class Binder {
     return pass;
   }
 
-  isBinded(bindAs) {
+  isBind(bindAs) {
     return !!(this.stores[bindAs] && this.stores[bindAs].store);
   }
 
-  getStore(bindAs) {
+  getStoreSettings(bindAs) {
     return this.stores[bindAs] || {};
   }
 
   unbind(bindAs) {
-    const storeSettings = this.getStore(bindAs);
+    const storeSettings = this.getStoreSettings(bindAs);
 
     if (isEmpty(storeSettings)) {
       this.showMessage(`Not binded store "${bindAs}" try to unbind!`, 'warn');
@@ -222,13 +224,44 @@ class Binder {
   }
 
   unbindData(bindAs, importData) {
-    const { store } = this.getStore(bindAs);
+    const { store } = this.getStoreSettings(bindAs);
     each(importData, (toVarName) => {
       if (toVarName in store) {
         Object.defineProperty(store, toVarName, { value: undefined });
       }
     });
   }
+
+
+  getStoreAsync(bindAs) {
+    return new Promise((resolve) => {
+      if (this.isBind(bindAs)) {
+        resolve(this.getStore(bindAs));
+      } else {
+        if (!this.storeWaiter[bindAs]) {
+          this.storeWaiter[bindAs] = [];
+        }
+        this.storeWaiter[bindAs].push(resolve);
+      }
+    });
+  }
+  getStore(bindAs) {
+    return this.getStoreSettings(bindAs).store;
+  }
+  resolveWaiterPromises(bindAs) {
+    if (!this.isBind(bindAs)) {
+      return;
+    }
+
+    const waiters = this.storeWaiter[bindAs];
+
+    if (waiters) {
+      waiters.forEach((resolve) => {
+        resolve(this.getStore(bindAs));
+      });
+    }
+  }
+
 
   unbindDisposers(bindAs) {
     each(this.stores, (store) => {
@@ -254,7 +287,7 @@ class Binder {
    */
 
   importVar(storeName, varName, initiator, raw) {
-    const s = this.getStore(storeName);
+    const s = this.getStoreSettings(storeName);
     const store = s && s.store ? s.store : null;
     let val;
     let exportData;
@@ -292,7 +325,7 @@ class Binder {
     if (process.env.NODE_ENV === 'test') {
       return;
     }
-    const s = this.getStore(storeName);
+    const s = this.getStoreSettings(storeName);
     let storeInst;
 
     if (s && s.store) {
@@ -306,9 +339,6 @@ class Binder {
         return storeInst.api[actionName].apply(storeInst, arg); // eslint-disable-line
       }
       console.warn(`CallApi warn. "${initiator}" calls unknown method "${actionName}" found in store "${storeName}".`);
-
-
-      // s.store[actionName].apply(s.store, arg);
     } else {
       console.warn(`CallApi warn. "${initiator}" calls method "${actionName}" from not bind store "${storeName}".`);
     }
