@@ -4,7 +4,7 @@ import { protoName } from './util';
 
 class Binder {
   stores = {};
-  storeWaiter = {};
+  storeBindWaiter = {};
 
   bind(store, options) {
     const { bindAs } = options;
@@ -238,26 +238,29 @@ class Binder {
       if (this.isBind(bindAs)) {
         resolve(this.getStore(bindAs));
       } else {
-        if (!this.storeWaiter[bindAs]) {
-          this.storeWaiter[bindAs] = [];
+        if (!this.storeBindWaiter[bindAs]) {
+          this.storeBindWaiter[bindAs] = [];
         }
-        this.storeWaiter[bindAs].push(resolve);
+        this.storeBindWaiter[bindAs].push(resolve);
       }
     });
   }
+
   getStore(bindAs) {
     return this.getStoreSettings(bindAs).store;
   }
+
   resolveWaiterPromises(bindAs) {
     if (!this.isBind(bindAs)) {
       return;
     }
 
-    const waiters = this.storeWaiter[bindAs];
+    const waiters = this.storeBindWaiter[bindAs];
 
     if (waiters) {
-      waiters.forEach((resolve) => {
+      waiters.forEach((resolve, index) => {
         resolve(this.getStore(bindAs));
+        waiters.splice(index, 1);
       });
     }
   }
