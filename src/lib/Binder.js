@@ -40,8 +40,7 @@ class Binder {
       }
     });
 
-    this.notifyOnBind(this.getStoreSettings(bindAs));
-    this.resolveWaiterPromises(bindAs);
+    this.notifyOnBind(bindAs);
   }
 
   addStore(store, options) {
@@ -80,30 +79,48 @@ class Binder {
     }
   }
 
-  notifyOnBind(store) {
-    if (store.options.onBind) {
-      store.options.onBind.forEach((onBindItem, index) => {
-        let bindCnt = 0;
-        const storeList = [];
-        const cb = onBindItem[onBindItem.length - 1];
-        onBindItem.forEach((storeName) => {
-          if (typeof storeName !== 'function') {
-            if (this.getStore(storeName)) {
-              bindCnt++;
-              storeList.push(this.getStore(storeName));
-            }
+  notifyOnBind(bindAs) {
+    const settings = this.getStoreSettings(bindAs);
+    const store = settings.store;
+    const onBind = settings.options && settings.options.onBind;
+
+    if (onBind && onBind.length && store) {
+      onBind.forEach((list) => {
+        const len = list && list.length;
+        const onBindCb = len && list[len - 1];
+        const storeList = len && list.slice(0, len - 1);
+
+        Promise.all(storeList.map(bindAsParam => this.getStoreAsync(bindAsParam))).then((stores) => {
+          if (typeof onBindCb === 'function') {
+            onBindCb.apply(store, stores);
+          } else {
+            store[onBindCb](...stores);
           }
         });
-        if (bindCnt === onBindItem.length - 1 && !store.notifyOnBind[index]) {
-          let onBindCb = cb;
-          if (typeof onBindCb === 'string' && typeof store.store[onBindCb] === 'function') {
-            onBindCb = store.store[onBindCb];
+
+        // This timeout is to check if some store required in "onBind" callback is not resolved
+        setTimeout(() => {
+          const pendingStores = this.getPendingStores(storeList);
+          if (pendingStores.length && pendingStores.length < storeList.length) {
+            // eslint-disable-next-line max-len
+            console.warn(`"${bindAs}.${typeof onBindCb === 'string' ? onBindCb : 'onBind'}" not called, because "${pendingStores.join(',')}" still not resolved.`);
           }
-          onBindCb.apply(store.store, storeList);
-          store.notifyOnBind[index] = true;
-        }
+        }, 5000);
       });
     }
+
+    this.resolveWaiterPromises(bindAs);
+  }
+
+  getPendingStores(storeList) {
+    const result = [];
+    storeList.forEach((storeName) => {
+      if (this.storeBindWaiter[storeName] && this.storeBindWaiter[storeName].length) {
+        result.push(storeName);
+      }
+    });
+
+    return result;
   }
 
   isDebug(bindAs) {
@@ -258,10 +275,11 @@ class Binder {
     const waiters = this.storeBindWaiter[bindAs];
 
     if (waiters) {
-      waiters.forEach((resolve, index) => {
+      waiters.forEach((resolve) => {
         resolve(this.getStore(bindAs));
-        waiters.splice(index, 1);
       });
+
+      this.storeBindWaiter[bindAs] = [];
     }
   }
 
