@@ -1,15 +1,21 @@
-// @flow
-import { type CurrentPairPayloadType, type CurrentRatePayloadType } from '../../bus/busTypes.js';
-import Emitter from '../../helper/helperClass/Emitter.js';
+/* eslint-disable */
+import { type CurrentPairPayloadType, type CurrentRatePayloadType } from 'demo/packages/bus/busTypes.js';
+import Emitter from 'demo/packages/helper/helperClass/Emitter.js';
 
-class Api {
+export default class Api {
   emitter = new Emitter();
+  store;
+  constructor(store) {
+    this.store = store;
+  }
 
   setPair(pair: CurrentPairPayloadType): void {
     console.log(['pair', pair]);
+    this.store.pair = pair;
   }
   setRate(rate: CurrentRatePayloadType): void {
     console.log(['rate', rate]);
+    this.store.rate = rate;
   }
 }
 
@@ -38,5 +44,3 @@ setInterval(() => {
 setTimeout(()=>{
   api1.emitter.removeSubscribers(api1.subsRate);
 }, 10000); */
-
-export default new Api();
