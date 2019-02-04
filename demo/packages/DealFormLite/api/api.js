@@ -2,22 +2,28 @@
 import { type CurrentPairPayloadType, type CurrentRatePayloadType } from 'demo/packages/bus/busTypes.js';
 import Emitter from 'demo/packages/helper/helperClass/Emitter.js';
 
+
 export default class Api {
   emitter = new Emitter();
   store;
   constructor(store) {
     this.store = store;
+
+
+
+
   }
 
   setPair(pair: CurrentPairPayloadType): void {
-    console.log(['pair', pair]);
     this.store.pair = pair;
   }
   setRate(rate: CurrentRatePayloadType): void {
-    console.log(['rate', rate]);
     this.store.rate = rate;
   }
 }
+
+
+
 
 /*
 Emitter test
