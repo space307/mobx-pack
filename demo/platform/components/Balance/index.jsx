@@ -31,6 +31,14 @@ const Balance = ({
           </Button>
           : null
       }
+      <Button
+        color="primary"
+        variant="raised"
+        onClick={api.setDealFormAmount}
+      >
+        setDealFormAmount
+      </Button>
+
     </div>
   </Paper>
 );

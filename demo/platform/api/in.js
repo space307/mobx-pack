@@ -1,10 +1,10 @@
 /* eslint-disable */
-import { type CurrentPairPayloadType, type CurrentRatePayloadType } from 'demo/packages/bus/busTypes.js';
+
 import Emitter from 'demo/packages/helper/helperClass/Emitter.js';
 import context from 'demo/platform/helper/context.js';
 import { ASSET_SERVICE } from 'demo/platform/constants/moduleNames.js';
 
-class Api {
+class InApi {
   emitter = new Emitter();
 
   subsSelectedAsset(cb): void {
@@ -13,22 +13,21 @@ class Api {
   subsAssetCollection(cb): void {
     this.emitter.subscribe(this.subsAssetCollection, cb);
   }
+  subsBidPrice(cb): void {
+    this.emitter.subscribe(this.subsBidPrice, cb);
+  }
 
-  getAsset(){
-
-    return 'TEST';
-  /*  return context.binder.getStoreAsync(ASSET_SERVICE).then((store)=>{
-      return Promise.resolve();
-    });*/
+  getAsset(cb){
+    context.binder.getStoreAsync(ASSET_SERVICE).then((store)=>{
+      cb(store.selectedAsset);
+    });
   }
 
   selectAsset(asset){
     context.binder.getStoreAsync(ASSET_SERVICE).then((store)=>{
-      console.log([1234, store]);
+      store.selectAsset(asset);
     });
-
   }
-
 }
 
-export default new Api();
+export default new InApi();

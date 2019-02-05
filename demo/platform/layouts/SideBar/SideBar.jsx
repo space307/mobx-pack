@@ -4,24 +4,16 @@ import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import paperStyle from 'demo/platform/style/paperBlock.json';
 
-import DealFormLiteFabric, { PlatformApiMd } from 'demo/packages/DealFormLite/index.js';
-import platformApi from 'demo/platform/api/api.js';
+import DealFormLiteFabric, { ApiMD as DealFormLiteApiMD } from 'demo/packages/DealFormLite/index.js';
+import inApi from 'demo/platform/api/in.js';
+import apiMD from 'demo/platform/middleware/ApiMD.js';
 
 
-const { component: DealFormLite, api } = DealFormLiteFabric(new PlatformApiMd(platformApi), {
-  platformApi,
-});
+const { component: DealFormLite, api } = DealFormLiteFabric(new DealFormLiteApiMD(inApi));
+
+apiMD.apply({ DealFormLite: api });
 
 
-/*
-setTimeout(()=>{
-  api.setRate(1000);
-  api.setPair('Hello');
-}, 1000);
-
-
-console.log([123, DealFormLite, api]);
-*/
 
 
 const Preloader = () => <div>Loading...</div>;

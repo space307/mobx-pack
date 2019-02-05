@@ -13,7 +13,7 @@ export default class Emitter {
     const subs = this.subscribers.get(fn);
 
     if (!subs) {
-      this.subscribers.set(fn, []);
+      this.subscribers.set(fn, [cb]);
     } else {
       subs.push(cb);
     }

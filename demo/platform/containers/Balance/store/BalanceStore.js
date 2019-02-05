@@ -2,6 +2,7 @@ import { observable, action } from 'mobx';
 import { BaseStore } from 'sources.js';
 import { RECHARGE_SERVICE }
   from 'demo/platform/constants/moduleNames.js';
+import outApi from 'demo/platform/api/out.js';
 
 export default class BalanceStore extends BaseStore {
   config = {
@@ -22,7 +23,12 @@ export default class BalanceStore extends BaseStore {
 
   api = {
     recharge: this.recharge,
+    setDealFormAmount: this.setDealFormAmount,
   };
+
+  setDealFormAmount() {
+    outApi.setDealFormAmount(1500);
+  }
 
   @action initRecharge() {
     this.isRecharge = true;
