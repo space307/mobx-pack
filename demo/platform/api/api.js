@@ -14,8 +14,15 @@ class Api {
     this.emitter.subscribe(this.subsAssetCollection, cb);
   }
 
-  selectAsset(asset){
+  getAsset(){
 
+    return 'TEST';
+  /*  return context.binder.getStoreAsync(ASSET_SERVICE).then((store)=>{
+      return Promise.resolve();
+    });*/
+  }
+
+  selectAsset(asset){
     context.binder.getStoreAsync(ASSET_SERVICE).then((store)=>{
       console.log([1234, store]);
     });

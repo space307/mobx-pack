@@ -5,4 +5,12 @@ export default class DealFormLiteStore {
   rate = 1;
   @observable
   pair = 'EURTEST';
+  out;
+  constructor(out) {
+    this.out = out;
+  }
+
+  getAsset() {
+    console.log([123, this.out.getAsset()]);
+  }
 }

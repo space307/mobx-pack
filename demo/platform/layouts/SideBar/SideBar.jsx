@@ -4,12 +4,16 @@ import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import paperStyle from 'demo/platform/style/paperBlock.json';
 
-import DealFormLiteFabric from 'demo/packages/DealFormLite/index.js';
-
-const { component: DealFormLite, api } = DealFormLiteFabric();
-
+import DealFormLiteFabric, { PlatformApiMd } from 'demo/packages/DealFormLite/index.js';
+import platformApi from 'demo/platform/api/api.js';
 
 
+const { component: DealFormLite, api } = DealFormLiteFabric(new PlatformApiMd(platformApi), {
+  platformApi,
+});
+
+
+/*
 setTimeout(()=>{
   api.setRate(1000);
   api.setPair('Hello');
@@ -17,7 +21,7 @@ setTimeout(()=>{
 
 
 console.log([123, DealFormLite, api]);
-
+*/
 
 
 const Preloader = () => <div>Loading...</div>;
@@ -52,7 +56,7 @@ class SideBar extends React.Component {
         {DealFormLite}
         {
           this.state.recharge
-          ?
+            ?
             <LoadableComponent />
             :
             <Button
