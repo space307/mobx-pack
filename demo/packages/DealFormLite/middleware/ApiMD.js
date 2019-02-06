@@ -1,26 +1,30 @@
 
 
 export default class ApiMD {
-  platformApi;
+  api = {};
+
   constructor(platformApi) {
-    this.platformApi = platformApi;
+    this.apply({ platformApi });
+  }
+
+  apply(api) {
+    this.api = { ...this.api, ...api };
   }
 
   getBalance(cb, type) {
-    this.platformApi.getBalance(cb, type);
+    this.api.platformApi.getBalance(cb, type);
   }
 
   selectAsset(asset) {
-    this.platformApi.selectAsset(asset);
+    this.api.platformApi.selectAsset(asset);
   }
 
   subsBidPrice(cb) {
-    this.platformApi.subsBidPrice(cb);
+    this.api.platformApi.subsBidPrice(cb);
   }
 
-  subsSelectedAsset(cb){
-    this.platformApi.subsSelectedAsset(cb);
+  subsSelectedAsset(cb) {
+    this.api.platformApi.subsSelectedAsset(cb);
   }
-
 }
 

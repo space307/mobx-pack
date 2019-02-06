@@ -25,7 +25,7 @@ export default class DealFormLiteStore {
 
   updateBalance() {
     this.out.getBalance((data) => {
-      this.balance = data;
+      this.balance = data && data.usd;
     }, 'usd');
   }
 

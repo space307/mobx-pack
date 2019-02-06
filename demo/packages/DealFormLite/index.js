@@ -17,6 +17,7 @@ export default function(middlewareClass) {
   const out = new OutApi(middlewareClass);
   const store = new Store(out);
   const api = new InApi(store);
+  middlewareClass.apply({InApi:api});
   const component = React.createElement(DealFormLite, {store});
 
   return { api, component };

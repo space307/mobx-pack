@@ -17,9 +17,9 @@ class InApi {
     this.emitter.subscribe(this.subsBidPrice, cb);
   }
 
-  getBalance(cb, type){
+  getBalance(cb){
     context.binder.getStoreAsync(BALANCE_SERVICE).then((store)=>{
-      cb(store.balance[type]);
+      cb(store.balance);
     });
   }
 

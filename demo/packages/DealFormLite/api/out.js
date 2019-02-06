@@ -5,8 +5,8 @@ export default class OutApi {
     this.middleware = middleware;
   }
 
-  getBalance(cb, type): void {
-    return this.middleware.getBalance(cb, type);
+  getBalance(cb): void {
+    return this.middleware.getBalance(cb);
   }
 
   selectAsset(asset){

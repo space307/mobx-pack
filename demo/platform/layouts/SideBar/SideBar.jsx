@@ -4,15 +4,22 @@ import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import paperStyle from 'demo/platform/style/paperBlock.json';
 
-import DealFormLiteFabric, { ApiMD as DealFormLiteApiMD } from 'demo/packages/DealFormLite/index.js';
+import DealFormLiteFabric, { ApiMD as DealFormLiteApiMD, busMD as DealFormLiteBusMD} from 'demo/packages/DealFormLite/index.js';
 import inApi from 'demo/platform/api/in.js';
 import apiMD from 'demo/platform/middleware/ApiMD.js';
 
 
+
+/*
 const { component: DealFormLite, api } = DealFormLiteFabric(new DealFormLiteApiMD(inApi));
-
 apiMD.apply({ DealFormLite: api });
+*/
 
+
+/**/
+import bus from 'demo/packages/bus/bus.js';
+import BusMD from 'demo/platform/middleware/BusMD.js';
+const { component: DealFormLite } = DealFormLiteFabric(new DealFormLiteBusMD(bus));
 
 
 
