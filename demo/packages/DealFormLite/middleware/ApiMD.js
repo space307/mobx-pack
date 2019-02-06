@@ -6,6 +6,9 @@ from package Alpha to Beta
 from package Beta to Alpha
 <Comp />(Beta) -> store(Beta) -> outApi(Beta) -> ApiMd(Beta) -> inApi(Alpha) -> store(Alpha) -> <Comp />(Alpha)
 
+ApiMd(Alpha) = должен знать inApi(Beta)
+ApiMd(Beta) = должен знать inApi(Alpha)
+
 */
 
 
