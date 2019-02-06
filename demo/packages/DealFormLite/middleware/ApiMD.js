@@ -1,4 +1,13 @@
 
+/*
+// Поток данных между пакетами
+from package Alpha to Beta
+<Comp />(Alpha) -> store(Alpha) -> outApi(Alpha) -> ApiMd(Alpha) -> inApi(Beta) -> store(Beta) -> <Comp />(Beta)
+from package Beta to Alpha
+<Comp />(Beta) -> store(Beta) -> outApi(Beta) -> ApiMd(Beta) -> inApi(Alpha) -> store(Alpha) -> <Comp />(Alpha)
+
+*/
+
 
 export default class ApiMD {
   platformApi;
@@ -18,9 +27,8 @@ export default class ApiMD {
     this.platformApi.subsBidPrice(cb);
   }
 
-  subsSelectedAsset(cb){
+  subsSelectedAsset(cb) {
     this.platformApi.subsSelectedAsset(cb);
   }
-
 }
 
