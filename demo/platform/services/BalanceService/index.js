@@ -5,6 +5,8 @@ import context from 'demo/platform/helper/context.js';
 import { ASSET_NAMES } from 'demo/platform/constants/common.js';
 import { ServiceConnector } from 'sources.js';
 
+import { sendBalance } from 'demo/platform/api/out.js';
+
 
 function validateBalanceChange(
   balance: {[key: string]: number},
@@ -46,6 +48,8 @@ export class BalanceService {
         this.balance[asset] += data[asset];
       });
     }
+
+    sendBalance(result);
     return result;
   }
 }

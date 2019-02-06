@@ -1,18 +1,22 @@
 /* eslint-disable */
 
-import apiMD from 'demo/platform/middleware/ApiMD.js';
-import BusMD from 'demo/platform/middleware/BusMD.js';
 
 class OutApi {
 
-  constructor(middleware){
+  start({middleware}){
+    //this.context = context;
     this.middleware = middleware;
+
   }
 
-  setDealFormAmount(amount) {
-    this.middleware.setDealFormAmount(amount);
+  sendBalance(balance) {
+    this.middleware.sendBalance(balance);
+  }
+
+  sendPrice(price){
+    this.middleware.sendPrice(price);
   }
 
 }
 
-export default new OutApi(BusMD);
+export default new OutApi();

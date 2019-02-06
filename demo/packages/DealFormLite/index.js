@@ -12,13 +12,27 @@ import busMD from './middleware/BusMD.js';
 
 export { ApiMD, busMD };
 
-export default function(middlewareClass) {
+export default function(Middleware, bus, id) {
 
-  const out = new OutApi(middlewareClass);
-  const store = new Store(out);
-  const api = new InApi(store);
-  middlewareClass.apply({InApi:api});
-  const component = React.createElement(DealFormLite, {store});
 
-  return { api, component };
+  const context = {
+    outApi: new OutApi(),
+    inApi: new InApi(),
+    store: new Store(),
+    middleware: new Middleware(),
+    bus,
+    id,
+  };
+
+
+  context.middleware.start(context);
+  context.outApi.start(context);
+  context.inApi.start(context);
+  context.store.start(context);
+
+
+
+  const component = React.createElement(DealFormLite, {store: context.store});
+
+  return { component };
 };

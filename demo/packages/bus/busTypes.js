@@ -35,6 +35,7 @@ export const PLATFORM_EVENTS = {
 
 export const DEAL_FORM_LITE_EVENTS = {
   SET_AMOUNT: 'DFL_SET_AMOUNT',
+  SET_ASSET: 'DFL_SET_ASSET',
 };
 
 

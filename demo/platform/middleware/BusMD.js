@@ -1,44 +1,34 @@
-
 import { PLATFORM_EVENTS, DEAL_FORM_LITE_EVENTS } from 'demo/packages/bus/busTypes.js';
-import bus from 'demo/packages/bus/bus.js';
-import inApi from 'demo/platform/api/in.js';
-
-class BusMD {
-  constructor(busParam, platformApi) {
-    this.platformApi = platformApi;
-    this.bus = busParam;
-
-    this.platformApi.subsSelectedAsset((asset) => {
-      this.bus.emit({
-        type: PLATFORM_EVENTS.CURRENT_ASSET,
-        payload: asset,
-      });
-    });
 
 
-    this.platformApi.subsBidPrice((price) => {
-      this.bus.emit({
-        type: PLATFORM_EVENTS.CURRENT_PRICE,
-        payload: price,
-      });
-    });
+export default class BusMD {
+  start({ bus }) {
+    this.bus = bus;
+  }
 
-    this.platformApi.getBalance((balance) => {
-      this.bus.emit({
-        type: PLATFORM_EVENTS.CURRENT_BALANCE,
-        payload: balance,
-      });
+  sendBalance(balance) {
+    this.bus.emit({
+      type: PLATFORM_EVENTS.CURRENT_BALANCE,
+      payload: balance,
     });
   }
 
-
-  setDealFormAmount(amount) {
+  sendPrice(price) {
     this.bus.emit({
-      type: DEAL_FORM_LITE_EVENTS.SET_AMOUNT,
-      payload: amount,
+      type: PLATFORM_EVENTS.CURRENT_PRICE,
+      payload: price,
+    });
+  }
+
+  getAsset(cb) {
+    this.bus.select(DEAL_FORM_LITE_EVENTS.SET_ASSET).subscribe(({ payload }) => {
+      cb(payload);
     });
   }
 }
 
-export default new BusMD(bus, inApi);
-
+/*
+ this.bus.select(DEAL_FORM_LITE_EVENTS.SET_ASSET).subscribe(({ payload }) => {
+      cb(payload);
+    });
+ */

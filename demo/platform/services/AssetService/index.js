@@ -29,13 +29,13 @@ export class AssetService implements AssetServiceInterface {
     reaction(
       () => this.selectedAssetData,
       (selectedAsset) => {
-        inApi.emitter.emit(inApi.subsSelectedAsset, toJS(selectedAsset));
+        //inApi.emitter.emit(inApi.subsSelectedAsset, toJS(selectedAsset));
       },
     );
 
     return fetchAssets().then((data: Array<AssetType>): void => {
       this.resetAssetCollection(data);
-      inApi.emitter.emit(inApi.subsAssetCollection, toJS(this.assetCollection));
+      //inApi.emitter.emit(inApi.subsAssetCollection, toJS(this.assetCollection));
     });
   }
 

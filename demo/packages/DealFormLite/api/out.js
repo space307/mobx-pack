@@ -1,26 +1,19 @@
 /* eslint-disable */
 
 export default class OutApi {
-  constructor(middleware) {
+
+  start({middleware}){
     this.middleware = middleware;
   }
 
-  getBalance(cb): void {
-    return this.middleware.getBalance(cb);
+  sendAsset(asset){
+    this.middleware.sendAsset(asset);
   }
 
-  selectAsset(asset){
-    return this.middleware.selectAsset(asset);
-  }
-
-  subsBidPrice(cb){
-    return this.middleware.subsBidPrice(cb);
-  }
-
-  subsSelectedAsset(cb){
-    return this.middleware.subsSelectedAsset(cb);
-  }
 
 }
+
+
+
 
 
