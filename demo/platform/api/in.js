@@ -2,7 +2,7 @@
 
 import Emitter from 'demo/packages/helper/helperClass/Emitter.js';
 import context from 'demo/platform/helper/context.js';
-import { ASSET_SERVICE } from 'demo/platform/constants/moduleNames.js';
+import { ASSET_SERVICE, BALANCE_SERVICE } from 'demo/platform/constants/moduleNames.js';
 
 class InApi {
   emitter = new Emitter();
@@ -17,9 +17,9 @@ class InApi {
     this.emitter.subscribe(this.subsBidPrice, cb);
   }
 
-  getAsset(cb){
-    context.binder.getStoreAsync(ASSET_SERVICE).then((store)=>{
-      cb(store.selectedAsset);
+  getBalance(cb, type){
+    context.binder.getStoreAsync(BALANCE_SERVICE).then((store)=>{
+      cb(store.balance[type]);
     });
   }
 

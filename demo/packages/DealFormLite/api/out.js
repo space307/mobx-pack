@@ -5,8 +5,8 @@ export default class OutApi {
     this.middleware = middleware;
   }
 
-  getAsset(cb): void {
-    return this.middleware.getAsset(cb);
+  getBalance(cb, type): void {
+    return this.middleware.getBalance(cb, type);
   }
 
   selectAsset(asset){
@@ -15,6 +15,10 @@ export default class OutApi {
 
   subsBidPrice(cb){
     return this.middleware.subsBidPrice(cb);
+  }
+
+  subsSelectedAsset(cb){
+    return this.middleware.subsSelectedAsset(cb);
   }
 
 }

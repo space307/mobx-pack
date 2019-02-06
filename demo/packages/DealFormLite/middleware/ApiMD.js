@@ -6,8 +6,8 @@ export default class ApiMD {
     this.platformApi = platformApi;
   }
 
-  getAsset(cb) {
-    this.platformApi.getAsset(cb);
+  getBalance(cb, type) {
+    this.platformApi.getBalance(cb, type);
   }
 
   selectAsset(asset) {
@@ -16,6 +16,10 @@ export default class ApiMD {
 
   subsBidPrice(cb) {
     this.platformApi.subsBidPrice(cb);
+  }
+
+  subsSelectedAsset(cb){
+    this.platformApi.subsSelectedAsset(cb);
   }
 
 }

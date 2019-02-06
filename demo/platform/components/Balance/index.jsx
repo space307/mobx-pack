@@ -36,7 +36,7 @@ const Balance = ({
         variant="raised"
         onClick={api.setDealFormAmount}
       >
-        setDealFormAmount
+        Set Deal Form Amount
       </Button>
 
     </div>

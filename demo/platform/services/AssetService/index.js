@@ -1,6 +1,6 @@
 // @flow
 import { find } from 'lodash';
-import { observable, action, computed, reaction } from 'mobx';
+import { observable, action, computed, reaction, toJS } from 'mobx';
 import { ASSET_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
 import { fetchAssets } from 'demo/platform/services/AssetService/client.js';
@@ -29,13 +29,13 @@ export class AssetService implements AssetServiceInterface {
     reaction(
       () => this.selectedAssetData,
       (selectedAsset) => {
-        inApi.emitter.emit(inApi.subsSelectedAsset, selectedAsset);
+        inApi.emitter.emit(inApi.subsSelectedAsset, toJS(selectedAsset));
       },
     );
 
     return fetchAssets().then((data: Array<AssetType>): void => {
       this.resetAssetCollection(data);
-      inApi.emitter.emit(inApi.subsAssetCollection, this.assetCollection);
+      inApi.emitter.emit(inApi.subsAssetCollection, toJS(this.assetCollection));
     });
   }
 

@@ -2,9 +2,11 @@ import { observable } from 'mobx';
 
 export default class DealFormLiteStore {
   @observable
+  balance = 0;
+  @observable
   price = 1;
   @observable
-  asset = 'EURTEST';
+  asset = '';
   @observable
   amount = 100;
   out;
@@ -15,12 +17,16 @@ export default class DealFormLiteStore {
     this.out.subsBidPrice((price) => {
       this.price = price;
     });
+
+    this.out.subsSelectedAsset(({ id }) => {
+      this.asset = id;
+    });
   }
 
-  getAsset() {
-    this.out.getAsset((data) => {
-      this.asset = data;
-    });
+  updateBalance() {
+    this.out.getBalance((data) => {
+      this.balance = data;
+    }, 'usd');
   }
 
   selectAsset(asset) {
