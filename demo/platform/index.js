@@ -24,10 +24,10 @@ const context = {
   middleware: new BusMD(),
   binder: binderContext.binder,
 };
-context.middleware.start(context);
+
 context.outApi.start(context);
 context.inApi.start(context);
-
+context.middleware.start(context);
 
 document.addEventListener('DOMContentLoaded', () => {
   Promise.all([

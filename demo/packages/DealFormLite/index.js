@@ -24,12 +24,10 @@ export default function(Middleware, bus, id) {
     id,
   };
 
-
-  context.middleware.start(context);
   context.outApi.start(context);
   context.inApi.start(context);
   context.store.start(context);
-
+  context.middleware.start(context);
 
 
   const component = React.createElement(DealFormLite, {store: context.store});

@@ -2,8 +2,11 @@ import { PLATFORM_EVENTS, DEAL_FORM_LITE_EVENTS } from 'demo/packages/bus/busTyp
 
 
 export default class BusMD {
-  start({ bus }) {
+  start({ bus, inApi }) {
     this.bus = bus;
+    this.inApi = inApi;
+
+    this.getAsset();
   }
 
   sendBalance(balance) {
@@ -20,9 +23,9 @@ export default class BusMD {
     });
   }
 
-  getAsset(cb) {
+  getAsset() {
     this.bus.select(DEAL_FORM_LITE_EVENTS.SET_ASSET).subscribe(({ payload }) => {
-      cb(payload);
+      this.inApi.setAsset(payload);
     });
   }
 }

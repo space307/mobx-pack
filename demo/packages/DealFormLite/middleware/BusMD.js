@@ -1,23 +1,25 @@
-import Emitter from 'demo/packages/helper/helperClass/Emitter.js';
 import { DEAL_FORM_LITE_EVENTS, PLATFORM_EVENTS } from 'demo/packages/bus/busTypes.js';
 
 
 export default class busMD {
-  start({ bus }) {
+  start({ bus, inApi }) {
     this.bus = bus;
+    this.inApi = inApi;
+
+    this.getBalance();
+    this.getPrice();
   }
 
 
-  getBalance(cb) {
+  getBalance() {
     this.bus.select(PLATFORM_EVENTS.CURRENT_BALANCE).subscribe(({ payload }) => {
-      cb(payload);
+      this.inApi.setBalance(payload);
     });
   }
 
-
-  getPrice(cb) {
+  getPrice() {
     this.bus.select(PLATFORM_EVENTS.CURRENT_PRICE).subscribe(({ payload }) => {
-      cb(payload);
+      this.inApi.setPrice(payload);
     });
   }
 
