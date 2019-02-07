@@ -8,7 +8,7 @@ import { ServiceConnector } from 'sources.js';
 import type { AssetType } from 'demo/platform/services/AssetService/typing/types.js';
 import type { AssetServiceInterface } from 'demo/platform/services/AssetService/typing/interfaces.js';
 
-import inApi from 'demo/platform/api/in.js';
+import outApi from 'demo/platform/api/out.js';
 
 
 export class AssetService implements AssetServiceInterface {
@@ -29,13 +29,12 @@ export class AssetService implements AssetServiceInterface {
     reaction(
       () => this.selectedAssetData,
       (selectedAsset) => {
-        //inApi.emitter.emit(inApi.subsSelectedAsset, toJS(selectedAsset));
+        outApi.sendAsset(toJS(selectedAsset));
       },
     );
 
     return fetchAssets().then((data: Array<AssetType>): void => {
       this.resetAssetCollection(data);
-      //inApi.emitter.emit(inApi.subsAssetCollection, toJS(this.assetCollection));
     });
   }
 

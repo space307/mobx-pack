@@ -8,6 +8,7 @@ export default class busMD {
 
     this.getBalance();
     this.getPrice();
+    this.getAsset();
   }
 
   sendBalanceRequest() {
@@ -25,6 +26,12 @@ export default class busMD {
   getPrice() {
     this.bus.select(PLATFORM_EVENTS.CURRENT_PRICE).subscribe(({ payload }) => {
       this.inApi.setPrice(payload);
+    });
+  }
+
+  getAsset() {
+    this.bus.select(PLATFORM_EVENTS.CURRENT_ASSET).subscribe(({ payload }) => {
+      this.inApi.setAsset(payload);
     });
   }
 

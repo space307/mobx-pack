@@ -8,6 +8,10 @@ class OutApi {
   sendPrice(price) {
     this.middleware.sendPrice(price);
   }
+
+  sendAsset(asset) {
+    this.middleware.sendAsset(asset);
+  }
 }
 
 export default new OutApi();

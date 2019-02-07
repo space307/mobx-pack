@@ -7,7 +7,15 @@ export default class InApi {
   }
 
   setBalance(balance){
-    this.store.balance = balance;
+    if(balance && balance.usd){
+      this.store.balance = balance.usd;
+    }
+  }
+
+  setAsset(asset){
+    if(asset){
+      this.store.asset = asset.id;
+    }
   }
 
   setPrice(price){

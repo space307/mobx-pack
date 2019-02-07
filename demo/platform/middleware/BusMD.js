@@ -32,15 +32,16 @@ export default class BusMD {
     });
   }
 
+  sendAsset(asset) {
+    this.bus.emit({
+      type: PLATFORM_EVENTS.CURRENT_ASSET,
+      payload: asset,
+    });
+  }
+
   getAsset() {
     this.bus.select(DEAL_FORM_LITE_EVENTS.SET_ASSET).subscribe(({ payload }) => {
       this.inApi.setAsset(payload);
     });
   }
 }
-
-/*
- this.bus.select(DEAL_FORM_LITE_EVENTS.SET_ASSET).subscribe(({ payload }) => {
-      cb(payload);
-    });
- */
