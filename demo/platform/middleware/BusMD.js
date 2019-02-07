@@ -39,6 +39,13 @@ export default class BusMD {
     });
   }
 
+  sendDealFormAmount(amount){
+    this.bus.emit({
+      type: DEAL_FORM_LITE_EVENTS.SET_AMOUNT,
+      payload: amount,
+    });
+  }
+
   getAsset() {
     this.bus.select(DEAL_FORM_LITE_EVENTS.SET_ASSET).subscribe(({ payload }) => {
       this.inApi.setAsset(payload);

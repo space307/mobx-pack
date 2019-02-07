@@ -27,7 +27,7 @@ export default class BalanceStore extends BaseStore {
   };
 
   setDealFormAmount() {
-    outApi.setDealFormAmount(1500);
+    outApi.sendDealFormAmount(1500);
   }
 
   @action initRecharge() {

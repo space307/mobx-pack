@@ -21,6 +21,10 @@ export default class InApi {
   setPrice(price){
     this.store.price = price;
   }
+
+  setAmount(amount){
+    this.store.amount = amount;
+  }
 }
 
 

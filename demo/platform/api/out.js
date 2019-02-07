@@ -12,6 +12,10 @@ class OutApi {
   sendAsset(asset) {
     this.middleware.sendAsset(asset);
   }
+
+  sendDealFormAmount(amount) {
+    this.middleware.sendDealFormAmount(amount);
+  }
 }
 
 export default new OutApi();
