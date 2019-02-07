@@ -3,7 +3,6 @@
 export default class InApi {
 
   start({middleware, store}){
-    this.middleware = middleware;
     this.store = store;
   }
 

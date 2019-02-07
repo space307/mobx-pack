@@ -7,6 +7,15 @@ export default class BusMD {
     this.inApi = inApi;
 
     this.getAsset();
+    this.getBalanceRequest();
+  }
+
+  getBalanceRequest() {
+    this.bus.select(PLATFORM_EVENTS.GET_BALANCE).subscribe(() => {
+      this.inApi.getBalance((balance) => {
+        this.sendBalance(balance);
+      });
+    });
   }
 
   sendBalance(balance) {

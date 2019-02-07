@@ -10,6 +10,10 @@ export default class OutApi {
     this.middleware.sendAsset(asset);
   }
 
+  sendBalanceRequest(){
+    this.middleware.sendBalanceRequest();
+  }
+
 
 }
 

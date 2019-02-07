@@ -10,6 +10,11 @@ export default class busMD {
     this.getPrice();
   }
 
+  sendBalanceRequest() {
+    this.bus.emit({
+      type: PLATFORM_EVENTS.GET_BALANCE,
+    });
+  }
 
   getBalance() {
     this.bus.select(PLATFORM_EVENTS.CURRENT_BALANCE).subscribe(({ payload }) => {

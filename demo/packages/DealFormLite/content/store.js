@@ -11,26 +11,13 @@ export default class DealFormLiteStore {
   amount = 100;
   out;
 
-  constructor() {
 
-
-    /* this.out.subsBidPrice((price) => {
-      this.price = price;
-    });
-
-    this.out.subsSelectedAsset(({ id }) => {
-      this.asset = id;
-    }); */
-  }
-
-  start({outApi}) {
+  start({ outApi }) {
     this.outApi = outApi;
   }
 
   updateBalance() {
-    /* this.out.getBalance((data) => {
-      this.balance = data && data.usd;
-    }, 'usd'); */
+    this.outApi.sendBalanceRequest();
   }
 
   selectAsset(asset) {
