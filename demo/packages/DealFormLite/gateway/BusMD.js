@@ -2,49 +2,52 @@ import { DEAL_FORM_LITE_EVENTS, PLATFORM_EVENTS } from 'demo/packages/bus/busTyp
 
 
 export default class busMD {
-  start({ bus, inApi }) {
+  start({ bus, api }) {
     this.bus = bus;
-    this.inApi = inApi;
-
+    this.api = api;
     this.getBalance();
     this.getPrice();
     this.getAsset();
     this.getDealFormAmount();
+
+    api.subsAssetRequest(this.subsAssetRequest);
+    api.subsBalanceRequest(this.subsBalanceRequest);
   }
 
-  sendBalanceRequest() {
+  subsAssetRequest = (asset) => {
+    this.bus.emit({
+      type: DEAL_FORM_LITE_EVENTS.SET_ASSET,
+      payload: asset,
+    });
+  };
+
+  subsBalanceRequest = () => {
     this.bus.emit({
       type: PLATFORM_EVENTS.GET_BALANCE,
     });
-  }
+  };
+
 
   getBalance() {
     this.bus.select(PLATFORM_EVENTS.CURRENT_BALANCE).subscribe(({ payload }) => {
-      this.inApi.setBalance(payload);
+      this.api.setBalance(payload);
     });
   }
 
   getPrice() {
     this.bus.select(PLATFORM_EVENTS.CURRENT_PRICE).subscribe(({ payload }) => {
-      this.inApi.setPrice(payload);
+      this.api.setPrice(payload);
     });
   }
 
   getAsset() {
     this.bus.select(PLATFORM_EVENTS.CURRENT_ASSET).subscribe(({ payload }) => {
-      this.inApi.setAsset(payload);
+      this.api.setAsset(payload);
     });
   }
   getDealFormAmount() {
     this.bus.select(DEAL_FORM_LITE_EVENTS.SET_AMOUNT).subscribe(({ payload }) => {
-      this.inApi.setAmount(payload);
-    });
-  }
-
-  sendAsset(asset) {
-    this.bus.emit({
-      type: DEAL_FORM_LITE_EVENTS.SET_ASSET,
-      payload: asset,
+      this.api.setAmount(payload);
     });
   }
 }

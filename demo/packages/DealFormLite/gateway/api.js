@@ -1,8 +1,11 @@
 /* eslint-disable */
+import Emitter from 'demo/packages/helper/helperClass/Emitter.js';
 
-export default class InApi {
+export default class Api {
 
-  start({middleware, store}){
+  emitter = new Emitter();
+
+  start({store}){
     this.store = store;
   }
 
@@ -24,6 +27,13 @@ export default class InApi {
 
   setAmount(amount){
     this.store.amount = amount;
+  }
+
+  subsAssetRequest(cb){
+    this.emitter.subscribe(this.subsAssetRequest, cb);
+  }
+  subsBalanceRequest(cb){
+    this.emitter.subscribe(this.subsBalanceRequest, cb);
   }
 }
 

@@ -1,25 +1,22 @@
 import React from 'react';
-import InApi from './api/in.js';
+import Api from './gateway/api.js';
 import Store from './content/store.js';
 import DealFormLite from './content/DealFormLite.jsx';
-import OutApi from './api/out.js';
-import busMD from './middleware/BusMD.js';
+import busMD from './gateway/BusMD.js';
 
 
 export { busMD };
 
 export default function (Middleware, bus, id) {
   const context = {
-    outApi: new OutApi(),
-    inApi: new InApi(),
+    api: new Api(),
     store: new Store(),
     middleware: new Middleware(),
     bus,
     id,
   };
 
-  context.outApi.start(context);
-  context.inApi.start(context);
+  context.api.start(context);
   context.store.start(context);
   context.middleware.start(context);
 

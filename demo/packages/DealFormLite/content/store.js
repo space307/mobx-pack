@@ -12,15 +12,15 @@ export default class DealFormLiteStore {
   out;
 
 
-  start({ outApi }) {
-    this.outApi = outApi;
+  start({ api }) {
+    this.api = api;
   }
 
   updateBalance() {
-    this.outApi.sendBalanceRequest();
+    this.api.emitter.emit(this.api.subsBalanceRequest);
   }
 
   selectAsset(asset) {
-    this.outApi.sendAsset(asset);
+    this.api.emitter.emit(this.api.subsAssetRequest, asset);
   }
 }
