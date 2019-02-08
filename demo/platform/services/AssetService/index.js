@@ -8,7 +8,7 @@ import { ServiceConnector } from 'sources.js';
 import type { AssetType } from 'demo/platform/services/AssetService/typing/types.js';
 import type { AssetServiceInterface } from 'demo/platform/services/AssetService/typing/interfaces.js';
 
-import outApi from 'demo/platform/api/out.js';
+import api from 'demo/platform/gateway/api.js';
 
 
 export class AssetService implements AssetServiceInterface {
@@ -29,7 +29,7 @@ export class AssetService implements AssetServiceInterface {
     reaction(
       () => this.selectedAssetData,
       (selectedAsset) => {
-        outApi.sendAsset(toJS(selectedAsset));
+        api.emitter.emit(api.subsAsset, toJS(selectedAsset));
       },
     );
 

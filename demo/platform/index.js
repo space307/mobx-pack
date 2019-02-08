@@ -9,24 +9,20 @@ import balanceService from 'demo/platform/services/BalanceService/index.js';
 import Platform from 'demo/platform/layouts/Platform/index.jsx';
 
 
-import outApi from 'demo/platform/api/out.js';
-import inApi from 'demo/platform/api/in.js';
-import BusMD from 'demo/platform/middleware/BusMD.js';
+import api from 'demo/platform/gateway/api.js';
+import BusMD from 'demo/platform/gateway/BusMD.js';
 import bus from 'demo/packages/bus/bus.js';
 import binderContext from 'demo/platform/helper/context.js';
 
 
-
 const context = {
-  outApi,
-  inApi,
+  api,
   bus,
   middleware: new BusMD(),
   binder: binderContext.binder,
 };
 
-context.outApi.start(context);
-context.inApi.start(context);
+context.api.start(context);
 context.middleware.start(context);
 
 document.addEventListener('DOMContentLoaded', () => {

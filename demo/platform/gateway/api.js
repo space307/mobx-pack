@@ -1,8 +1,12 @@
 
 import { toJS } from 'mobx';
+import Emitter from 'demo/packages/helper/helperClass/Emitter.js';
 import { ASSET_SERVICE, BALANCE_SERVICE } from 'demo/platform/constants/moduleNames.js';
 
-class InApi {
+
+class Api {
+  emitter = new Emitter();
+
   start({ binder }) {
     this.binder = binder;
   }
@@ -18,7 +22,18 @@ class InApi {
       store.selectAsset(asset);
     });
   }
+
+  subsPrice(cb) {
+    this.emitter.subscribe(this.subsPrice, cb);
+  }
+  subsAsset(cb) {
+    this.emitter.subscribe(this.subsAsset, cb);
+  }
+  subsDealFormAmount(cb) {
+    this.emitter.subscribe(this.subsDealFormAmount, cb);
+  }
 }
 
-export default new InApi();
+
+export default new Api();
 
