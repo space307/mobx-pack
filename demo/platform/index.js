@@ -7,23 +7,8 @@ import baseService from 'demo/platform/services/BaseService/index.js';
 import dealService from 'demo/platform/services/DealService/index.js';
 import balanceService from 'demo/platform/services/BalanceService/index.js';
 import Platform from 'demo/platform/layouts/Platform/index.jsx';
+import apiService from 'demo/platform/gateway/api.js';
 
-
-import api from 'demo/platform/gateway/api.js';
-import BusMD from 'demo/platform/gateway/BusMD.js';
-import bus from 'demo/packages/bus/bus.js';
-import binderContext from 'demo/platform/helper/context.js';
-
-
-const context = {
-  api,
-  bus,
-  middleware: new BusMD(),
-  binder: binderContext.binder,
-};
-
-context.api.start(context);
-context.middleware.start(context);
 
 document.addEventListener('DOMContentLoaded', () => {
   Promise.all([
@@ -32,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     baseService.start('entry'),
     dealService.start('entry'),
     balanceService.start('entry'),
+    apiService.start('entry'),
   ]).then(() => {
     ReactDOM.render(React.createElement(Platform), document.querySelector('#root'));
   });

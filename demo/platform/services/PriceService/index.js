@@ -8,7 +8,6 @@ import {
 import context from 'demo/platform/helper/context.js';
 import type { PriceServiceInterface } from 'demo/platform/services/PriceService/typing/interfaces.js';
 import type { AssetServiceInterface } from 'demo/platform/services/AssetService/typing/interfaces.js';
-import api from 'demo/platform/gateway/api.js';
 
 function randNumber(min, max) {
   return Math.floor(Math.random() * (max - (min + 1))) + min;
@@ -32,16 +31,6 @@ export class PriceService implements PriceServiceInterface {
           this.assetService.selectedAssetData &&
           this.assetService.selectedAssetData.id;
         this.generatePrice();
-      },
-      {
-        fireImmediately: true,
-      },
-    );
-
-    reaction(
-      () => this.bidPrice,
-      (bidPrice) => {
-        api.emitter.emit(api.subsPrice, bidPrice);
       },
       {
         fireImmediately: true,

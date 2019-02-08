@@ -4,10 +4,10 @@ import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 import paperStyle from 'demo/platform/style/paperBlock.json';
 
-import DealFormLiteFabric, { busMD as DealFormLiteBusMD } from 'demo/packages/DealFormLite/index.js';
+import DealFormLiteFabric from 'demo/packages/DealFormLite/index.js';
 import bus from 'demo/packages/bus/bus.js';
 
-const { component: DealFormLite } = DealFormLiteFabric(DealFormLiteBusMD, bus, 'DealFormLite1');
+const { component: DealFormLite } = DealFormLiteFabric(bus, 'DealFormLite1');
 
 
 const Preloader = () => <div>Loading...</div>;
