@@ -1,6 +1,7 @@
 {
-  "extends": "airbnb",
+  "extends": ["airbnb"],
   "parser": "babel-eslint",
+  "plugins": ["flowtype"],
   "env": {
     "browser": true,
     "jest": true
@@ -14,6 +15,8 @@
     "react/forbid-prop-types": "off",
     "jsx-a11y/href-no-hash": "off",
     "jsx-a11y/no-autofocus":"off",
+    "react/sort-comp": "off",
+    "flowtype/define-flow-type": 2,
     "jsx-a11y/label-has-for": [ 2, {
       "required": {
         "some": [ "nesting", "id" ]

@@ -3,12 +3,8 @@ import React from 'react';
 import {observer, Observer} from 'mobx-react';
 
 import { TestStoreConfig, TestServiceConfig } from './Enviroment.js';
-import { BinderContext, StoreContext } from './ComponentContext.js';
-
-export const GlobalContext = { binder: {}, initialState: {} };
-
-import Connector from './Provider.jsx';
-
+import { BinderContext, StoreContext, GlobalContext } from './ComponentContext.js';
+import ProviderLocal from './ProviderLocal.jsx'
 
 
 class Engine extends React.PureComponent {
@@ -20,7 +16,7 @@ class Engine extends React.PureComponent {
 
 
 
-const EngineConnector = Connector(
+const EngineConnector = ProviderLocal(
   Engine,
   {
     helper([store]){
@@ -81,7 +77,7 @@ class Car extends React.Component {
 
 
 
-const Garage = Connector(
+const Garage = ProviderLocal(
   Car,
   {
     helper([store, testService], {theme}){
@@ -122,6 +118,8 @@ class MyApplication extends React.Component {
   }
 
   render() {
+
+    console.log(['GlobalContext', GlobalContext]);
 
     console.log(['MyApplication render']);
     return (

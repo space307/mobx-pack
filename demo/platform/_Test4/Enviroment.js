@@ -1,7 +1,7 @@
 // @flow
 
 import { observable } from 'mobx';
-import type { ServiceConfigType } from './types.js';
+import type { ServiceConfigType } from 'sources.js';
 
 const SERVICE_NAME = ' TestService';
 const STORE_NAME = ' TestStore';
@@ -94,3 +94,17 @@ export const TestStoreConfig: ServiceConfigType<*, Class<TestStoreInterface>> = 
     onBind: [[SERVICE_NAME, 'onBind']],
   },
 };
+
+
+interface InitialStateInterface {
+  +vip: boolean;
+  +abTest: boolean;
+}
+
+class InitialState implements InitialStateInterface {
+  vip: boolean = false;
+  abTest: boolean = true;
+}
+
+
+export const initialState: InitialStateInterface = new InitialState();

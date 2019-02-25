@@ -1,11 +1,4 @@
 // @flow
-import Binder from '../Binder.js';
-
-
-export type GlobalContextType = {
-  binder: Binder,
-  initialState: *,
-};
 
 export type ServiceConfigType<serviceClassType> = {
   proto: serviceClassType,
@@ -17,4 +10,3 @@ export type ServiceConfigType<serviceClassType> = {
     onBind?: Array<Array<string>>,
   },
 };
-

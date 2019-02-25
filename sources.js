@@ -5,8 +5,8 @@ import Binder from 'src/lib/Binder.js';
 import Connector from 'src/lib/Connector.jsx';
 import ServiceStarter from 'src/lib/ServiceStarter.js';
 import ServiceConnector from 'src/lib/ServiceConnector.js';
-import { GlobalContextType, ServiceConfigType } from 'src/lib/typing/common.js';
-import Provider from 'src/lib/Provider.jsx';
+import type { GlobalContextType, ServiceConfigType } from 'src/lib/typing/common.js';
+import CreateProvider from 'src/lib/Provider.jsx';
 import { startService, startServices, stopService, stopServices } from 'src/lib/serviceUtils.js';
 
 export {
@@ -18,7 +18,7 @@ export {
   ServiceConnector,
   GlobalContextType,
   ServiceConfigType,
-  Provider,
+  CreateProvider,
   startService,
   startServices,
   stopService,
