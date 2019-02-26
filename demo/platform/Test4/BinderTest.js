@@ -1,5 +1,7 @@
 // @flow
 import { Binder } from 'sources.js';
+//import EventEmitter from 'src/lib/helper/EventEmitter.js';
+
 
 
 const binder = new Binder();
@@ -77,3 +79,37 @@ binder.bind(new Test4(), Test4.config);
 setTimeout(() => {
   console.log(['binder', binder]);
 }, 1000);
+
+
+/*
+
+const ee1 = new EventEmitter();
+const ee2 = new EventEmitter();
+ee1.subscribe('hello', (payload)=>{
+  console.log(['ee1 hello', payload]);
+
+});
+ee2.subscribe('hello', (payload)=>{
+  console.log(['ee2 hello', payload]);
+
+});
+ee2.subscribe('buy', (payload)=>{
+  console.log(['ee2 buy', payload]);
+
+});
+ee1.emit('hello', 123);
+ee2.emit('hello', 456);
+ee2.emit('buy', 456);
+ee2.clear();
+
+ee2.emit('buy', 456);
+ee2.emit('hello', 456);
+
+
+
+
+
+
+
+console.log(['events', ee1, EventEmitter]);
+*/

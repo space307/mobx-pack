@@ -1,10 +1,30 @@
 import { isEmpty, each, cloneDeep } from 'lodash';
 import { toJS } from 'mobx';
 import { protoName } from './util';
+import EventEmitter from './helper/EventEmitter.js';
+
+const EMITTER_EVENT = {
+  BIND: 'BIND',
+  UNBIND: 'UNBIND',
+};
+
 
 class Binder {
   stores = {};
   storeBindWaiter = {};
+  emitter:EventEmitter = new EventEmitter();
+
+  constructor(parentEmitter) {
+    if (parentEmitter instanceof EventEmitter) {
+      parentEmitter.subscribe(EMITTER_EVENT.BIND, ({ store, options }) => {
+        this.bind(store, options);
+      });
+
+      parentEmitter.subscribe(EMITTER_EVENT.UNBIND, (bindAs) => {
+        this.unbind(bindAs);
+      });
+    }
+  }
 
   bind(store, options) {
     const { bindAs } = options;
@@ -33,6 +53,7 @@ class Binder {
     });
 
     this.notifyOnBind(bindAs);
+    this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
   }
 
   addStore(store, options) {
@@ -47,6 +68,12 @@ class Binder {
         services: {},
       },
     };
+  }
+
+  clear() {
+    this.stores = {};
+    this.storeBindWaiter = {};
+    this.emitter.clear();
   }
 
   showMessage(msg, type = 'info') {
@@ -218,6 +245,8 @@ class Binder {
     if (this.isDebug(bindAs)) {
       this.showMessage(`"${bindAs}" unbind.`);
     }
+
+    this.emitter.emit(EMITTER_EVENT.UNBIND, bindAs);
   }
 
   unbindData(bindAs, importData) {
