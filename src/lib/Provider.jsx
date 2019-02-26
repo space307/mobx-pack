@@ -7,12 +7,6 @@ import { startServices, stopServices, type StartServiceReturnType } from './serv
 import type { ServiceConfigType } from './typing/common.js';
 
 
-/*
-export const BinderContext: React$Context<*> = React.createContext();
-export const StoreContext: React$Context<?Array<*>> = React.createContext();
-*/
-
-
 type ConnectorOptionsType<InitialStateType> = {
   stop: boolean,
   services: Array<ServiceConfigType<InitialStateType>>,
@@ -25,7 +19,7 @@ type ConnectorStateTypes = {
 };
 
 
-export default function CreateProvider(BinderContext:  React$Context<*>, StoreContext: React$Context<?Array<*>>) {
+export default function CreateProvider(BinderContext: React$Context<*>, StoreContext: React$Context<?Array<*>>) {
   return function Provider(
     Component: React$ComponentType<*>,
     options: ConnectorOptionsType<*>,
