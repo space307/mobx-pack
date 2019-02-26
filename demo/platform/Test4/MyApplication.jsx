@@ -1,103 +1,30 @@
 /*  eslint-disable */
 import React from 'react';
-import {observer, Observer} from 'mobx-react';
-
-import { TestStoreConfig, TestServiceConfig } from './Enviroment.js';
-import { BinderContext, StoreContext } from './ComponentContext.js';
-
-export const GlobalContext = { binder: {}, initialState: {} };
-
-import Connector from './Provider.jsx';
 
 
 
-class Engine extends React.PureComponent {
+
+const GlobalContext = {binder: {hello:1}, initialState: {buy:1}};
+
+export const BinderContext: React$Context<?*> = React.createContext();
+export const StoreContext: React$Context<?Array<*>> = React.createContext();
+
+
+
+
+class Garage extends React.Component {
+
+  static contextType = BinderContext;
+
+  componentDidMount(): void {
+
+    console.log(['componentDidMount', this.context]);
+  }
+
   render() {
-    console.log(['Engine render', this.props.timer]);
-    return (<div>Engine!!!</div>);
+    return <div>Garage</div>;
   }
 }
-
-
-
-const EngineConnector = Connector(
-  Engine,
-  {
-    helper([store]){
-
-      return { }
-
-    },
-    services: [TestStoreConfig]
-  }
-
-);
-
-
-
-/*
-class Driver extends React.PureComponent {
-  render() {
-    console.log(['Driver render', this.props.timer]);
-    return (<div>Driver!!! timer:{this.props.timer} theme: {this.props.theme}
-    <Engine />
-    </div>);
-  }
-}
-
-
-const DriverContainer = ({theme})=>(<StoreContext.Consumer>{
-  ([store])=>(<Observer>{()=>(<Driver theme={theme} timer={store.timer2}/>)}</Observer>)
-}</StoreContext.Consumer>);
-*/
-
-
-
-class Car extends React.Component {
-
-    state={
-      visible: false
-    };
-
-    toggle = ()=>{
-      this.setState({visible: !this.state.visible});
-    };
-
-    render() {
-    console.log(['Car render', this.props.timer, this.props.theme]);
-    return <div>Timer {this.props.timer} secs. Theme: {this.props.theme}
-      {
-        this.state.visible ?
-          <EngineConnector />
-          : null
-      }
-
-   {/* <DriverContainer theme={this.props.theme} />*/}
-
-      <button onClick={this.toggle}>Toggle</button>
-    </div>
-  }
-}
-
-
-
-const Garage = Connector(
-  Car,
-  {
-    helper([store, testService], {theme}){
-
-      return {
-        theme,
-        timer: store.timer
-      }
-
-    },
-  services: [TestStoreConfig, TestServiceConfig]
-});
-
-
-
-
 
 
 class MyApplication extends React.Component {
