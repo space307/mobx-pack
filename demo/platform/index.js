@@ -9,6 +9,7 @@ import balanceService from 'demo/platform/services/BalanceService/index.js';
 import Platform from 'demo/platform/layouts/Platform/index.jsx';
 //import MyApplication from 'demo/platform/_Test4/MyApplication.jsx';
 import MyApplication from 'demo/platform/Test4/MyApplication.jsx';
+import BinderTest from 'demo/platform/Test4/BinderTest.js';
 
 
 

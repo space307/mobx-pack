@@ -32,34 +32,15 @@ class Binder {
       }
     });
 
-    each(this.stores, (item) => {
-      if (item) {
-        if (item.bindHash && item.bindHash[bindAs]) {
-          this.notifyOnBind(item);
-        }
-      }
-    });
-
     this.notifyOnBind(bindAs);
   }
 
   addStore(store, options) {
     const { bindAs } = options;
-    const bindHash = {};
-    if (options.onBind) {
-      options.onBind.forEach((arr) => {
-        arr.forEach((storeName) => {
-          if (typeof storeName !== 'function') {
-            bindHash[storeName] = 1;
-          }
-        });
-      });
-    }
 
     this.stores[bindAs] = {
       bindAs,
       store,
-      bindHash,
       options: cloneDeep(options),
       disposers: {
         list: [],
