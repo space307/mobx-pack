@@ -1,8 +1,4 @@
 // @flow
-
-import { observable } from 'mobx';
-import type { ServiceConfigType } from 'sources.js';
-
 import { Binder } from 'sources.js';
 
 
