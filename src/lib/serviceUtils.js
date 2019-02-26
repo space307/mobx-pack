@@ -25,7 +25,7 @@ export function startService(serviceConfig: ServiceConfigType<*>, binder: Binder
     proto: Service,
     protoAttrs,
   } = serviceConfig;
-  const serviceInBinder = binder.getStore(bindAs).store;
+  const serviceInBinder = binder.getStore(bindAs);
   const onStartFunctionName = onStart || 'onStart';
 
   return serviceInBinder
@@ -81,7 +81,7 @@ export function stopService(serviceConfig: ServiceConfigType<*>, binder: Binder)
     onStop,
   } = serviceConfig;
 
-  const serviceInBinder = binder.getStore(bindAs).store;
+  const serviceInBinder = binder.getStore(bindAs);
   const onStopFunctionName = onStop || 'onStop';
 
   if (serviceInBinder) {

@@ -4,13 +4,18 @@ import React from 'react';
 import { observer } from 'mobx-react';
 
 import { startServices, stopServices, type StartServiceReturnType } from './serviceUtils.js';
-import type { ServiceConfigType } from './typing/common.js';
+import type { ServiceConfigType, GlobalContextType } from './typing/common.js';
 
 
-type ConnectorOptionsType<InitialStateType> = {
+type ConnectorOptionsAttributeType<InitialStateType> = {
   stop: boolean,
-  services: Array<ServiceConfigType<InitialStateType>>,
+  services: Array<ServiceConfigType<InitialStateType>> | (props: *)=> Array<ServiceConfigType<InitialStateType>>,
   helper: (services: ?Array<*>, props: *) => *,
+};
+
+type ConnectorOptionsPropType<InitialStateType> = {
+  ...ConnectorOptionsAttributeType<InitialStateType>,
+  services: Array<ServiceConfigType<InitialStateType>>,
 };
 
 type ConnectorStateTypes = {
@@ -18,11 +23,16 @@ type ConnectorStateTypes = {
   result: ?Array<*>,
 };
 
+type ProviderType = (
+  Component: React$ComponentType<*>,
+  options: ConnectorOptionsAttributeType<*>)=>React$ComponentType<*>
 
-export default function CreateProvider(BinderContext: React$Context<*>, StoreContext: React$Context<?Array<*>>) {
+export default function CreateProvider(
+  BinderContext: React$Context<GlobalContextType>,
+  StoreContext: React$Context<?Array<*>>): ProviderType {
   return function Provider(
     Component: React$ComponentType<*>,
-    options: ConnectorOptionsType<*>,
+    options: ConnectorOptionsAttributeType<*>,
   ): React$ComponentType<*> {
     const defaultOptions = {
       stop: false,
@@ -38,13 +48,17 @@ export default function CreateProvider(BinderContext: React$Context<*>, StoreCon
 
         static contextType = BinderContext;
 
-        options: $Shape<ConnectorOptionsType<*>>;
+        options: $Shape<ConnectorOptionsPropType<*>>;
 
         serviceToStop: Array<ServiceConfigType<*>> = [];
 
-        constructor() {
+        constructor(props: PropType) {
           super();
-          this.options = { ...defaultOptions, ...options };
+
+          const services = typeof options.services === 'function' ? options.services(props) : options.services;
+          const { stop, helper } = options;
+
+          this.options = { ...defaultOptions, ...{ stop, helper }, ...{ services } };
         }
 
         componentDidMount(): void {
@@ -102,7 +116,7 @@ export default function CreateProvider(BinderContext: React$Context<*>, StoreCon
 
         render() {
           const props = this.composeProps(this.state.result, this.props);
-          const hasService = this.options.services.length;
+          const hasService = this.options.services && this.options.services.length;
           const serviceOk = !hasService || this.state.result;
           const helperOk = !this.options.helper || !!props;
 
