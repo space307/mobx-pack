@@ -17,12 +17,7 @@ class Binder {
   constructor(parentBinder) {
     if (parentBinder instanceof Binder) {
       each(parentBinder.stores, ({ store, options }) => {
-        if (!this.isBind(options.bindAs)) {
-          this.addStore(store, options);
-        } else {
-          this.showMessage(`Binder try to copy store "${options.bindAs}" from parent binder, 
-          but the store with the same name already bind.`, 'error');
-        }
+        this.addStore(store, options);
       });
 
       parentBinder.emitter.subscribe(EMITTER_EVENT.BIND, ({ store, options }) => {
