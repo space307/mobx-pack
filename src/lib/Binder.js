@@ -12,6 +12,7 @@ const EMITTER_EVENT = {
 class Binder {
   stores = {};
   storeBindWaiter = {};
+  storeUnbindWaiter = {};
   emitter:EventEmitter = new EventEmitter();
 
   constructor(parentBinder) {
@@ -74,22 +75,6 @@ class Binder {
     };
   }
 
-  clear() {
-    this.stores = {};
-    this.storeBindWaiter = {};
-    this.emitter.clear();
-  }
-
-  showMessage(msg, type = 'info') {
-    if (type === 'info') {
-      console.log(`Binder. ${msg}`);
-    } else if (type === 'warn') {
-      console.warn(`Binder. ${msg}`);
-    } else if (type === 'error') {
-      console.error(`Binder. ${msg}`);
-    }
-  }
-
   notifyOnBind(bindAs) {
     const settings = this.getStoreSettings(bindAs);
     const store = settings.store;
@@ -101,7 +86,7 @@ class Binder {
         const onBindCb = len && list[len - 1];
         const storeList = len && list.slice(0, len - 1);
 
-        this.getStoreListAsync(storeList).then((stores) => {
+        this.getBindStoreListAsync(storeList).then((stores) => {
           if (typeof onBindCb === 'function') {
             onBindCb.apply(store, stores);
           } else {
@@ -120,7 +105,11 @@ class Binder {
       });
     }
 
-    this.resolveWaiterPromises(bindAs);
+    this.resolveWaiterPromises(bindAs, this.storeBindWaiter);
+  }
+
+  notifyOnBehaviour(bindAs, waiters){
+
   }
 
   getPendingStores(storeList) {
@@ -134,11 +123,129 @@ class Binder {
     return result;
   }
 
+
+  isBind(bindAs) {
+    return !!(this.stores[bindAs] && this.stores[bindAs].store);
+  }
+
+  getStoreSettings(bindAs) {
+    return this.stores[bindAs] || {};
+  }
+
+  unbind(bindAs) {
+    const storeSettings = this.getStoreSettings(bindAs);
+
+    if (isEmpty(storeSettings)) {
+      this.showMessage(`Not bind store "${bindAs}" try to unbind!`, 'warn');
+      return;
+    }
+
+    // unbind data exporting to other stores
+    each(this.stores, (item) => {
+      if (item) {
+        const importData = item.options.importData && item.options.importData[bindAs];
+        if (importData) {
+          // console.log(['unbind data exporting to other stores', item.bindAs, importData]);
+          this.unbindData(item.bindAs, importData);
+        }
+      }
+    });
+
+    // unbind data importing from other stores
+    if (storeSettings.options.importData) {
+      each(storeSettings.options.importData, (importData) => {
+        this.unbindData(bindAs, importData);
+      });
+    }
+
+    // unbind disposers in this store
+    storeSettings.disposers.list.forEach((disposer) => {
+      if (typeof disposer === 'function') {
+        disposer();
+      }
+    });
+
+    // unbind disposers in other stores
+    this.unbindDisposers(bindAs);
+
+    // clear store settings in binder
+    this.stores[bindAs] = undefined;
+
+    if (this.isDebug(bindAs)) {
+      this.showMessage(`"${bindAs}" unbind.`);
+    }
+
+    this.emitter.emit(EMITTER_EVENT.UNBIND, bindAs);
+  }
+
+  getBindStoreAsync(bindAs) {
+    return this.getStoreAsyncBehavior(bindAs, this.storeBindWaiter);
+  }
+
+  getBindStoreListAsync(storeList) {
+    return Promise.all(storeList.map(bindAsParam => this.getBindStoreAsync(bindAsParam)));
+  }
+
+  getUnbindStoreAsync(bindAs) {
+    return this.getStoreAsyncBehavior(bindAs, this.storeUnbindWaiter);
+  }
+  getUnbindStoreListAsync(storeList) {
+    return Promise.all(storeList.map(bindAsParam => this.getUnbindStoreAsync(bindAsParam)));
+  }
+
+  getStoreAsyncBehavior(bindAs, waitersStorage) {
+    return new Promise((resolve) => {
+      if (this.isBind(bindAs)) {
+        resolve(this.getStore(bindAs));
+      } else {
+        if (!waitersStorage[bindAs]) {
+          waitersStorage[bindAs] = [];
+        }
+        waitersStorage[bindAs].push(resolve);
+      }
+    });
+  }
+
+  getStore(bindAs) {
+    return this.getStoreSettings(bindAs).store;
+  }
+
+  resolveWaiterPromises(bindAs, waitersStorage) {
+    if (!this.isBind(bindAs)) {
+      return;
+    }
+
+    const waiters = waitersStorage[bindAs];
+
+    if (waiters) {
+      waiters.forEach((resolve) => {
+        resolve(this.getStore(bindAs));
+      });
+
+      waitersStorage[bindAs] = [];
+    }
+  }
+
   isDebug(bindAs) {
     const s = this.getStoreSettings(bindAs);
     return s && s.options ? s.options.debug : false;
   }
 
+  clear() {
+    this.stores = {};
+    this.storeBindWaiter = {};
+    this.emitter.clear();
+  }
+
+  showMessage(msg, type = 'info') {
+    if (type === 'info') {
+      console.log(`Binder. ${msg}`);
+    } else if (type === 'warn') {
+      console.warn(`Binder. ${msg}`);
+    } else if (type === 'error') {
+      console.error(`Binder. ${msg}`);
+    }
+  }
   processStore(from, to) {
     if (from.bindAs !== to.bindAs) {
       const { importData } = to.options;
@@ -199,109 +306,6 @@ class Binder {
     return pass;
   }
 
-  isBind(bindAs) {
-    return !!(this.stores[bindAs] && this.stores[bindAs].store);
-  }
-
-  getStoreSettings(bindAs) {
-    return this.stores[bindAs] || {};
-  }
-
-  unbind(bindAs) {
-    const storeSettings = this.getStoreSettings(bindAs);
-
-    if (isEmpty(storeSettings)) {
-      this.showMessage(`Not bind store "${bindAs}" try to unbind!`, 'warn');
-      return;
-    }
-
-    // unbind data exporting to other stores
-    each(this.stores, (item) => {
-      if (item) {
-        const importData = item.options.importData && item.options.importData[bindAs];
-        if (importData) {
-          // console.log(['unbind data exporting to other stores', item.bindAs, importData]);
-          this.unbindData(item.bindAs, importData);
-        }
-      }
-    });
-
-    // unbind data importing from other stores
-    if (storeSettings.options.importData) {
-      each(storeSettings.options.importData, (importData) => {
-        this.unbindData(bindAs, importData);
-      });
-    }
-
-    // unbind disposers in this store
-    storeSettings.disposers.list.forEach((disposer) => {
-      if (typeof disposer === 'function') {
-        disposer();
-      }
-    });
-
-    // unbind disposers in other stores
-    this.unbindDisposers(bindAs);
-
-    // clear store settings in binder
-    this.stores[bindAs] = undefined;
-
-    if (this.isDebug(bindAs)) {
-      this.showMessage(`"${bindAs}" unbind.`);
-    }
-
-    this.emitter.emit(EMITTER_EVENT.UNBIND, bindAs);
-  }
-
-  unbindData(bindAs, importData) {
-    const { store } = this.getStoreSettings(bindAs);
-    each(importData, (toVarName) => {
-      if (toVarName in store) {
-        Object.defineProperty(store, toVarName, { value: undefined });
-      }
-    });
-  }
-
-
-  getStoreAsync(bindAs) {
-    return new Promise((resolve) => {
-      if (this.isBind(bindAs)) {
-        resolve(this.getStore(bindAs));
-      } else {
-        if (!this.storeBindWaiter[bindAs]) {
-          this.storeBindWaiter[bindAs] = [];
-        }
-        this.storeBindWaiter[bindAs].push(resolve);
-      }
-    });
-  }
-
-  getStoreListAsync(storeList) {
-    return Promise.all(storeList.map(bindAsParam => this.getStoreAsync(bindAsParam)));
-  }
-
-
-  getStore(bindAs) {
-    return this.getStoreSettings(bindAs).store;
-  }
-
-  resolveWaiterPromises(bindAs) {
-    if (!this.isBind(bindAs)) {
-      return;
-    }
-
-    const waiters = this.storeBindWaiter[bindAs];
-
-    if (waiters) {
-      waiters.forEach((resolve) => {
-        resolve(this.getStore(bindAs));
-      });
-
-      this.storeBindWaiter[bindAs] = [];
-    }
-  }
-
-
   unbindDisposers(bindAs) {
     each(this.stores, (store) => {
       if (store && store.disposers.services[bindAs]) {
@@ -311,6 +315,15 @@ class Binder {
             store.disposers.list[disposer] = undefined;
           }
         });
+      }
+    });
+  }
+
+  unbindData(bindAs, importData) {
+    const { store } = this.getStoreSettings(bindAs);
+    each(importData, (toVarName) => {
+      if (toVarName in store) {
+        Object.defineProperty(store, toVarName, { value: undefined });
       }
     });
   }
