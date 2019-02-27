@@ -14,13 +14,17 @@ class Binder {
   storeBindWaiter = {};
   emitter:EventEmitter = new EventEmitter();
 
-  constructor(parentEmitter) {
-    if (parentEmitter instanceof EventEmitter) {
-      parentEmitter.subscribe(EMITTER_EVENT.BIND, ({ store, options }) => {
+  constructor(parentBinder) {
+    if (parentBinder instanceof Binder) {
+      each(parentBinder.stores, ({ store, options }) => {
+        this.addStore(store, options);
+      });
+
+      parentBinder.emitter.subscribe(EMITTER_EVENT.BIND, ({ store, options }) => {
         this.bind(store, options);
       });
 
-      parentEmitter.subscribe(EMITTER_EVENT.UNBIND, (bindAs) => {
+      parentBinder.emitter.subscribe(EMITTER_EVENT.UNBIND, (bindAs) => {
         this.unbind(bindAs);
       });
     }

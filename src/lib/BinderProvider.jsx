@@ -15,7 +15,7 @@ export default function CreateBinderProvider(BinderContext: React$Context<Global
       constructor() {
         super();
         this.newContext = {
-          binder: new Binder(this.context && this.context.binder && this.context.binder.emitter),
+          binder: new Binder(this.context && this.context.binder),
           initialState,
         };
       }

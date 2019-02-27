@@ -1,10 +1,10 @@
 // @flow
 import { Binder } from 'sources.js';
-//import EventEmitter from 'src/lib/helper/EventEmitter.js';
 
 
 
 const binder = new Binder();
+const binderLocal = new Binder(binder);
 
 
 const StoreName = {
@@ -13,6 +13,8 @@ const StoreName = {
   Test3: 'Test3',
   Test4: 'Test4',
   Test5: 'Test5',
+  Test1Local: 'Test1Local',
+  Test2Local: 'Test2Local',
 };
 
 
@@ -69,6 +71,27 @@ class Test5 {
   }
 }
 
+
+class Test1Local {
+  static config = {
+    bindAs: StoreName.Test1Local,
+    onBind: [[StoreName.Test2, StoreName.Test2Local, 'onBind']],
+  };
+  onBind(...arg) {
+    console.log(['Test1Local onBind', arg]);
+  }
+}
+
+class Test2Local {
+  static config = {
+    bindAs: StoreName.Test2Local,
+    onBind: [[StoreName.Test1, StoreName.Test1Local, 'onBind']],
+  };
+  onBind(...arg) {
+    console.log(['Test2Local onBind', arg]);
+  }
+}
+
 // binder.bind(new Test4(), Test4.config);
 binder.bind(new Test1(), Test1.config);
 binder.bind(new Test2(), Test2.config);
@@ -76,40 +99,5 @@ binder.bind(new Test3(), Test3.config);
 binder.bind(new Test5(), Test5.config);
 binder.bind(new Test4(), Test4.config);
 
-setTimeout(() => {
-  console.log(['binder', binder]);
-}, 1000);
-
-
-/*
-
-const ee1 = new EventEmitter();
-const ee2 = new EventEmitter();
-ee1.subscribe('hello', (payload)=>{
-  console.log(['ee1 hello', payload]);
-
-});
-ee2.subscribe('hello', (payload)=>{
-  console.log(['ee2 hello', payload]);
-
-});
-ee2.subscribe('buy', (payload)=>{
-  console.log(['ee2 buy', payload]);
-
-});
-ee1.emit('hello', 123);
-ee2.emit('hello', 456);
-ee2.emit('buy', 456);
-ee2.clear();
-
-ee2.emit('buy', 456);
-ee2.emit('hello', 456);
-
-
-
-
-
-
-
-console.log(['events', ee1, EventEmitter]);
-*/
+binderLocal.bind(new Test1Local(), Test1Local.config);
+binderLocal.bind(new Test2Local(), Test2Local.config);
