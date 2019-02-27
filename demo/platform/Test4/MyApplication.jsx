@@ -1,11 +1,16 @@
 /*  eslint-disable */
 import React from 'react';
-import {observer, Observer} from 'mobx-react';
+import { observer, Observer } from 'mobx-react';
 
-import { TestStoreConfig, TestServiceConfig, initialState } from './Enviroment.js';
+import { GarageStoreConfig, TimeServiceConfig, CarStoreConfig, initialState } from './Enviroment.js';
 import { BinderContext, StoreContext, GlobalContext } from './ComponentContext.js';
-import {Provider, BinderProvider } from './Provider.jsx'
+import { Provider, BinderProvider } from './Provider.jsx';
 
+
+
+
+
+/*
 
 class Engine extends React.PureComponent {
   render() {
@@ -15,23 +20,17 @@ class Engine extends React.PureComponent {
 }
 
 
-
 const EngineConnector = Provider(
   Engine,
   {
-    helper([store]){
-
-      return { }
-
+    helper([store]) {
+      return { };
     },
-    services: [TestStoreConfig]
-  }
+    services: [TestStoreConfig],
+  },
 
 );
 
-
-
-/*
 class Driver extends React.PureComponent {
   render() {
     console.log(['Driver render', this.props.timer]);
@@ -41,96 +40,120 @@ class Driver extends React.PureComponent {
   }
 }
 
-
 const DriverContainer = ({theme})=>(<StoreContext.Consumer>{
   ([store])=>(<Observer>{()=>(<Driver theme={theme} timer={store.timer2}/>)}</Observer>)
 }</StoreContext.Consumer>);
 */
 
+class Car extends React.PureComponent {
+  render() {
+    const {modelName, time} = this.props;
+    console.log(['Car render']);
+    return (<div>
 
+      <BinderContext.Consumer>{
+        (binder)=>{
+          console.log(['binder', binder]);
+          return null
+        }
+      }</BinderContext.Consumer>
 
-class Car extends React.Component {
-
-    state={
-      visible: false
-    };
-
-    toggle = ()=>{
-      this.setState({visible: !this.state.visible});
-    };
-
-    render() {
-    console.log(['Car render', this.props.timer, this.props.theme]);
-    return <div>Timer {this.props.timer} secs. Theme: {this.props.theme}
-      {
-        this.state.visible ?
-          <EngineConnector />
-          : null
-      }
-
-   {/* <DriverContainer theme={this.props.theme} />*/}
-
-      <button onClick={this.toggle}>Toggle</button>
-    </div>
+      <h1>Car</h1>
+      <div>modelName: {modelName}</div>
+      <div>time: {time}</div>
+    </div>);
   }
 }
 
+const CarContainer = BinderProvider(
+  Provider(
+    Car,
+    {
+      helper([carStore, timeService], props){
+        console.log(['props', props, timeService]);
+        return {
+          modelName: carStore.modelName,
+          //time: timeService.time,
+        }
+      },
+      services: (props)=>[{ ...CarStoreConfig, ...{ protoAttrs: [props.modelName] } }, TimeServiceConfig]
+    }
+    ),
+  initialState
+);
 
 
-const Garage = Provider(
-  Car,
+class Garage extends React.Component {
+    state={
+      visible: false,
+      cars:[]
+    };
+
+    addCar = () => {
+      this.setState({ cars: this.state.cars.concat(['mercedes']) });
+    };
+
+    render() {
+      const {counter, color} = this.props;
+      console.log(['Garage render', counter, color]);
+
+      return (<div>
+        <h1>Garage</h1>
+        <div>Counter: {counter}</div>
+        <div>Color: {color}</div>
+
+        {
+          this.state.cars.map((modelName, index)=><CarContainer key={index} modelName={modelName}/>)
+        }
+        <button onClick={this.addCar}>Add car</button>
+      </div>);
+    }
+}
+
+
+const GarageContainer = Provider(
+  Garage,
   {
-    helper([store, testService], {theme}){
-
+    helper([garageStore], { color }) {
       return {
-        theme,
-        timer: store.timer
-      }
-
+        color,
+        counter: garageStore.counter,
+      };
     },
-  services: (props)=>{
-      console.log(['props', props]);
-
-      return [{...TestStoreConfig, ...{protoAttrs:[props.theme]}}, TestServiceConfig]
-  }
-});
-
-
+    services: props => [{ ...GarageStoreConfig, ...{ protoAttrs: [props.color] } }],
+  });
 
 
 
 
 class MyApplication extends React.Component {
-
   state = {
     timer: 0,
-    theme: 'dark',
+    color: 'dark',
   };
 
   componentDidMount() {
-    setInterval(()=>{
+    setInterval(() => {
       this.setState({timer: this.state.timer += 1});
     }, 1000);
 
-
-    setTimeout(()=>{
-      this.setState({theme: 'light'});
+    setTimeout(() => {
+      this.setState({ color: 'light' });
     }, 3000);
-
-
-
   }
 
   render() {
-
-    //console.log(['MyApplication render']);
+   // console.log(['MyApplication render']);
     return (
       <div>
-      <h1>My Application </h1>
-        {/*<Garage theme={this.state.theme} />*/}
-    </div>
+        <h1>My Application </h1>
+        <GarageContainer color={this.state.color} />
+      </div>
     );
   }
 }
 
-export default BinderProvider(MyApplication, initialState);
+export default BinderProvider(
+  Provider(MyApplication, { services: [TimeServiceConfig] }),
+  initialState,
+);

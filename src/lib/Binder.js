@@ -17,6 +17,7 @@ class Binder {
 
   constructor(parentBinder) {
     if (parentBinder instanceof Binder) {
+      console.log(['parentBinder', parentBinder.stores]);
       each(parentBinder.stores, ({ store, options }) => {
         this.addStore(store, options);
       });
@@ -40,7 +41,7 @@ class Binder {
     }
 
     if (this.isBind(bindAs)) {
-      this.showMessage(`Store "${bindAs}" was already bind.`, 'warn');
+      this.showMessage(`Store "${bindAs}" was already bind.`, 'error');
       return;
     }
 
@@ -117,8 +118,10 @@ class Binder {
         this.getStoreListAsyncBehavior(storeList, waitersStorage).then((stores) => {
           if (typeof depsCb === 'function') {
             depsCb.apply(store, stores);
-          } else {
+          } else if (typeof store[depsCb] === 'function') {
             store[depsCb](...stores);
+          } else {
+            this.showMessage(`${optionsParam} method ${depsCb} not found in "${bindAs}".`, 'error');
           }
         });
 

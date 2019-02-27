@@ -1,26 +1,68 @@
 // @flow
-
+/* eslint-disable no-console */
 import { observable } from 'mobx';
 import type { ServiceConfigType } from 'sources.js';
 
-const SERVICE_NAME = ' TestService';
-const STORE_NAME = ' TestStore';
 
-interface TestServiceInterface {
+const SERVICE_NAMES = {
+  GARAGE_STORE: 'GARAGE_STORE',
+  TIME_SERVICE: 'TIME_SERVICE',
+  CAR_STORE: 'CAR_STORE',
+};
+
+
+/* -- TimeService --*/
+
+interface TimeServiceInterface {
+  +time: string;
+}
+
+export class TimeService implements TimeServiceInterface {
+  @observable
+  time: string = '';
+
+  onStart(initialService: *): boolean {
+    console.log(['onStart', SERVICE_NAMES.TIME_SERVICE, initialService]);
+
+    setInterval((): void => {
+      const date = new Date();
+      this.time = `${date.getMinutes()}:${date.getSeconds()}`;
+    }, 10000);
+
+    return true;
+  }
+}
+
+export const TimeServiceConfig: ServiceConfigType<*, Class<TimeServiceInterface>> = {
+  onStart: 'onStart',
+  proto: TimeService,
+  config: {
+    bindAs: SERVICE_NAMES.TIME_SERVICE,
+  },
+};
+/* --/ TimeService --*/
+
+/* -- GarageStore --*/
+interface GarageStoreInterface {
   +counter: number;
   setCount(count: number): void;
 }
 
-export class TestService implements TestServiceInterface {
+
+export class GarageStore implements GarageStoreInterface {
   @observable
   counter: number = 0;
 
+  constructor(color: string): void {
+    console.log(['constructor', SERVICE_NAMES.GARAGE_STORE, color]);
+  }
+
   onStart(initialService: *): boolean {
-    console.log(['onStart', SERVICE_NAME, initialService]);
+    console.log(['onStart', SERVICE_NAMES.GARAGE_STORE, initialService]);
 
     setInterval((): void => {
       this.counter += 1;
-    }, 1000);
+    }, 10000);
 
     return true;
   }
@@ -30,72 +72,62 @@ export class TestService implements TestServiceInterface {
   }
 
   onBind(): void {
-    console.log(['onBind', SERVICE_NAME]);
+    console.log(['onBind', SERVICE_NAMES.GARAGE_STORE]);
   }
 }
 
-export const TestServiceConfig: ServiceConfigType<*, Class<TestServiceInterface>> = {
+export const GarageStoreConfig: ServiceConfigType<*, Class<GarageStoreInterface>> = {
   onStart: 'onStart',
-  proto: TestService,
+  proto: GarageStore,
   config: {
-    bindAs: SERVICE_NAME,
+    bindAs: SERVICE_NAMES.GARAGE_STORE,
   },
 };
+/* --/ GarageStore --*/
 
-interface TestStoreInterface {
-  +timer: number;
-  +timer2: number;
-  setTimer(timer: number): void;
+
+/* -- CarStore --*/
+interface CarStoreInterface {
+  +modelName: string;
+  setModelName(modelName: string): void
 }
 
-export class TestStore implements TestStoreInterface {
-  @observable
-  timer: number = 0;
-  @observable
-  timer2: number = 0;
-  @observable
-  abTest: boolean = false;
 
-  testService: TestServiceInterface;
+export class CarStore implements CarStoreInterface {
+  @observable
+  modelName: string = 'Zapor';
 
-  constructor(a: number, b: number, c: number): void {
-    console.log(['constructor', STORE_NAME, a, b, c]);
+  constructor(modelName: string) {
+    this.setModelName(modelName);
   }
 
+
   onStart(initialService: *): boolean {
-    console.log(['onStart', STORE_NAME, initialService]);
-
-    setInterval((): void => {
-      this.timer++;
-    }, 10000);
-
-    setInterval((): void => {
-      this.timer2++;
-    }, 2000);
-
+    console.log(['onStart', SERVICE_NAMES.CAR_STORE, initialService]);
     return true;
   }
 
-  onBind(testService: TestServiceInterface): void {
-    this.testService = testService;
-    console.log(['onBind', STORE_NAME, testService]);
+  setModelName(modelName: string): void {
+    this.modelName = modelName;
   }
 
-  setTimer(timer: number): void {
-    this.timer = timer;
+  onBind(): void {
+    console.log(['onBind', SERVICE_NAMES.CAR_STORE]);
   }
 }
 
-export const TestStoreConfig: ServiceConfigType<*, Class<TestStoreInterface>> = {
+export const CarStoreConfig: ServiceConfigType<*, Class<CarStoreInterface>> = {
   onStart: 'onStart',
-  proto: TestStore,
+  proto: CarStore,
   config: {
-    bindAs: STORE_NAME,
-    onBind: [[SERVICE_NAME, 'onBind']],
+    bindAs: SERVICE_NAMES.CAR_STORE,
+    onBind: [[SERVICE_NAMES.GARAGE_STORE, SERVICE_NAMES.TIME_SERVICE, 'onBind']],
   },
 };
+/* --/ CarStore --*/
 
 
+/* -- InitialState --*/
 interface InitialStateInterface {
   +vip: boolean;
   +abTest: boolean;
@@ -108,3 +140,4 @@ class InitialState implements InitialStateInterface {
 
 
 export const initialState: InitialStateInterface = new InitialState();
+/* --/ InitialState --*/
