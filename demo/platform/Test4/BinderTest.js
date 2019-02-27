@@ -74,7 +74,7 @@ class Test5 {
 
 class Test1Local {
   static config = {
-    bindAs: StoreName.Test1Local,
+    bindAs: StoreName.Test1,
     onBind: [[StoreName.Test2, StoreName.Test2Local, 'onBind']],
   };
   onBind(...arg) {
