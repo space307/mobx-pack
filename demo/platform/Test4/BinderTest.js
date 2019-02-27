@@ -2,7 +2,6 @@
 import { Binder } from 'sources.js';
 
 
-
 const binder = new Binder();
 const binderLocal = new Binder(binder);
 
@@ -64,10 +63,14 @@ class Test5 {
   static config = {
     bindAs: StoreName.Test5,
     onBind: [[StoreName.Test1, StoreName.Test4, 'onBind']],
+    onUnbind: [[StoreName.Test1, 'onUnbind']],
   };
 
   onBind(...arg) {
     console.log(['Test5 onBind', arg]);
+  }
+  onUnbind(...arg) {
+    console.log(['Test5 onUnbind', arg]);
   }
 }
 
@@ -86,9 +89,13 @@ class Test2Local {
   static config = {
     bindAs: StoreName.Test2Local,
     onBind: [[StoreName.Test1, StoreName.Test1Local, 'onBind']],
+    onUnbind: [[StoreName.Test1, 'onUnbind']],
   };
   onBind(...arg) {
     console.log(['Test2Local onBind', arg]);
+  }
+  onUnbind(...arg) {
+    console.log(['Test2Local onUnbind', arg]);
   }
 }
 
@@ -101,3 +108,9 @@ binder.bind(new Test4(), Test4.config);
 
 binderLocal.bind(new Test1Local(), Test1Local.config);
 binderLocal.bind(new Test2Local(), Test2Local.config);
+
+
+setTimeout(() => {
+  console.log(['setTimeout']);
+  binder.unbind(Test1.config.bindAs);
+}, 1000);

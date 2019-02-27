@@ -50,14 +50,19 @@ class Binder {
       this.showMessage(`"${bindAs}" bind.`);
     }
 
+    /* -- Legacy -- */
     each(this.stores, (item) => {
       if (item) {
         this.processStore(item, this.getStoreSettings(bindAs));
         this.processStore(this.getStoreSettings(bindAs), item);
       }
     });
+    /* --/ Legacy -- */
 
-    this.notifyOnBind(bindAs);
+
+    this.handleOnUnbind(bindAs);
+    this.handleOnBind(bindAs);
+    this.resolveWaiterPromises(bindAs, this.storeBindWaiter);
     this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
   }
 
@@ -75,47 +80,83 @@ class Binder {
     };
   }
 
-  notifyOnBind(bindAs) {
+  handleOnBind(bindAs) {
+    this.handleBehaviour(bindAs, this.storeBindWaiter, 'onBind');
+  }
+
+  handleOnUnbind(bindAs) {
+    this.handleBehaviour(bindAs, this.storeUnbindWaiter, 'onUnbind');
+  }
+
+  getBindStoreAsync(bindAs) {
+    return this.getStoreAsyncBehavior(bindAs, this.storeBindWaiter);
+  }
+
+  getBindStoreListAsync(storeList) {
+    return this.getStoreListAsyncBehavior(storeList, this.storeBindWaiter);
+  }
+
+  getUnbindStoreAsync(bindAs) {
+    return this.getStoreAsyncBehavior(bindAs, this.storeUnbindWaiter);
+  }
+
+  getUnbindStoreListAsync(storeList) {
+    return this.getStoreListAsyncBehavior(storeList, this.storeUnbindWaiter);
+  }
+
+  handleBehaviour(bindAs, waitersStorage, optionsParam, checkResolve = true) {
     const settings = this.getStoreSettings(bindAs);
     const store = settings.store;
-    const onBind = settings.options && settings.options.onBind;
+    const deps = settings.options && settings.options[optionsParam];
 
-    if (onBind && onBind.length && store) {
-      onBind.forEach((list) => {
+    if (deps && deps.length && store) {
+      deps.forEach((list) => {
         const len = list && list.length;
-        const onBindCb = len && list[len - 1];
+        const depsCb = len && list[len - 1];
         const storeList = len && list.slice(0, len - 1);
-
-        this.getBindStoreListAsync(storeList).then((stores) => {
-          if (typeof onBindCb === 'function') {
-            onBindCb.apply(store, stores);
+        this.getStoreListAsyncBehavior(storeList, waitersStorage).then((stores) => {
+          if (typeof depsCb === 'function') {
+            depsCb.apply(store, stores);
           } else {
-            store[onBindCb](...stores);
+            store[depsCb](...stores);
           }
         });
 
-        // This timeout is to check if some store required in "onBind" callback is not resolved
-        setTimeout(() => {
-          const pendingStores = this.getPendingStores(storeList);
-          if (pendingStores.length && pendingStores.length < storeList.length) {
-            // eslint-disable-next-line max-len
-            console.warn(`"${bindAs}.${typeof onBindCb === 'string' ? onBindCb : 'onBind'}" not called, because "${pendingStores.join(',')}" still not resolved.`);
-          }
-        }, 5000);
+        // This timeout is to check if some store required in "onBind/onUnbind" callback is not resolved
+        if (checkResolve) {
+          setTimeout(() => {
+            const pendingStores = this.getPendingStores(storeList, waitersStorage);
+            if (pendingStores.length && pendingStores.length < storeList.length) {
+              // eslint-disable-next-line max-len
+              console.warn(`"${bindAs}.${typeof depsCb === 'string' ? depsCb : optionsParam}" not called, because "${pendingStores.join(',')}" still not resolved.`);
+            }
+          }, 5000);
+        }
       });
     }
-
-    this.resolveWaiterPromises(bindAs, this.storeBindWaiter);
   }
 
-  notifyOnBehaviour(bindAs, waiters){
-
+  getStoreListAsyncBehavior(storeList, waitersStorage) {
+    return Promise.all(storeList.map(bindAsParam => this.getStoreAsyncBehavior(bindAsParam, waitersStorage)));
   }
 
-  getPendingStores(storeList) {
+  getStoreAsyncBehavior(bindAs, waitersStorage) {
+    return new Promise((resolve) => {
+      if (this.isBind(bindAs)) {
+        resolve(this.getStore(bindAs));
+      } else {
+        if (!waitersStorage[bindAs]) {
+          waitersStorage[bindAs] = [];
+        }
+        waitersStorage[bindAs].push(resolve);
+      }
+    });
+  }
+
+  getPendingStores(storeList, waitersStorage) {
     const result = [];
     storeList.forEach((storeName) => {
-      if (this.storeBindWaiter[storeName] && this.storeBindWaiter[storeName].length) {
+      if (waitersStorage[storeName] && waitersStorage[storeName].length) {
         result.push(storeName);
       }
     });
@@ -140,6 +181,7 @@ class Binder {
       return;
     }
 
+    /* -- Legacy -- */
     // unbind data exporting to other stores
     each(this.stores, (item) => {
       if (item) {
@@ -167,6 +209,7 @@ class Binder {
 
     // unbind disposers in other stores
     this.unbindDisposers(bindAs);
+    /* --/ Legacy -- */
 
     // clear store settings in binder
     this.stores[bindAs] = undefined;
@@ -174,36 +217,8 @@ class Binder {
     if (this.isDebug(bindAs)) {
       this.showMessage(`"${bindAs}" unbind.`);
     }
-
+    this.resolveWaiterPromises(bindAs, this.storeUnbindWaiter);
     this.emitter.emit(EMITTER_EVENT.UNBIND, bindAs);
-  }
-
-  getBindStoreAsync(bindAs) {
-    return this.getStoreAsyncBehavior(bindAs, this.storeBindWaiter);
-  }
-
-  getBindStoreListAsync(storeList) {
-    return Promise.all(storeList.map(bindAsParam => this.getBindStoreAsync(bindAsParam)));
-  }
-
-  getUnbindStoreAsync(bindAs) {
-    return this.getStoreAsyncBehavior(bindAs, this.storeUnbindWaiter);
-  }
-  getUnbindStoreListAsync(storeList) {
-    return Promise.all(storeList.map(bindAsParam => this.getUnbindStoreAsync(bindAsParam)));
-  }
-
-  getStoreAsyncBehavior(bindAs, waitersStorage) {
-    return new Promise((resolve) => {
-      if (this.isBind(bindAs)) {
-        resolve(this.getStore(bindAs));
-      } else {
-        if (!waitersStorage[bindAs]) {
-          waitersStorage[bindAs] = [];
-        }
-        waitersStorage[bindAs].push(resolve);
-      }
-    });
   }
 
   getStore(bindAs) {
@@ -246,6 +261,8 @@ class Binder {
       console.error(`Binder. ${msg}`);
     }
   }
+
+  /* -- Legacy -- */
   processStore(from, to) {
     if (from.bindAs !== to.bindAs) {
       const { importData } = to.options;
@@ -395,6 +412,7 @@ class Binder {
       console.warn(`CallApi warn. "${initiator}" calls method "${actionName}" from not bind store "${storeName}".`);
     }
   }
+  /* --/ Legacy -- */
 }
 
 export default Binder;

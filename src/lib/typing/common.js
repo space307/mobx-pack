@@ -15,6 +15,7 @@ export type ServiceConfigType<serviceClassType> = {
   config: {
     bindAs: string,
     onBind?: Array<Array<string>>,
+    onUnbind?: Array<Array<string>>,
   },
 };
 
