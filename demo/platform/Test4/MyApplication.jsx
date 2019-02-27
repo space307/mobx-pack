@@ -50,14 +50,6 @@ class Car extends React.PureComponent {
     const {modelName, time} = this.props;
     console.log(['Car render']);
     return (<div>
-
-      <BinderContext.Consumer>{
-        (binder)=>{
-          console.log(['binder', binder]);
-          return null
-        }
-      }</BinderContext.Consumer>
-
       <h1>Car</h1>
       <div>modelName: {modelName}</div>
       <div>time: {time}</div>
@@ -70,7 +62,6 @@ const CarContainer = BinderProvider(
     Car,
     {
       helper([carStore, timeService], props){
-        console.log(['props', props, timeService]);
         return {
           modelName: carStore.modelName,
           //time: timeService.time,
@@ -101,7 +92,6 @@ class Garage extends React.Component {
         <h1>Garage</h1>
         <div>Counter: {counter}</div>
         <div>Color: {color}</div>
-
         {
           this.state.cars.map((modelName, index)=><CarContainer key={index} modelName={modelName}/>)
         }
