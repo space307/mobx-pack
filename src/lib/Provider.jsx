@@ -8,9 +8,10 @@ import type { ServiceConfigType, GlobalContextType } from './typing/common.js';
 
 
 type ConnectorOptionsAttributeType<InitialStateType> = {
-  stop: boolean,
-  services: Array<ServiceConfigType<InitialStateType>> | (props: *)=> Array<ServiceConfigType<InitialStateType>>,
-  helper: (services: ?Array<*>, props: *) => *,
+  stop?: boolean,
+  services?: Array<ServiceConfigType<InitialStateType>> | (props: *)=> Array<ServiceConfigType<InitialStateType>>,
+  helper?: (services: ?Array<*>, props: *) => *,
+  stub?: React$ComponentType<*>,
 };
 
 type ConnectorOptionsPropType<InitialStateType> = {
@@ -25,14 +26,14 @@ type ConnectorStateTypes = {
 
 type ProviderType = (
   Component: React$ComponentType<*>,
-  options: ConnectorOptionsAttributeType<*>)=>React$ComponentType<*>
+  options?: ConnectorOptionsAttributeType<*>)=>React$ComponentType<*>
 
 export default function CreateProvider(
   BinderContext: React$Context<GlobalContextType>,
   StoreContext: React$Context<?Array<*>>): ProviderType {
   return function Provider(
     Component: React$ComponentType<*>,
-    options: ConnectorOptionsAttributeType<*>,
+    options?: ConnectorOptionsAttributeType<*>,
   ): React$ComponentType<*> {
     const defaultOptions = {
       stop: false,
@@ -55,10 +56,14 @@ export default function CreateProvider(
         constructor(props: PropType) {
           super();
 
-          const services = typeof options.services === 'function' ? options.services(props) : options.services;
-          const { stop, helper } = options;
 
-          this.options = { ...defaultOptions, ...{ stop, helper }, ...{ services } };
+          if (options) {
+            const services = typeof options.services === 'function' ? options.services(props) : options.services;
+            const { stop, helper } = options;
+            this.options = { ...defaultOptions, ...{ stop, helper }, ...{ services } };
+          } else {
+            this.options = { ...defaultOptions };
+          }
         }
 
         componentDidMount(): void {
@@ -119,6 +124,7 @@ export default function CreateProvider(
           const hasService = this.options.services && this.options.services.length;
           const serviceOk = !hasService || this.state.result;
           const helperOk = !this.options.helper || !!props;
+          const Stub = this.options.stub;
 
           if (serviceOk && helperOk) {
             return hasService ? (
@@ -129,7 +135,7 @@ export default function CreateProvider(
               <Component {...props} />
             );
           }
-          return null;
+          return typeof Stub === 'function' ? <Stub /> : null;
         }
       },
     );
