@@ -10,6 +10,9 @@ import CreateProvider from 'src/lib/Provider.jsx';
 import CreateBinderProvider from 'src/lib/BinderProvider.jsx';
 import { startService, startServices, stopService, stopServices } from 'src/lib/serviceUtils.js';
 
+
+export ServiceDecorators from 'src/lib/ServiceDecorators.js';
+
 export {
   BaseComponent,
   BaseStore,

@@ -10,6 +10,7 @@ import { Provider, BinderProvider } from './Provider.jsx';
 
 
 
+
 /*
 
 class Engine extends React.PureComponent {
@@ -121,6 +122,12 @@ class MyApplication extends React.Component {
     timer: 0,
     color: 'dark',
   };
+
+  constructor(){
+    super();
+    console.log(['context']);
+
+  }
 
   componentDidMount() {
     setInterval(() => {

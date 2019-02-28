@@ -17,7 +17,6 @@ class Binder {
 
   constructor(parentBinder) {
     if (parentBinder instanceof Binder) {
-      console.log(['parentBinder', parentBinder.stores]);
       each(parentBinder.stores, ({ store, options }) => {
         this.addStore(store, options);
       });
