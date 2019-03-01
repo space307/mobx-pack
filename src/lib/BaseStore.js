@@ -5,7 +5,7 @@
  */
 import _ from 'lodash';
 import { observable } from 'mobx';
-import { protoName } from './util.js';
+import { protoName } from './helper/util.js';
 
 export const STATUS_SERVICE_SLEEP = 'sleep';
 export const STATUS_SERVICE_STARTING = 'starting';

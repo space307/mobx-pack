@@ -1,4 +1,8 @@
-import { cloneDeep } from 'lodash';
+// @flow
+type StoreType = Class<*>;
+function validateName(name) {
+  return /^[A-Za-z][A-Za-z0-9]+$/.test(name);
+}
 
 function createConfig() {
   return {
@@ -12,12 +16,50 @@ function createConfig() {
   };
 }
 
-function bindAs(storeName: string, config?:*): (store: *) => * {
-  return (store: *): * => {
-    console.log(['bindAs']);
-    if (config) {
-      store.binderConfig = cloneDeep(config);
-    } else if (!store.binderConfig) {
+function putServiceNamesToConfig(
+  serviceNames: Array<string>,
+  store: StoreType,
+  callbackName: string,
+  optionName: string): void {
+  const proto = store.constructor;
+  if (!proto.binderConfig || !proto.binderConfig.config) {
+    proto.binderConfig = createConfig();
+  }
+
+  if (serviceNames && serviceNames.length && callbackName) {
+    serviceNames.forEach(
+      (serviceName: string) => {
+        if (!validateName(serviceName)) {
+          throw new Error(`Wrong service name "${serviceName}" 
+          passed to function "${callbackName}" decorator (service:${proto.name}).`);
+        }
+      },
+    );
+
+    proto.binderConfig.config[optionName].push(
+      [...serviceNames,
+        callbackName],
+    );
+  }
+}
+
+
+export function putMethodNameToConfig(store: StoreType, callbackName: string, optionName: string): void {
+  const proto = store.constructor;
+  if (!proto.binderConfig) {
+    proto.binderConfig = createConfig();
+  }
+  proto.binderConfig[optionName] = callbackName;
+}
+
+
+export function bindAs(storeName: string): (store: StoreType) => StoreType {
+  return (store: StoreType): StoreType => {
+    if (!validateName(storeName)) {
+      throw new Error(`Wrong name "${storeName}" passed to bindAs decorator (service:${store.name}).`);
+    }
+
+    if (!store.binderConfig || !store.binderConfig.config) {
       store.binderConfig = createConfig();
     }
     store.binderConfig.config.bindAs = storeName;
@@ -26,43 +68,38 @@ function bindAs(storeName: string, config?:*): (store: *) => * {
 }
 
 
-function bindServicesBehaviour(serviceNames: Array<string>, store: *, callbackName: string, optionName: string): void {
-  const proto = store.constructor;
-  if (!proto.binderConfig) {
-    proto.binderConfig = createConfig();
-  }
-
-  if (serviceNames && serviceNames.length && callbackName) {
-    proto.binderConfig.config[optionName].push(
-      [...serviceNames,
-        callbackName],
-
-    );
-  }
-}
-
-
-function bindServices(
+export function bindServices(
   serviceNames: Array<string>,
-): (store: *, callbackName: string) => * {
-  return (store: *, callbackName: string): * => {
-    bindServicesBehaviour(serviceNames, store, callbackName, 'onBind');
+): (store: StoreType, callbackName: string) => StoreType {
+  return (store: StoreType, callbackName: string): StoreType => {
+    putServiceNamesToConfig(serviceNames, store, callbackName, 'onBind');
     return store;
   };
 }
 
-function unbindServices(
+export function unbindServices(
   serviceNames: Array<string>,
-): (store: *, callbackName: string) => * {
-  return (store: *, callbackName: string): * => {
-    bindServicesBehaviour(serviceNames, store, callbackName, 'onUnbind');
+): (store: StoreType, callbackName: string) => StoreType {
+  return (store: StoreType, callbackName: string): StoreType => {
+    putServiceNamesToConfig(serviceNames, store, callbackName, 'onUnbind');
     return store;
   };
 }
 
 
-@bindAs('TestStore')
+export function onStart(store: StoreType, callbackName: string) {
+  putMethodNameToConfig(store, callbackName, 'onStart');
+  return store;
+}
+
+export function onStop(store: StoreType, callbackName: string) {
+  putMethodNameToConfig(store, callbackName, 'onStop');
+  return store;
+}
+
+/* @bindAs('TestStore')
 class Test {
+  @onStart
   onStart() {
 
   }
@@ -79,9 +116,10 @@ class Test {
   onUnbind() {
 
   }
-}
 
-export default {};
+  @onStop
+  onStop() {
 
+  }
+} */
 
-console.log(['Class', Test, Test.binderConfig.config]);

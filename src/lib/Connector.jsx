@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { observer } from 'mobx-react';
 import { each, forIn } from 'lodash';
-import { getUid, protoName } from './util.js';
+import { getUid, protoName } from './helper/util.js';
 
 
 function ConnectorF(Component, opt = {}) {

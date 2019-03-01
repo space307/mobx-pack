@@ -1,6 +1,6 @@
 import { isEmpty, each, cloneDeep } from 'lodash';
 import { toJS } from 'mobx';
-import { protoName } from './util';
+import { protoName } from './helper/util';
 import EventEmitter from './helper/EventEmitter.js';
 
 const EMITTER_EVENT = {
