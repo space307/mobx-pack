@@ -21,6 +21,14 @@ export class TimeService implements TimeServiceInterface {
   @observable
   time: string = '';
 
+  static binderConfig: ServiceConfigType = {
+    onStart: 'onStart',
+    proto: TimeService,
+    config: {
+      bindAs: SERVICE_NAMES.TIME_SERVICE,
+    },
+  };
+
   onStart(initialService: *): boolean {
     console.log(['onStart', SERVICE_NAMES.TIME_SERVICE, initialService]);
 
@@ -32,14 +40,6 @@ export class TimeService implements TimeServiceInterface {
     return true;
   }
 }
-
-export const TimeServiceConfig: ServiceConfigType<*, Class<TimeServiceInterface>> = {
-  onStart: 'onStart',
-  proto: TimeService,
-  config: {
-    bindAs: SERVICE_NAMES.TIME_SERVICE,
-  },
-};
 /* --/ TimeService --*/
 
 /* -- GarageStore --*/
@@ -52,6 +52,14 @@ interface GarageStoreInterface {
 export class GarageStore implements GarageStoreInterface {
   @observable
   counter: number = 0;
+
+  static binderConfig: ServiceConfigType = {
+    onStart: 'onStart',
+    proto: GarageStore,
+    config: {
+      bindAs: SERVICE_NAMES.GARAGE_STORE,
+    },
+  };
 
   constructor(color: string): void {
     console.log(['constructor', SERVICE_NAMES.GARAGE_STORE, color]);
@@ -76,13 +84,6 @@ export class GarageStore implements GarageStoreInterface {
   }
 }
 
-export const GarageStoreConfig: ServiceConfigType<*, Class<GarageStoreInterface>> = {
-  onStart: 'onStart',
-  proto: GarageStore,
-  config: {
-    bindAs: SERVICE_NAMES.GARAGE_STORE,
-  },
-};
 /* --/ GarageStore --*/
 
 
@@ -96,6 +97,14 @@ interface CarStoreInterface {
 export class CarStore implements CarStoreInterface {
   @observable
   modelName: string = 'Zapor';
+
+  static binderConfig: ServiceConfigType = {
+    onStart: 'onStart',
+    config: {
+      bindAs: SERVICE_NAMES.CAR_STORE,
+      onBind: [[SERVICE_NAMES.GARAGE_STORE, SERVICE_NAMES.TIME_SERVICE, 'onBind']],
+    },
+  };
 
   constructor(modelName: string) {
     this.setModelName(modelName);
@@ -116,14 +125,7 @@ export class CarStore implements CarStoreInterface {
   }
 }
 
-export const CarStoreConfig: ServiceConfigType<*, Class<CarStoreInterface>> = {
-  onStart: 'onStart',
-  proto: CarStore,
-  config: {
-    bindAs: SERVICE_NAMES.CAR_STORE,
-    onBind: [[SERVICE_NAMES.GARAGE_STORE, SERVICE_NAMES.TIME_SERVICE, 'onBind']],
-  },
-};
+
 /* --/ CarStore --*/
 
 

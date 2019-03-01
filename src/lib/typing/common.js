@@ -7,9 +7,7 @@ export type GlobalContextType = {
   initialState: *,
 };
 
-export type ServiceConfigType<serviceClassType> = {
-  proto: serviceClassType,
-  protoAttrs?: Array<*>,
+export type ServiceConfigType = {
   onStart?: string,
   onStop?: string,
   config: {
@@ -19,3 +17,21 @@ export type ServiceConfigType<serviceClassType> = {
   },
 };
 
+export type ServiceClassType = Class<*> & {
+  binderConfig: ServiceConfigType,
+  name: string,
+  constructor: ()=>void,
+}
+
+export type ServiceStartConfigType = {
+  proto: ServiceClassType,
+  protoAttrs?: Array<*>,
+  binderConfig: ServiceConfigType
+}
+
+
+export type StartServiceReturnType = {
+  service: *,
+  started: boolean,
+  serviceStartConfig: ServiceStartConfigType,
+};

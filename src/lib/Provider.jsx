@@ -3,20 +3,22 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 
-import { startServices, stopServices, type StartServiceReturnType } from './serviceUtils.js';
-import type { ServiceConfigType, GlobalContextType } from './typing/common.js';
+import { startServices, stopServices } from './serviceUtils.js';
+import type { GlobalContextType, ServiceStartConfigType, StartServiceReturnType } from './typing/common.js';
 
 
-type ConnectorOptionsAttributeType<InitialStateType> = {
+type ServiceItemType = Class<*> | Array<*>;
+
+type ConnectorOptionsAttributeType = {
   stop?: boolean,
-  services?: Array<ServiceConfigType<InitialStateType>> | (props: *)=> Array<ServiceConfigType<InitialStateType>>,
+  services?: Array<ServiceItemType> | (props: *)=> Array<ServiceItemType>,
   helper?: (services: ?Array<*>, props: *) => *,
   stub?: React$ComponentType<*>,
 };
 
-type ConnectorOptionsPropType<InitialStateType> = {
-  ...ConnectorOptionsAttributeType<InitialStateType>,
-  services: Array<ServiceConfigType<InitialStateType>>,
+type ConnectorOptionsPropType = {
+  ...ConnectorOptionsAttributeType,
+  services: Array<ServiceItemType>,
 };
 
 type ConnectorStateTypes = {
@@ -26,14 +28,27 @@ type ConnectorStateTypes = {
 
 type ProviderType = (
   Component: React$ComponentType<*>,
-  options?: ConnectorOptionsAttributeType<*>)=>React$ComponentType<*>
+  options?: ConnectorOptionsAttributeType)=>React$ComponentType<*>
+
+function convertToServiceStartConfig(ServiceProtoList: Array<ServiceItemType>): Array<ServiceStartConfigType> {
+  return ServiceProtoList.map((ServiceProto: ServiceItemType): ServiceStartConfigType => {
+    const proto = Array.isArray(ServiceProto) ? ServiceProto[0] : ServiceProto;
+    const protoAttrs = Array.isArray(ServiceProto) ? ServiceProto[1] : undefined;
+
+    return {
+      proto,
+      protoAttrs,
+      binderConfig: proto.binderConfig,
+    };
+  });
+}
 
 export default function CreateProvider(
   BinderContext: React$Context<GlobalContextType>,
   StoreContext: React$Context<?Array<*>>): ProviderType {
   return function Provider(
     Component: React$ComponentType<*>,
-    options?: ConnectorOptionsAttributeType<*>,
+    options?: ConnectorOptionsAttributeType,
   ): React$ComponentType<*> {
     const defaultOptions = {
       stop: false,
@@ -49,9 +64,9 @@ export default function CreateProvider(
 
         static contextType = BinderContext;
 
-        options: $Shape<ConnectorOptionsPropType<*>>;
+        options: $Shape<ConnectorOptionsPropType>;
 
-        serviceToStop: Array<ServiceConfigType<*>> = [];
+        serviceToStop: Array<ServiceStartConfigType> = [];
 
         constructor(props: PropType) {
           super();
@@ -77,17 +92,19 @@ export default function CreateProvider(
         }
 
         startServices() {
-          const { services: ServiceConfigList } = this.options;
+          const { services: ServiceProtoList } = this.options;
           const { binder, initialState } = this.context;
 
           if (!binder || !initialState) {
             this.setState({ error: 'binder && initialState not received in Container' });
           }
 
-          if (ServiceConfigList && ServiceConfigList.length) {
-            startServices(binder, initialState, ServiceConfigList).then((services: *) => {
+          if (ServiceProtoList && ServiceProtoList.length) {
+            const serviceStartConfigList = convertToServiceStartConfig(ServiceProtoList);
+
+            startServices(binder, initialState, serviceStartConfigList).then((services: *) => {
               type ResultType = {
-                toStop: Array<ServiceConfigType<*>>,
+                toStop: Array<ServiceStartConfigType>,
                 services: Array<*>,
               };
               const result = {
@@ -96,9 +113,9 @@ export default function CreateProvider(
               };
 
               services.reduce(
-                (acc: ResultType, { service, started, serviceConfig }: StartServiceReturnType): ResultType => {
+                (acc: ResultType, { service, started, serviceStartConfig }: StartServiceReturnType): ResultType => {
                   if (started) {
-                    acc.toStop.push(serviceConfig);
+                    acc.toStop.push(serviceStartConfig);
                   }
                   acc.services.push(service);
                   return acc;

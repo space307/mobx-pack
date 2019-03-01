@@ -1,15 +1,10 @@
 // @flow
 
 import Binder from './Binder.js';
-import type { ServiceConfigType } from './typing/common.js';
+import type { ServiceClassType, ServiceStartConfigType, StartServiceReturnType } from './typing/common.js';
 
-export type StartServiceReturnType = {
-  service: *,
-  started: boolean,
-  serviceConfig: ServiceConfigType<*>,
-};
 
-function createService(Service: Class<*>, protoAttrs?: ?Array<*>): * {
+function createService(Service: ServiceClassType, protoAttrs?: ?Array<*>): * {
   if (protoAttrs && !Array.isArray(protoAttrs)) {
     throw new Error(`Wrong ServiceParams! (${Service.name})`);
   }
@@ -17,25 +12,26 @@ function createService(Service: Class<*>, protoAttrs?: ?Array<*>): * {
   return protoAttrs ? new Service(...protoAttrs) : new Service();
 }
 
-export function startService(serviceConfig: ServiceConfigType<*>, binder: Binder, initialState: *): Promise<*> {
+export function startService(serviceStartConfig: ServiceStartConfigType, binder: Binder, initialState: *): Promise<*> {
+  const { binderConfig, proto } = serviceStartConfig;
   const {
     config,
     config: { bindAs },
     onStart,
-    proto: Service,
-    protoAttrs,
-  } = serviceConfig;
+  } = binderConfig;
+
+
   const serviceInBinder = binder.getStore(bindAs);
   const onStartFunctionName = onStart || 'onStart';
 
   return serviceInBinder
-    ? Promise.resolve({ service: serviceInBinder, started: false, serviceConfig })
+    ? Promise.resolve({ service: serviceInBinder, started: false, serviceStartConfig })
     : new Promise(
       (resolve: (data: StartServiceReturnType) => void, reject: (error: Error) => void): void => {
-        const service = createService(Service, protoAttrs);
+        const service = createService(proto, serviceStartConfig.protoAttrs);
 
         if (!service[onStartFunctionName]) {
-          reject(new Error(`OnStart method not found! (${Service.name})`));
+          reject(new Error(`OnStart method not found! (${proto.name})`));
         }
 
         const onStartResult = service[onStartFunctionName](initialState);
@@ -45,7 +41,7 @@ export function startService(serviceConfig: ServiceConfigType<*>, binder: Binder
             .then(
               (): void => {
                 binder.bind(service, config);
-                resolve({ service, started: true, serviceConfig });
+                resolve({ service, started: true, serviceStartConfig });
               },
             )
             .catch(
@@ -55,7 +51,7 @@ export function startService(serviceConfig: ServiceConfigType<*>, binder: Binder
             );
         } else if (onStartResult === true) {
           binder.bind(service, config);
-          resolve({ service, started: true, serviceConfig });
+          resolve({ service, started: true, serviceStartConfig });
         } else {
           reject(new Error(`Service ${bindAs} onStart return "false"`));
         }
@@ -66,20 +62,21 @@ export function startService(serviceConfig: ServiceConfigType<*>, binder: Binder
 export function startServices(
   binder: Binder,
   initialState: *,
-  serviceConfigList: Array<ServiceConfigType<*>>,
+  serviceStartConfigList: Array<ServiceStartConfigType>,
 ): Promise<*> {
   return Promise.all(
-    serviceConfigList.map(
-      (serviceConfig: ServiceConfigType<*>): Promise<*> => startService(serviceConfig, binder, initialState),
+    serviceStartConfigList.map(
+      (serviceStartConfig: ServiceStartConfigType): Promise<*> =>
+        startService(serviceStartConfig, binder, initialState),
     ),
   );
 }
 
-export function stopService(serviceConfig: ServiceConfigType<*>, binder: Binder): void {
+export function stopService(serviceStartConfig: ServiceStartConfigType, binder: Binder): void {
   const {
     config: { bindAs },
     onStop,
-  } = serviceConfig;
+  } = serviceStartConfig.binderConfig;
 
   const serviceInBinder = binder.getStore(bindAs);
   const onStopFunctionName = onStop || 'onStop';
@@ -92,14 +89,14 @@ export function stopService(serviceConfig: ServiceConfigType<*>, binder: Binder)
   }
 }
 
-export function stopServices(binder: Binder, serviceConfigList: Array<ServiceConfigType<*>>): void {
-  if (!serviceConfigList || !binder) {
+export function stopServices(binder: Binder, serviceStartConfigList: Array<ServiceStartConfigType>): void {
+  if (!serviceStartConfigList || !binder) {
     throw new Error('Wrong stopServices attributes!');
   }
 
-  serviceConfigList.forEach(
-    (serviceConfig: ServiceConfigType<*>): void => {
-      stopService(serviceConfig, binder);
+  serviceStartConfigList.forEach(
+    (ServiceProto: ServiceStartConfigType): void => {
+      stopService(ServiceProto, binder);
     },
   );
 }

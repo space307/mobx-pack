@@ -2,7 +2,7 @@
 import React from 'react';
 import { observer, Observer } from 'mobx-react';
 
-import { GarageStoreConfig, TimeServiceConfig, CarStoreConfig, initialState } from './Enviroment.js';
+import { GarageStore, TimeService, CarStore, initialState } from './Enviroment.js';
 import { BinderContext, StoreContext, GlobalContext } from './ComponentContext.js';
 import { Provider, BinderProvider } from './Provider.jsx';
 
@@ -68,7 +68,8 @@ const CarContainer = BinderProvider(
           //time: timeService.time,
         }
       },
-      services: (props)=>[{ ...CarStoreConfig, ...{ protoAttrs: [props.modelName] } }, TimeServiceConfig]
+      //services: (props)=>[{ ...CarStore, ...{ protoAttrs: [props.modelName] } }, TimeService]
+      services: (props)=>[CarStore, TimeService]
     }
     ),
   initialState
@@ -111,7 +112,7 @@ const GarageContainer = Provider(
         counter: garageStore.counter,
       };
     },
-    services: props => [{ ...GarageStoreConfig, ...{ protoAttrs: [props.color] } }],
+    services: props => [GarageStore],
   });
 
 
@@ -151,6 +152,6 @@ class MyApplication extends React.Component {
 }
 
 export default BinderProvider(
-  Provider(MyApplication, { services: [TimeServiceConfig] }),
+  Provider(MyApplication, { services: [TimeService] }),
   initialState,
 );
