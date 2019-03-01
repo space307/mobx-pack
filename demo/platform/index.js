@@ -12,7 +12,8 @@ import MyApplication from 'demo/platform/Test4/MyApplication.jsx';
 /* import BinderTest from 'demo/platform/Test4/BinderTest.js'; */
 import { isEmpty, each, cloneDeep } from 'lodash';
 
-import { ServiceDecorators } from 'sources.js'
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
 /*  Promise.all([
@@ -25,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ReactDOM.render(React.createElement(Platform), document.querySelector('#root'));
   }); */
 
-  // ReactDOM.render(React.createElement(MyApplication), document.querySelector('#root'));
+   ReactDOM.render(React.createElement(MyApplication), document.querySelector('#root'));
 
 });
 

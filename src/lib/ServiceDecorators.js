@@ -44,7 +44,7 @@ function putServiceNamesToConfig(
 }
 
 
-export function putMethodNameToConfig(store: StoreType, callbackName: string, optionName: string): void {
+function putMethodNameToConfig(store: StoreType, callbackName: string, optionName: string): void {
   const proto = store.constructor;
   if (!proto.binderConfig) {
     proto.binderConfig = createConfig();
@@ -96,6 +96,7 @@ export function onStop(store: StoreType, callbackName: string) {
   putMethodNameToConfig(store, callbackName, 'onStop');
   return store;
 }
+
 
 /* @bindAs('TestStore')
 class Test {
