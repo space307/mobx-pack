@@ -63,13 +63,14 @@ const CarContainer = BinderProvider(
     Car,
     {
       helper([carStore, timeService], props){
+        console.log(['carStore', carStore]);
+
         return {
           modelName: carStore.modelName,
           //time: timeService.time,
         }
       },
-      //services: (props)=>[{ ...CarStore, ...{ protoAttrs: [props.modelName] } }, TimeService]
-      services: (props)=>[CarStore, TimeService]
+      services: (props)=>[[CarStore, [props.modelName]], TimeService]
     }
     ),
   initialState

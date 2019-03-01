@@ -1,7 +1,7 @@
 // @flow
 type StoreType = Class<*>;
 function validateName(name) {
-  return /^[A-Za-z][A-Za-z0-9]+$/.test(name);
+  return /^[A-Za-z][A-Za-z0-9_]+$/.test(name);
 }
 
 function createConfig() {

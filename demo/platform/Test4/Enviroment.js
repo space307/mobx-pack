@@ -1,7 +1,7 @@
 // @flow
 /* eslint-disable no-console */
 import { observable } from 'mobx';
-import type { ServiceConfigType } from 'sources.js';
+import { onStop, onStart, unbindServices, bindServices, bindAs } from 'sources.js';
 
 
 const SERVICE_NAMES = {
@@ -93,24 +93,18 @@ interface CarStoreInterface {
   setModelName(modelName: string): void
 }
 
-
-export class CarStore implements CarStoreInterface {
+@bindAs(SERVICE_NAMES.CAR_STORE)
+class CarStore implements CarStoreInterface {
   @observable
   modelName: string = 'Zapor';
 
-  static binderConfig: ServiceConfigType = {
-    onStart: 'onStart',
-    config: {
-      bindAs: SERVICE_NAMES.CAR_STORE,
-      onBind: [[SERVICE_NAMES.GARAGE_STORE, SERVICE_NAMES.TIME_SERVICE, 'onBind']],
-    },
-  };
-
   constructor(modelName: string) {
-    this.setModelName(modelName);
+    if (modelName) {
+      this.setModelName(modelName);
+    }
   }
 
-
+  @onStart
   onStart(initialService: *): boolean {
     console.log(['onStart', SERVICE_NAMES.CAR_STORE, initialService]);
     return true;
@@ -120,10 +114,13 @@ export class CarStore implements CarStoreInterface {
     this.modelName = modelName;
   }
 
+  @bindServices([SERVICE_NAMES.GARAGE_STORE, SERVICE_NAMES.TIME_SERVICE])
   onBind(): void {
     console.log(['onBind', SERVICE_NAMES.CAR_STORE]);
   }
 }
+
+export { CarStore };
 
 
 /* --/ CarStore --*/

@@ -133,7 +133,7 @@ export default function CreateProvider(
         }
 
         composeProps(result: ?Array<*>, props: PropType) {
-          return result && this.options.helper ? this.options.helper(result, props) : props;
+          return result && this.options.helper ? this.options.helper([result], props) : props;
         }
 
         render() {
