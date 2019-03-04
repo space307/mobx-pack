@@ -9,6 +9,11 @@ const EMITTER_EVENT = {
 };
 
 
+const CALLBACK_NAME = {
+  BIND: 'onBind',
+  UNBIND: 'onUnbind',
+};
+
 class Binder {
   stores = {};
   storeBindWaiter = {};
@@ -71,26 +76,6 @@ class Binder {
     this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
   }
 
-  saveDeps(bindAs) {
-    const settings = this.getStoreSettings(bindAs);
-    const deps = settings.options && settings.options.onBind;
-
-    if (deps && deps.length) {
-      deps.forEach((list) => {
-        const len = list && list.length;
-        list.forEach((item, i) => {
-          if (i < len - 1) {
-            if (!this.depsList[item]) {
-              this.depsList[item] = [];
-            }
-
-            this.depsList[item].push(bindAs);
-          }
-        });
-      });
-    }
-  }
-
   addStore(store, options) {
     const { bindAs } = options;
 
@@ -106,14 +91,14 @@ class Binder {
   }
 
   handleOnBind(bindAs) {
-    this.handleBehaviour(bindAs, this.storeBindWaiter, 'onBind');
+    this.handleBehaviour(bindAs, this.storeBindWaiter, CALLBACK_NAME.BIND);
   }
 
   handleOnUnbind(bindAs) {
-    this.handleBehaviour(bindAs, this.storeUnbindWaiter, 'onUnbind');
+    this.handleBehaviour(bindAs, this.storeUnbindWaiter, CALLBACK_NAME.UNBIND);
   }
 
-  getBindStoreAsync(bindAs) {
+  /*  getBindStoreAsync(bindAs) {
     return this.getStoreAsyncBehavior(bindAs, this.storeBindWaiter);
   }
 
@@ -127,7 +112,7 @@ class Binder {
 
   getUnbindStoreListAsync(storeList) {
     return this.getStoreListAsyncBehavior(storeList, this.storeUnbindWaiter);
-  }
+  } */
 
   isBindOnParent(bindAs) {
     return this.parentBinder && this.parentBinder.isBind(bindAs);
@@ -146,7 +131,7 @@ class Binder {
         const len = list && list.length;
         const depsCb = len && list[len - 1];
         const storeList = len && list.slice(0, len - 1);
-        this.getStoreListAsyncBehavior(storeList, waitersStorage).then((stores) => {
+        this.getStoreListAsyncBehavior(storeList, waitersStorage, optionsParam).then((stores) => {
           if (typeof depsCb === 'function') {
             depsCb.apply(store, stores);
           } else if (typeof store[depsCb] === 'function') {
@@ -170,13 +155,13 @@ class Binder {
     }
   }
 
-  getStoreListAsyncBehavior(storeList, waitersStorage) {
-    return Promise.all(storeList.map(bindAsParam => this.getStoreAsyncBehavior(bindAsParam, waitersStorage)));
+  getStoreListAsyncBehavior(storeList, waitersStorage, optionsParam) {
+    return Promise.all(storeList.map(bindAsParam => this.getStoreAsyncBehavior(bindAsParam, waitersStorage, optionsParam)));
   }
 
-  getStoreAsyncBehavior(bindAs, waitersStorage) {
+  getStoreAsyncBehavior(bindAs, waitersStorage, optionsParam) {
     return new Promise((resolve) => {
-      if (this.isBind(bindAs)) {
+      if (this.isBind(bindAs) && optionsParam === CALLBACK_NAME.BIND) {
         resolve(this.getStore(bindAs));
       } else {
         if (!waitersStorage[bindAs]) {
@@ -206,10 +191,40 @@ class Binder {
   getStoreSettings(bindAs) {
     return this.stores[bindAs] || {};
   }
+  saveDeps(bindAs) {
+    if (this.isBindOnParent(bindAs)) {
+      return;
+    }
 
-  handleDepsOnUnbind() {
+    const settings = this.getStoreSettings(bindAs);
+    const deps = settings.options && settings.options.onBind;
 
+    if (deps && deps.length) {
+      deps.forEach((list) => {
+        const len = list && list.length;
+        list.forEach((item, i) => {
+          if (i < len - 1) {
+            if (!this.depsList[item]) {
+              this.depsList[item] = [];
+            }
+            this.depsList[item].push(bindAs);
+          }
+        });
+      });
+    }
   }
+
+  handleDepsOnUnbind(bindAs) {
+    const deps = this.depsList[bindAs];
+
+    if (deps && deps.length) {
+      deps.forEach((name) => {
+
+
+      });
+    }
+  }
+
 
   unbind(bindAs) {
     const storeSettings = this.getStoreSettings(bindAs);
