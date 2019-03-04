@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 import { Binder } from 'sources.js';
-import { initialState } from './Enviroment.js';
+import { initialState } from './Environment.js';
 
 
 export const GlobalContext = { binder: new Binder(), initialState };

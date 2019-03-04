@@ -2,7 +2,7 @@
 import React from 'react';
 import { observer, Observer } from 'mobx-react';
 
-import { GarageStore, TimeService, CarStore, initialState } from './Enviroment.js';
+import { GarageStore, TimeService, CarStore, initialState } from './Environment.js';
 import { BinderContext, StoreContext, GlobalContext } from './ComponentContext.js';
 import { Provider, BinderProvider } from './Provider.jsx';
 

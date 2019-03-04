@@ -17,18 +17,12 @@ interface TimeServiceInterface {
   +time: string;
 }
 
-export class TimeService implements TimeServiceInterface {
+@bindAs(SERVICE_NAMES.TIME_SERVICE)
+class TimeService implements TimeServiceInterface {
   @observable
   time: string = '';
 
-  static binderConfig: ServiceConfigType = {
-    onStart: 'onStart',
-    proto: TimeService,
-    config: {
-      bindAs: SERVICE_NAMES.TIME_SERVICE,
-    },
-  };
-
+  @onStart
   onStart(initialService: *): boolean {
     console.log(['onStart', SERVICE_NAMES.TIME_SERVICE, initialService]);
 
@@ -48,23 +42,15 @@ interface GarageStoreInterface {
   setCount(count: number): void;
 }
 
-
-export class GarageStore implements GarageStoreInterface {
+@bindAs(SERVICE_NAMES.GARAGE_STORE)
+class GarageStore implements GarageStoreInterface {
   @observable
   counter: number = 0;
-
-  static binderConfig: ServiceConfigType = {
-    onStart: 'onStart',
-    proto: GarageStore,
-    config: {
-      bindAs: SERVICE_NAMES.GARAGE_STORE,
-    },
-  };
 
   constructor(color: string): void {
     console.log(['constructor', SERVICE_NAMES.GARAGE_STORE, color]);
   }
-
+  @onStart
   onStart(initialService: *): boolean {
     console.log(['onStart', SERVICE_NAMES.GARAGE_STORE, initialService]);
 
@@ -75,12 +61,23 @@ export class GarageStore implements GarageStoreInterface {
     return true;
   }
 
-  setCount(count: number): void {
-    this.counter = count;
-  }
-
+  @bindServices([SERVICE_NAMES.TIME_SERVICE])
   onBind(): void {
     console.log(['onBind', SERVICE_NAMES.GARAGE_STORE]);
+  }
+
+  @bindServices([SERVICE_NAMES.CAR_STORE])
+  onBindCar(): void {
+    console.log(['onBindCar!!!!', SERVICE_NAMES.GARAGE_STORE]);
+  }
+
+  @unbindServices([SERVICE_NAMES.CAR_STORE])
+  onUnbindCar(): void {
+    console.log(['onUnbindCar', SERVICE_NAMES.GARAGE_STORE]);
+  }
+
+  setCount(count: number): void {
+    this.counter = count;
   }
 }
 
@@ -109,7 +106,11 @@ class CarStore implements CarStoreInterface {
     console.log(['onStart', SERVICE_NAMES.CAR_STORE, initialService]);
     return true;
   }
-
+  @onStop
+  onStop(): boolean {
+    console.log(['onStop', SERVICE_NAMES.CAR_STORE]);
+    return true;
+  }
   setModelName(modelName: string): void {
     this.modelName = modelName;
   }
@@ -120,7 +121,8 @@ class CarStore implements CarStoreInterface {
   }
 }
 
-export { CarStore };
+console.log(['environment', CarStore, GarageStore, TimeService]);
+export { CarStore, GarageStore, TimeService };
 
 
 /* --/ CarStore --*/
