@@ -13,6 +13,8 @@ class Binder {
   stores = {};
   storeBindWaiter = {};
   storeUnbindWaiter = {};
+  depsList = {};
+
   emitter:EventEmitter = new EventEmitter();
 
   constructor(parentBinder) {
@@ -63,7 +65,28 @@ class Binder {
     this.handleOnUnbind(bindAs);
     this.handleOnBind(bindAs);
     this.resolveWaiterPromises(bindAs, this.storeBindWaiter);
+    this.saveDeps(bindAs);
     this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
+  }
+
+  saveDeps(bindAs) {
+    const settings = this.getStoreSettings(bindAs);
+    const deps = settings.options && settings.options.onBind;
+
+    if (deps && deps.length) {
+      deps.forEach((list) => {
+        const len = list && list.length;
+        list.forEach((item, i) => {
+          if (i < len - 1) {
+            if (!this.depsList[item]) {
+              this.depsList[item] = [];
+            }
+
+            this.depsList[item].push(bindAs);
+          }
+        });
+      });
+    }
   }
 
   addStore(store, options) {
@@ -175,6 +198,10 @@ class Binder {
     return this.stores[bindAs] || {};
   }
 
+  handleDepsOnUnbind() {
+
+  }
+
   unbind(bindAs) {
     const storeSettings = this.getStoreSettings(bindAs);
 
@@ -208,11 +235,13 @@ class Binder {
         disposer();
       }
     });
-    this.resolveWaiterPromises(bindAs, this.storeUnbindWaiter);
-
     // unbind disposers in other stores
     this.unbindDisposers(bindAs);
     /* --/ Legacy -- */
+
+    this.resolveWaiterPromises(bindAs, this.storeUnbindWaiter);
+    this.handleDepsOnUnbind(bindAs);
+
 
     // clear store settings in binder
     this.stores[bindAs] = undefined;

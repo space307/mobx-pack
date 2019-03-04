@@ -152,6 +152,8 @@ class MyApplication extends React.Component {
     color: 'dark',
   };
 
+  static contextType = BinderContext;
+
   componentDidMount() {
     setInterval(() => {
       this.setState({timer: this.state.timer += 1});
@@ -163,6 +165,7 @@ class MyApplication extends React.Component {
   }
 
   render() {
+    console.log(['MyApplication', this.context]);
 
     return (
       <div>
