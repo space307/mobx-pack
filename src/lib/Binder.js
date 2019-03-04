@@ -14,11 +14,13 @@ class Binder {
   storeBindWaiter = {};
   storeUnbindWaiter = {};
   depsList = {};
+  parentBinder: Binder;
 
   emitter:EventEmitter = new EventEmitter();
 
   constructor(parentBinder) {
     if (parentBinder instanceof Binder) {
+      this.parentBinder = parentBinder;
       each(parentBinder.stores, ({ store, options }) => {
         this.addStore(store, options);
       });
@@ -127,7 +129,14 @@ class Binder {
     return this.getStoreListAsyncBehavior(storeList, this.storeUnbindWaiter);
   }
 
+  isBindOnParent(bindAs) {
+    return this.parentBinder && this.parentBinder.isBind(bindAs);
+  }
+
   handleBehaviour(bindAs, waitersStorage, optionsParam, checkResolve = true) {
+    if (this.isBindOnParent(bindAs)) {
+      return;
+    }
     const settings = this.getStoreSettings(bindAs);
     const store = settings.store;
     const deps = settings.options && settings.options[optionsParam];
