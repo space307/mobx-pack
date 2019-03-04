@@ -72,7 +72,7 @@ export function startServices(
   );
 }
 
-export function stopService(serviceStartConfig: ServiceStartConfigType, binder: Binder): void {
+export function stopService(binder: Binder, serviceStartConfig: ServiceStartConfigType): void {
   const {
     config: { bindAs },
     onStop,
@@ -93,10 +93,9 @@ export function stopServices(binder: Binder, serviceStartConfigList: Array<Servi
   if (!serviceStartConfigList || !binder) {
     throw new Error('Wrong stopServices attributes!');
   }
-
   serviceStartConfigList.forEach(
     (ServiceProto: ServiceStartConfigType): void => {
-      stopService(ServiceProto, binder);
+      stopService(binder, ServiceProto);
     },
   );
 }

@@ -58,12 +58,13 @@ class Car extends React.PureComponent {
   }
 }
 
+/*
 const CarContainer = BinderProvider(
   Provider(
     Car,
     {
-      helper([carStore, timeService], props){
-        console.log(['carStore', carStore]);
+      helper(carStore, timeService, props){
+        //console.log(['CarContainer helper!!!!!!', carStore, timeService]);
 
         return {
           modelName: carStore.modelName,
@@ -75,9 +76,26 @@ const CarContainer = BinderProvider(
     ),
   initialState
 );
+*/
+
+const CarContainer = Provider(
+  Car,
+  {
+    helper(carStore, timeService, props){
+      //console.log(['CarContainer helper!!!!!!', carStore, timeService]);
+
+      return {
+        modelName: carStore.modelName,
+        //time: timeService.time,
+      }
+    },
+    services: (props)=>[[CarStore, [props.modelName]], TimeService],
+    stop: true
+  }
+);
 
 
-class Garage extends React.Component {
+  class Garage extends React.Component {
     state={
       visible: false,
       cars:[]
@@ -87,9 +105,16 @@ class Garage extends React.Component {
       this.setState({ cars: this.state.cars.concat(['mercedes']) });
     };
 
+  removeCar = () => {
+    const cars = this.state.cars.slice();
+    cars.pop();
+
+    this.setState({ cars });
+  };
+
     render() {
       const {counter, color} = this.props;
-      console.log(['Garage render', counter, color]);
+      //console.log(['Garage render', counter, color]);
 
       return (<div>
         <h1>Garage</h1>
@@ -99,6 +124,7 @@ class Garage extends React.Component {
           this.state.cars.map((modelName, index)=><CarContainer key={index} modelName={modelName}/>)
         }
         <button onClick={this.addCar}>Add car</button>
+        <button onClick={this.removeCar}>Remove Car</button>
       </div>);
     }
 }
@@ -107,7 +133,8 @@ class Garage extends React.Component {
 const GarageContainer = Provider(
   Garage,
   {
-    helper([garageStore], { color }) {
+    helper(garageStore, { color }) {
+
       return {
         color,
         counter: garageStore.counter,
@@ -125,12 +152,6 @@ class MyApplication extends React.Component {
     color: 'dark',
   };
 
-  constructor(){
-    super();
-    console.log(['context']);
-
-  }
-
   componentDidMount() {
     setInterval(() => {
       this.setState({timer: this.state.timer += 1});
@@ -142,7 +163,7 @@ class MyApplication extends React.Component {
   }
 
   render() {
-   // console.log(['MyApplication render']);
+
     return (
       <div>
         <h1>My Application </h1>

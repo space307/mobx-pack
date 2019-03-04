@@ -208,6 +208,7 @@ class Binder {
         disposer();
       }
     });
+    this.resolveWaiterPromises(bindAs, this.storeUnbindWaiter);
 
     // unbind disposers in other stores
     this.unbindDisposers(bindAs);
@@ -219,7 +220,7 @@ class Binder {
     if (this.isDebug(bindAs)) {
       this.showMessage(`"${bindAs}" unbind.`);
     }
-    this.resolveWaiterPromises(bindAs, this.storeUnbindWaiter);
+
     this.emitter.emit(EMITTER_EVENT.UNBIND, bindAs);
   }
 

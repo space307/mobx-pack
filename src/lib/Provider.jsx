@@ -87,7 +87,7 @@ export default function CreateProvider(
         componentWillUnmount() {
           if (this.options.stop && this.serviceToStop && this.serviceToStop.length) {
             const { binder } = this.context;
-            stopServices(this.serviceToStop, binder);
+            stopServices(binder, this.serviceToStop);
           }
         }
 
@@ -133,7 +133,12 @@ export default function CreateProvider(
         }
 
         composeProps(result: ?Array<*>, props: PropType) {
-          return result && this.options.helper ? this.options.helper([result], props) : props;
+          if (result && typeof this.options.helper) {
+            const attributes = Array.isArray(result) ? result.slice() : [];
+            attributes.push(props);
+            return this.options.helper ? this.options.helper(...attributes) : props;
+          }
+          return props;
         }
 
         render() {

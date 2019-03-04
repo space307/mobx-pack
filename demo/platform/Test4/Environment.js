@@ -33,6 +33,10 @@ class TimeService implements TimeServiceInterface {
 
     return true;
   }
+  @onStop
+  onStop(){
+    console.log(['onStop', SERVICE_NAMES.TIME_SERVICE]);
+  }
 }
 /* --/ TimeService --*/
 
@@ -59,6 +63,10 @@ class GarageStore implements GarageStoreInterface {
     }, 10000);
 
     return true;
+  }
+  @onStop
+  onStop(){
+    console.log(['onStop', SERVICE_NAMES.GARAGE_STORE]);
   }
 
   @bindServices([SERVICE_NAMES.TIME_SERVICE])
