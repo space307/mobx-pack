@@ -16,8 +16,11 @@ const CALLBACK_NAME = {
 
 class Binder {
   stores = {};
-  storeBindWaiter = {};
-  storeUnbindWaiter = {};
+  storeWaiter = {
+    [CALLBACK_NAME.BIND]: {},
+    [CALLBACK_NAME.UNBIND]: {},
+  };
+
   depsList = {
     [CALLBACK_NAME.BIND]: {},
     [CALLBACK_NAME.UNBIND]: {},
@@ -74,8 +77,9 @@ class Binder {
 
     this.handleOnUnbind(bindAs);
     this.handleOnBind(bindAs);
-    this.resolveWaiterPromises(bindAs, this.storeBindWaiter);
-    //this.saveDeps(bindAs, CALLBACK_NAME.BIND);
+    this.resolveWaiterPromises(bindAs, CALLBACK_NAME.BIND);
+    this.saveDeps(bindAs, CALLBACK_NAME.BIND);
+    this.saveDeps(bindAs, CALLBACK_NAME.UNBIND);
     this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
   }
 
@@ -94,11 +98,11 @@ class Binder {
   }
 
   handleOnBind(bindAs) {
-    this.handleCallbackList(bindAs, this.storeBindWaiter, CALLBACK_NAME.BIND);
+    this.handleCallbackList(bindAs, CALLBACK_NAME.BIND);
   }
 
   handleOnUnbind(bindAs) {
-    this.handleCallbackList(bindAs, this.storeUnbindWaiter, CALLBACK_NAME.UNBIND);
+    this.handleCallbackList(bindAs, CALLBACK_NAME.UNBIND);
   }
 
   /*  getBindStoreAsync(bindAs) {
@@ -132,53 +136,57 @@ class Binder {
     };
   }
 
-  handleCallbackList(bindAs, waitersStorage, optionsParam, checkResolve = true) {
+  handleCallbackList(bindAs, callbackName, checkResolve = true) {
     if (this.isBindOnParent(bindAs)) {
       return;
     }
     const settings = this.getStoreSettings(bindAs);
     const store = settings.store;
-    const deps = settings.options && settings.options[optionsParam];
+    const deps = settings.options && settings.options[callbackName];
 
     if (deps && deps.length && store) {
       deps.forEach((list) => {
-        this.handleCallback(bindAs, list, waitersStorage, store, optionsParam, checkResolve);
+        this.handleCallback(bindAs, list, store, callbackName, checkResolve);
       });
     }
   }
 
-  handleCallback(bindAs, list, waitersStorage, store, optionsParam, checkResolve) {
+  handleCallback(bindAs, list, store, callbackName, checkResolve) {
     const { depsCb, storeList } = this.destructCallback(list);
-    this.getStoreListAsyncBehavior(storeList, waitersStorage, optionsParam).then((stores) => {
-      if (typeof depsCb === 'function') {
-        depsCb.apply(store, stores);
-      } else if (typeof store[depsCb] === 'function') {
-        store[depsCb](...stores);
-      } else {
-        this.showMessage(`${optionsParam} method ${depsCb} not found in "${bindAs}".`, 'error');
+    this.getStoreListAsyncBehavior(storeList, callbackName).then((stores) => {
+
+      if (this.isBind(bindAs)) {
+        if (typeof depsCb === 'function') {
+          depsCb.apply(store, stores);
+        } else if (typeof store[depsCb] === 'function') {
+          store[depsCb](...stores);
+        } else {
+          this.showMessage(`${callbackName} method ${depsCb} not found in "${bindAs}".`, 'error');
+        }
       }
     });
 
     // This timeout is to check if some store required in "onBind/onUnbind" callback is not resolved
     if (checkResolve) {
       setTimeout(() => {
-        const pendingStores = this.getPendingStores(storeList, waitersStorage);
+        const pendingStores = this.getPendingStores(storeList, callbackName);
         if (pendingStores.length && pendingStores.length < storeList.length) {
           // eslint-disable-next-line max-len
-          console.warn(`"${bindAs}.${typeof depsCb === 'string' ? depsCb : optionsParam}" not called, because "${pendingStores.join(',')}" still not resolved.`);
+          console.warn(`"${bindAs}.${typeof depsCb === 'string' ? depsCb : callbackName}" not called, because "${pendingStores.join(',')}" still not resolved.`);
         }
       }, 5000);
     }
   }
 
-  getStoreListAsyncBehavior(storeList, waitersStorage, optionsParam) {
+  getStoreListAsyncBehavior(storeList, callbackName) {
     return Promise.all(storeList.map(bindAsParam =>
-      this.getStoreAsyncBehavior(bindAsParam, waitersStorage, optionsParam)));
+      this.getStoreAsyncBehavior(bindAsParam, callbackName)));
   }
 
-  getStoreAsyncBehavior(bindAs, waitersStorage, optionsParam) {
+  getStoreAsyncBehavior(bindAs, callbackName) {
+    const waitersStorage = this.storeWaiter[callbackName];
     return new Promise((resolve) => {
-      if (this.isBind(bindAs) && optionsParam === CALLBACK_NAME.BIND) {
+      if (this.isBind(bindAs) && callbackName === CALLBACK_NAME.BIND) {
         resolve(this.getStore(bindAs));
       } else {
         if (!waitersStorage[bindAs]) {
@@ -189,8 +197,9 @@ class Binder {
     });
   }
 
-  getPendingStores(storeList, waitersStorage) {
+  getPendingStores(storeList, callbackName) {
     const result = [];
+    const waitersStorage = this.storeWaiter[callbackName];
     storeList.forEach((storeName) => {
       if (waitersStorage[storeName] && waitersStorage[storeName].length) {
         result.push(storeName);
@@ -246,7 +255,7 @@ class Binder {
                 const { storeList } = this.destructCallback(list);
 
                 if (this.isListUnBind(storeList)) {
-                  this.handleCallback(bindAs, list, this.storeBindWaiter, store, callbackName, false);
+                  this.handleCallback(bindAs, list, store, callbackName, false);
                 }
               }
             });
@@ -303,7 +312,7 @@ class Binder {
     this.unbindDisposers(bindAs);
     /* --/ Legacy -- */
 
-    this.resolveWaiterPromises(bindAs, this.storeUnbindWaiter);
+    this.resolveWaiterPromises(bindAs, CALLBACK_NAME.UNBIND);
 
 
     // clear store settings in binder
@@ -313,7 +322,8 @@ class Binder {
       this.showMessage(`"${bindAs}" unbind.`);
     }
 
-    //this.handleDepsOnUnbind(bindAs, CALLBACK_NAME.BIND);
+    this.handleDepsOnUnbind(bindAs, CALLBACK_NAME.BIND);
+    this.handleDepsOnUnbind(bindAs, CALLBACK_NAME.UNBIND);
     this.emitter.emit(EMITTER_EVENT.UNBIND, bindAs);
   }
 
@@ -321,11 +331,13 @@ class Binder {
     return this.getStoreSettings(bindAs).store;
   }
 
-  resolveWaiterPromises(bindAs, waitersStorage) {
+  resolveWaiterPromises(bindAs, callbackName) {
     if (!this.isBind(bindAs)) {
       return;
     }
 
+
+    const waitersStorage = this.storeWaiter[callbackName];
     const waiters = waitersStorage[bindAs];
 
     if (waiters) {
@@ -344,7 +356,14 @@ class Binder {
 
   clear() {
     this.stores = {};
-    this.storeBindWaiter = {};
+    this.storeWaiter = {
+      [CALLBACK_NAME.BIND]: {},
+      [CALLBACK_NAME.UNBIND]: {},
+    };
+    this.depsList = {
+      [CALLBACK_NAME.BIND]: {},
+      [CALLBACK_NAME.UNBIND]: {},
+    };
     this.emitter.clear();
   }
 

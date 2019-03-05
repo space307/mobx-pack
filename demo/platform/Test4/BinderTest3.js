@@ -50,26 +50,26 @@ class Test3 {
 
 binder.bind(new Test1(), Test1.config);
 binder.bind(new Test2(), Test2.config);
-
+binder.unbind(Test1.config.bindAs);
+console.log([1]);
 setTimeout(()=>{
+  console.log([11, binder.isBind(Test1.config.bindAs)]);
+
+});
+setTimeout(()=>{
+  console.log([2, binder.isBind(Test1.config.bindAs)]);
   binder.unbind(Test2.config.bindAs);
 });
 
 setTimeout(()=>{
+  console.log([3]);
   binder.bind(new Test2(), Test2.config);
 });
 setTimeout(()=>{
+  console.log([4]);
   binder.unbind(Test2.config.bindAs);
 });
 setTimeout(()=>{
+  console.log([5]);
   binder.bind(new Test2(), Test2.config);
 });
-/*
-setTimeout(()=>{
-  binder.bind(new Test2(), Test2.config);
-});
-
-setTimeout(()=>{
-  binder.unbind(Test2.config.bindAs);
-});
-*/
