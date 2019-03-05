@@ -263,7 +263,7 @@ class Binder {
                 const { storeList } = this.destructCallback(list);
 
                 if (this.isListUnBind(storeList)) {
-                  this.handleCallback(bindAs, list, store, callbackName, false);
+                  this.handleCallback(depBindAs, list, store, callbackName, false);
                 }
               }
             });

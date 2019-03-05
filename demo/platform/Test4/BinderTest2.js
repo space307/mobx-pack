@@ -3,7 +3,7 @@ import { Binder } from 'sources.js';
 
 
 const binder = new Binder();
-const binderLocal = new Binder(binder);
+//const binderLocal = new Binder(binder);
 
 
 const StoreName = {
@@ -90,6 +90,27 @@ class Test1Local {
   }
 }
 
+
+class Test2Local {
+  static config = {
+    bindAs: StoreName.Test2Local,
+    onBind: [
+      [StoreName.Test1Local, StoreName.Test3, 'onBind1Local3'],
+    ],
+    onUnbind: [
+      [StoreName.Test1Local, StoreName.Test3, 'onUnbind1Local3'],
+    ],
+  };
+  onBind1Local3(...arg) {
+    console.log(['Test2Local onBind1Local3', arg]);
+  }
+  onUnbind1Local3(...arg) {
+    console.log(['Test2Local onUnbind1Local3', arg]);
+  }
+}
+
+
+
 binder.bind(new Test3(), Test3.config);
 binder.bind(new Test1(), Test1.config);
 
@@ -97,9 +118,16 @@ setTimeout(()=>{
   binder.bind(new Test2(), Test2.config);
 });
 
+
+
 setTimeout(()=>{
-console.log(['binder', binder]);
+  binder.bind(new Test1Local(), Test1Local.config);
 });
+
+setTimeout(()=>{
+  binder.bind(new Test2Local(), Test2Local.config);
+});
+
 
 setTimeout(()=>{
   console.log([1]);
@@ -115,6 +143,21 @@ setTimeout(()=>{
   binder.bind(new Test2(), Test2.config);
   binder.bind(new Test3(), Test3.config);
 });
+setTimeout(()=>{
+
+});
+
+setTimeout(()=>{
+  console.log([3]);
+  binder.unbind(Test1Local.config.bindAs);
+  binder.unbind(Test3.config.bindAs, 1);
+
+
+
+  setTimeout(()=>{
+    console.log(['binder', binder]);
+  });
+}, 6000);
 
 
 
