@@ -9,7 +9,7 @@ import balanceService from 'demo/platform/services/BalanceService/index.js';
 import Platform from 'demo/platform/layouts/Platform/index.jsx';
 // import MyApplication from 'demo/platform/_Test4/MyApplication.jsx';
 //import MyApplication from 'demo/platform/Test4/MyApplication.jsx';
-import BinderTest2 from 'demo/platform/Test4/BinderTest2.js';
+import BinderTest2 from 'demo/platform/Test4/BinderTest3.js';
 /* import BinderTest from 'demo/platform/Test4/BinderTest.js'; */
 import { isEmpty, each, cloneDeep } from 'lodash';
 
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ReactDOM.render(React.createElement(Platform), document.querySelector('#root'));
   }); */
 
-   ReactDOM.render(React.createElement(MyApplication), document.querySelector('#root'));
+   //ReactDOM.render(React.createElement(MyApplication), document.querySelector('#root'));
 
 });
 

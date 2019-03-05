@@ -1,4 +1,4 @@
-import { isEmpty, each, cloneDeep } from 'lodash';
+import { isEmpty, each, cloneDeep, includes } from 'lodash';
 import { toJS } from 'mobx';
 import { protoName } from './helper/util';
 import EventEmitter from './helper/EventEmitter.js';
@@ -18,7 +18,10 @@ class Binder {
   stores = {};
   storeBindWaiter = {};
   storeUnbindWaiter = {};
-  depsList = {};
+  depsList = {
+    [CALLBACK_NAME.BIND]: {},
+    [CALLBACK_NAME.UNBIND]: {},
+  };
   parentBinder: Binder;
 
   emitter:EventEmitter = new EventEmitter();
@@ -72,7 +75,7 @@ class Binder {
     this.handleOnUnbind(bindAs);
     this.handleOnBind(bindAs);
     this.resolveWaiterPromises(bindAs, this.storeBindWaiter);
-    this.saveDeps(bindAs);
+    //this.saveDeps(bindAs, CALLBACK_NAME.BIND);
     this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
   }
 
@@ -91,11 +94,11 @@ class Binder {
   }
 
   handleOnBind(bindAs) {
-    this.handleBehaviour(bindAs, this.storeBindWaiter, CALLBACK_NAME.BIND);
+    this.handleCallbackList(bindAs, this.storeBindWaiter, CALLBACK_NAME.BIND);
   }
 
   handleOnUnbind(bindAs) {
-    this.handleBehaviour(bindAs, this.storeUnbindWaiter, CALLBACK_NAME.UNBIND);
+    this.handleCallbackList(bindAs, this.storeUnbindWaiter, CALLBACK_NAME.UNBIND);
   }
 
   /*  getBindStoreAsync(bindAs) {
@@ -118,7 +121,18 @@ class Binder {
     return this.parentBinder && this.parentBinder.isBind(bindAs);
   }
 
-  handleBehaviour(bindAs, waitersStorage, optionsParam, checkResolve = true) {
+  destructCallback(list) {
+    const len = list && list.length;
+    const depsCb = len && list[len - 1];
+    const storeList = len && list.slice(0, len - 1);
+
+    return {
+      storeList,
+      depsCb,
+    };
+  }
+
+  handleCallbackList(bindAs, waitersStorage, optionsParam, checkResolve = true) {
     if (this.isBindOnParent(bindAs)) {
       return;
     }
@@ -128,35 +142,38 @@ class Binder {
 
     if (deps && deps.length && store) {
       deps.forEach((list) => {
-        const len = list && list.length;
-        const depsCb = len && list[len - 1];
-        const storeList = len && list.slice(0, len - 1);
-        this.getStoreListAsyncBehavior(storeList, waitersStorage, optionsParam).then((stores) => {
-          if (typeof depsCb === 'function') {
-            depsCb.apply(store, stores);
-          } else if (typeof store[depsCb] === 'function') {
-            store[depsCb](...stores);
-          } else {
-            this.showMessage(`${optionsParam} method ${depsCb} not found in "${bindAs}".`, 'error');
-          }
-        });
-
-        // This timeout is to check if some store required in "onBind/onUnbind" callback is not resolved
-        if (checkResolve) {
-          setTimeout(() => {
-            const pendingStores = this.getPendingStores(storeList, waitersStorage);
-            if (pendingStores.length && pendingStores.length < storeList.length) {
-              // eslint-disable-next-line max-len
-              console.warn(`"${bindAs}.${typeof depsCb === 'string' ? depsCb : optionsParam}" not called, because "${pendingStores.join(',')}" still not resolved.`);
-            }
-          }, 5000);
-        }
+        this.handleCallback(bindAs, list, waitersStorage, store, optionsParam, checkResolve);
       });
     }
   }
 
+  handleCallback(bindAs, list, waitersStorage, store, optionsParam, checkResolve) {
+    const { depsCb, storeList } = this.destructCallback(list);
+    this.getStoreListAsyncBehavior(storeList, waitersStorage, optionsParam).then((stores) => {
+      if (typeof depsCb === 'function') {
+        depsCb.apply(store, stores);
+      } else if (typeof store[depsCb] === 'function') {
+        store[depsCb](...stores);
+      } else {
+        this.showMessage(`${optionsParam} method ${depsCb} not found in "${bindAs}".`, 'error');
+      }
+    });
+
+    // This timeout is to check if some store required in "onBind/onUnbind" callback is not resolved
+    if (checkResolve) {
+      setTimeout(() => {
+        const pendingStores = this.getPendingStores(storeList, waitersStorage);
+        if (pendingStores.length && pendingStores.length < storeList.length) {
+          // eslint-disable-next-line max-len
+          console.warn(`"${bindAs}.${typeof depsCb === 'string' ? depsCb : optionsParam}" not called, because "${pendingStores.join(',')}" still not resolved.`);
+        }
+      }, 5000);
+    }
+  }
+
   getStoreListAsyncBehavior(storeList, waitersStorage, optionsParam) {
-    return Promise.all(storeList.map(bindAsParam => this.getStoreAsyncBehavior(bindAsParam, waitersStorage, optionsParam)));
+    return Promise.all(storeList.map(bindAsParam =>
+      this.getStoreAsyncBehavior(bindAsParam, waitersStorage, optionsParam)));
   }
 
   getStoreAsyncBehavior(bindAs, waitersStorage, optionsParam) {
@@ -191,38 +208,61 @@ class Binder {
   getStoreSettings(bindAs) {
     return this.stores[bindAs] || {};
   }
-  saveDeps(bindAs) {
+  saveDeps(bindAs, callbackName) {
     if (this.isBindOnParent(bindAs)) {
       return;
     }
 
     const settings = this.getStoreSettings(bindAs);
-    const deps = settings.options && settings.options.onBind;
+    const deps = settings.options && settings.options[callbackName];
 
     if (deps && deps.length) {
       deps.forEach((list) => {
         const len = list && list.length;
         list.forEach((item, i) => {
           if (i < len - 1) {
-            if (!this.depsList[item]) {
-              this.depsList[item] = [];
+            if (!this.depsList[callbackName][item]) {
+              this.depsList[callbackName][item] = [];
             }
-            this.depsList[item].push(bindAs);
+            this.depsList[callbackName][item].push(bindAs);
           }
         });
       });
     }
   }
 
-  handleDepsOnUnbind(bindAs) {
-    const deps = this.depsList[bindAs];
+  handleDepsOnUnbind(bindAs, callbackName) {
+    const depsListItem = this.depsList[callbackName][bindAs];
+    if (depsListItem && depsListItem.length) {
+      depsListItem.forEach((depBindAs) => {
+        if (this.isBind(depBindAs)) {
+          const settings = this.getStoreSettings(depBindAs);
+          const deps = settings.options && settings.options[callbackName];
+          const store = this.getStore(depBindAs);
 
-    if (deps && deps.length) {
-      deps.forEach((name) => {
+          if (deps) {
+            deps.forEach((list) => {
+              if (includes(list, bindAs)) {
+                const { storeList } = this.destructCallback(list);
 
-
+                if (this.isListUnBind(storeList)) {
+                  this.handleCallback(bindAs, list, this.storeBindWaiter, store, callbackName, false);
+                }
+              }
+            });
+          }
+        }
       });
     }
+  }
+
+  isListUnBind(list) {
+    return list.reduce((acc, bindAs) => {
+      if (this.isBind(bindAs)) {
+        acc = false;
+      }
+      return acc;
+    }, true);
   }
 
 
@@ -264,7 +304,6 @@ class Binder {
     /* --/ Legacy -- */
 
     this.resolveWaiterPromises(bindAs, this.storeUnbindWaiter);
-    this.handleDepsOnUnbind(bindAs);
 
 
     // clear store settings in binder
@@ -274,6 +313,7 @@ class Binder {
       this.showMessage(`"${bindAs}" unbind.`);
     }
 
+    //this.handleDepsOnUnbind(bindAs, CALLBACK_NAME.BIND);
     this.emitter.emit(EMITTER_EVENT.UNBIND, bindAs);
   }
 
