@@ -154,7 +154,6 @@ class Binder {
   handleCallback(bindAs, list, store, callbackName, checkResolve) {
     const { depsCb, storeList } = this.destructCallback(list);
     this.getStoreListAsyncBehavior(storeList, callbackName).then((stores) => {
-
       if (this.isBind(bindAs)) {
         if (typeof depsCb === 'function') {
           depsCb.apply(store, stores);
@@ -233,7 +232,9 @@ class Binder {
             if (!this.depsList[callbackName][item]) {
               this.depsList[callbackName][item] = [];
             }
-            this.depsList[callbackName][item].push(bindAs);
+            if (!includes(this.depsList[callbackName][item], bindAs)) {
+              this.depsList[callbackName][item].push(bindAs);
+            }
           }
         });
       });

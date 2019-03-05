@@ -21,15 +21,15 @@ class Test1 {
   static config = {
     bindAs: StoreName.Test1,
     onBind: [
-      [StoreName.Test2, StoreName.Test3, 'onBind'],
+      [StoreName.Test2, StoreName.Test3, 'onBind23'],
       [StoreName.Test3, 'onBind3'],
     ],
     onUnbind: [
       [StoreName.Test3, 'onUnbind3'],
     ],
   };
-  onBind(...arg) {
-    console.log(['Test1 onBind', arg]);
+  onBind23(...arg) {
+    console.log(['Test1 onBind23', arg]);
   }
   onBind3(...arg) {
     console.log(['Test1 onBind3', arg]);
@@ -76,24 +76,53 @@ class Test1Local {
   static config = {
     bindAs: StoreName.Test1Local,
     onBind: [
-      [StoreName.Test2, 'onBind'],
+      [StoreName.Test2, 'onBind2'],
     ],
     onUnbind: [
       [StoreName.Test3, 'onUnbind3'],
     ],
   };
-  onBind(...arg) {
-    console.log(['Test1Local onBind', arg]);
+  onBind2(...arg) {
+    console.log(['Test1Local onBind2', arg]);
   }
   onUnbind3(...arg) {
     console.log(['Test1Local onUnbind3', arg]);
   }
 }
 
-
-// binder.bind(new Test4(), Test4.config);
+binder.bind(new Test3(), Test3.config);
 binder.bind(new Test1(), Test1.config);
-//binder.unbind(Test1.config.bindAs);
+
+setTimeout(()=>{
+  binder.bind(new Test2(), Test2.config);
+});
+
+setTimeout(()=>{
+console.log(['binder', binder]);
+});
+
+setTimeout(()=>{
+  console.log([1]);
+  binder.unbind(Test2.config.bindAs);
+  binder.unbind(Test3.config.bindAs);
+});
+
+
+
+
+setTimeout(()=>{
+  console.log([2]);
+  binder.bind(new Test2(), Test2.config);
+  binder.bind(new Test3(), Test3.config);
+});
+
+
+
+
+/*
+binder.bind(new Test4(), Test4.config);
+binder.bind(new Test1(), Test1.config);
+binder.unbind(Test1.config.bindAs);
 
 binder.bind(new Test2(), Test2.config);
 binder.bind(new Test3(), Test3.config);
@@ -106,6 +135,7 @@ setTimeout(()=>{
 }, 1000);
 
 //binder.bind(new Test3(), Test3.config);
+*/
 
 
 /*
