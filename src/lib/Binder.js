@@ -216,6 +216,7 @@ class Binder {
   getStoreSettings(bindAs) {
     return this.stores[bindAs] || {};
   }
+
   saveDeps(bindAs, callbackName) {
     if (this.isBindOnParent(bindAs)) {
       return;
@@ -244,7 +245,13 @@ class Binder {
   handleDepsOnUnbind(bindAs, callbackName) {
     const depsListItem = this.depsList[callbackName][bindAs];
     if (depsListItem && depsListItem.length) {
+      const duplicates = {};
       depsListItem.forEach((depBindAs) => {
+        if (duplicates[depBindAs]) {
+          return;
+        }
+
+        duplicates[depBindAs] = 1;
         if (this.isBind(depBindAs)) {
           const settings = this.getStoreSettings(depBindAs);
           const deps = settings.options && settings.options[callbackName];
