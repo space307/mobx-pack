@@ -25,6 +25,7 @@ class Test1 {
     ],
     onUnbind: [
       [StoreName.Test2, 'onUnbind'],
+      [StoreName.Test2, StoreName.Test3, 'onUnbind2'],
     ],
   };
   onBind(...arg) {
@@ -32,6 +33,9 @@ class Test1 {
   }
   onUnbind(...arg) {
     console.log(['Test1 onUnbind', arg]);
+  }
+  onUnbind2(...arg) {
+    console.log(['Test1 onUnbind2', arg]);
   }
 }
 
@@ -50,28 +54,48 @@ class Test3 {
 
 binder.bind(new Test1(), Test1.config);
 binder.bind(new Test2(), Test2.config);
-binder.unbind(Test1.config.bindAs);
 
 
-console.log([1]);
+
 setTimeout(()=>{
-  console.log([11, binder.isBind(Test1.config.bindAs)]);
-
+  console.log([1]);
+  binder.unbind(Test2.config.bindAs);
 });
 setTimeout(()=>{
-  console.log([2, binder.isBind(Test1.config.bindAs)]);
-  binder.unbind(Test2.config.bindAs);
+  console.log([2]);
+  binder.bind(new Test2(), Test2.config);
 });
 
 setTimeout(()=>{
   console.log([3]);
-  binder.bind(new Test2(), Test2.config);
-});
-setTimeout(()=>{
-  console.log([4]);
   binder.unbind(Test2.config.bindAs);
 });
+
 setTimeout(()=>{
-  console.log([5]);
+  console.log([4]);
   binder.bind(new Test2(), Test2.config);
 });
+
+
+setTimeout(()=>{
+  console.log([5]);
+  binder.unbind(Test2.config.bindAs);
+});
+
+setTimeout(()=>{
+  console.log([6]);
+  binder.bind(new Test2(), Test2.config);
+});setTimeout(()=>{
+  console.log([7]);
+  binder.bind(new Test3(), Test3.config);
+});
+
+setTimeout(()=>{
+  console.log([8]);
+  binder.unbind(Test3.config.bindAs);
+});
+
+setTimeout(()=>{
+  console.log(['binder', binder]);
+});
+

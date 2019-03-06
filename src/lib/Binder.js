@@ -16,7 +16,7 @@ const CALLBACK_NAME = {
 
 class Binder {
   stores = {};
-  storeWaiter = {
+  callbackResolvers = {
     [CALLBACK_NAME.BIND]: {},
     [CALLBACK_NAME.UNBIND]: {},
   };
@@ -77,7 +77,7 @@ class Binder {
 
     this.handleOnUnbind(bindAs);
     this.handleOnBind(bindAs);
-    this.resolveWaiterPromises(bindAs, CALLBACK_NAME.BIND);
+    this.resolveCallbackPromises(bindAs, CALLBACK_NAME.BIND);
     this.saveDeps(bindAs, CALLBACK_NAME.BIND);
     this.saveDeps(bindAs, CALLBACK_NAME.UNBIND);
     this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
@@ -146,14 +146,14 @@ class Binder {
 
     if (deps && deps.length && store) {
       deps.forEach((list) => {
-        this.handleCallback(bindAs, list, store, callbackName, checkResolve);
+        this.handleCallback(bindAs, list, store, callbackName, checkResolve, true);
       });
     }
   }
 
-  handleCallback(bindAs, list, store, callbackName, checkResolve) {
+  handleCallback(bindAs, list, store, callbackName, checkResolve, immediateResolve) {
     const { depsCb, storeList } = this.destructCallback(list);
-    this.getStoreListAsyncBehavior(storeList, callbackName).then((stores) => {
+    this.getStoreListAsyncBehavior(storeList, callbackName, immediateResolve).then((stores) => {
       if (this.isBind(bindAs)) {
         if (typeof depsCb === 'function') {
           depsCb.apply(store, stores);
@@ -162,6 +162,8 @@ class Binder {
         } else {
           this.showMessage(`${callbackName} method ${depsCb} not found in "${bindAs}".`, 'error');
         }
+
+        this.handleCallback(bindAs, list, store, callbackName, checkResolve, false);
       }
     });
 
@@ -177,30 +179,30 @@ class Binder {
     }
   }
 
-  getStoreListAsyncBehavior(storeList, callbackName) {
+  getStoreListAsyncBehavior(storeList, callbackName, immediateResolve) {
     return Promise.all(storeList.map(bindAsParam =>
-      this.getStoreAsyncBehavior(bindAsParam, callbackName)));
+      this.getStoreAsyncBehavior(bindAsParam, callbackName, immediateResolve)));
   }
 
-  getStoreAsyncBehavior(bindAs, callbackName) {
-    const waitersStorage = this.storeWaiter[callbackName];
+  getStoreAsyncBehavior(bindAs, callbackName, immediateResolve) {
+    const resolvers = this.callbackResolvers[callbackName];
     return new Promise((resolve) => {
-      if (this.isBind(bindAs) && callbackName === CALLBACK_NAME.BIND) {
+      if (this.isBind(bindAs) && callbackName === CALLBACK_NAME.BIND && immediateResolve) {
         resolve(this.getStore(bindAs));
       } else {
-        if (!waitersStorage[bindAs]) {
-          waitersStorage[bindAs] = [];
+        if (!resolvers[bindAs]) {
+          resolvers[bindAs] = [];
         }
-        waitersStorage[bindAs].push(resolve);
+        resolvers[bindAs].push(resolve);
       }
     });
   }
 
   getPendingStores(storeList, callbackName) {
     const result = [];
-    const waitersStorage = this.storeWaiter[callbackName];
+    const resolvers = this.callbackResolvers[callbackName];
     storeList.forEach((storeName) => {
-      if (waitersStorage[storeName] && waitersStorage[storeName].length) {
+      if (resolvers[storeName] && resolvers[storeName].length) {
         result.push(storeName);
       }
     });
@@ -242,51 +244,10 @@ class Binder {
     }
   }
 
-  handleDepsOnUnbind(bindAs, callbackName) {
-    const depsListItem = this.depsList[callbackName][bindAs];
-    if (depsListItem && depsListItem.length) {
-      const duplicates = {};
-      depsListItem.forEach((depBindAs) => {
-        if (duplicates[depBindAs]) {
-          return;
-        }
-
-        duplicates[depBindAs] = 1;
-        if (this.isBind(depBindAs)) {
-          const settings = this.getStoreSettings(depBindAs);
-          const deps = settings.options && settings.options[callbackName];
-          const store = this.getStore(depBindAs);
-
-          if (deps) {
-            deps.forEach((list) => {
-              if (includes(list, bindAs)) {
-                const { storeList } = this.destructCallback(list);
-
-                if (this.isListUnBind(storeList)) {
-                  this.handleCallback(depBindAs, list, store, callbackName, false);
-                }
-              }
-            });
-          }
-        }
-      });
-    }
-  }
-
-  isListUnBind(list) {
-    return list.reduce((acc, bindAs) => {
-      if (this.isBind(bindAs)) {
-        acc = false;
-      }
-      return acc;
-    }, true);
-  }
-
-
   unbind(bindAs) {
     const storeSettings = this.getStoreSettings(bindAs);
 
-    if (isEmpty(storeSettings)) {
+    if (!this.isBind(bindAs)) {
       this.showMessage(`Not bind store "${bindAs}" try to unbind!`, 'warn');
       return;
     }
@@ -320,7 +281,7 @@ class Binder {
     this.unbindDisposers(bindAs);
     /* --/ Legacy -- */
 
-    this.resolveWaiterPromises(bindAs, CALLBACK_NAME.UNBIND);
+    this.resolveCallbackPromises(bindAs, CALLBACK_NAME.UNBIND);
 
 
     // clear store settings in binder
@@ -330,8 +291,6 @@ class Binder {
       this.showMessage(`"${bindAs}" unbind.`);
     }
 
-    this.handleDepsOnUnbind(bindAs, CALLBACK_NAME.BIND);
-    this.handleDepsOnUnbind(bindAs, CALLBACK_NAME.UNBIND);
     this.emitter.emit(EMITTER_EVENT.UNBIND, bindAs);
   }
 
@@ -339,21 +298,20 @@ class Binder {
     return this.getStoreSettings(bindAs).store;
   }
 
-  resolveWaiterPromises(bindAs, callbackName) {
+  resolveCallbackPromises(bindAs, callbackName) {
     if (!this.isBind(bindAs)) {
       return;
     }
 
+    const resolvers = this.callbackResolvers[callbackName];
+    const resolversList = resolvers[bindAs];
 
-    const waitersStorage = this.storeWaiter[callbackName];
-    const waiters = waitersStorage[bindAs];
-
-    if (waiters) {
-      waiters.forEach((resolve) => {
+    if (resolversList) {
+      resolversList.forEach((resolve) => {
         resolve(this.getStore(bindAs));
       });
 
-      waitersStorage[bindAs] = [];
+      resolvers[bindAs] = [];
     }
   }
 
@@ -364,7 +322,7 @@ class Binder {
 
   clear() {
     this.stores = {};
-    this.storeWaiter = {
+    this.callbackResolvers = {
       [CALLBACK_NAME.BIND]: {},
       [CALLBACK_NAME.UNBIND]: {},
     };

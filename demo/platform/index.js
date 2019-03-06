@@ -9,10 +9,32 @@ import balanceService from 'demo/platform/services/BalanceService/index.js';
 import Platform from 'demo/platform/layouts/Platform/index.jsx';
 // import MyApplication from 'demo/platform/_Test4/MyApplication.jsx';
 //import MyApplication from 'demo/platform/Test4/MyApplication.jsx';
-import BinderTest2 from 'demo/platform/Test4/BinderTest2.js';
+import BinderTest2 from 'demo/platform/Test4/BinderTest4.js';
 /* import BinderTest from 'demo/platform/Test4/BinderTest.js'; */
 import { isEmpty, each, cloneDeep } from 'lodash';
 
+/*
+function Test(){
+  return new Promise((resolve)=>{
+    setTimeout(()=>{
+      resolve();
+    }, 2000);
+  });
+}
+
+function Test2(a){
+
+  Test().then(()=>{
+
+    console.log(['resolve', a]);
+
+  });
+}
+
+
+Test2(1);
+Test2(2);
+Test2(3);*/
 
 
 
