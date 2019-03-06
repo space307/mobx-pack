@@ -24,17 +24,18 @@ class Test1 {
       [StoreName.Test2, 'onBind'],
     ],
     onUnbind: [
-      [StoreName.Test2, StoreName.Test3, 'onUnbind2'],
+      [StoreName.Test2, 'onUnbind2'],
+      [StoreName.Test2, StoreName.Test3, 'onUnbind23'],
     ],
   };
   onBind(...arg) {
     console.log(['Test1 onBind', arg]);
   }
-  onUnbind(...arg) {
-    console.log(['Test1 onUnbind', arg]);
-  }
   onUnbind2(...arg) {
     console.log(['Test1 onUnbind2', arg]);
+  }
+  onUnbind23(...arg) {
+    console.log(['Test1 onUnbind23', arg]);
   }
 }
 
@@ -53,7 +54,10 @@ class Test3 {
 
 binder.bind(new Test1(), Test1.config);
 binder.bind(new Test2(), Test2.config);
+binder.bind(new Test3(), Test3.config);
 
+binder.unbind(Test2.config.bindAs);
+binder.unbind(Test3.config.bindAs);
 
 
 /*setTimeout(()=>{

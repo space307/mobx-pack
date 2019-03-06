@@ -123,7 +123,75 @@ class Binder {
     };
   }
   handleOnBind(bindAs) {
-    const callbackName = CALLBACK_NAME.BIND;
+    this.lookOverDeps(bindAs, CALLBACK_NAME.BIND, (depBindAs, callback, store) => {
+      const {
+        depsCb,
+        storeList,
+      } = this.destructCallback(callback);
+
+      if (!callback.__locked && this.isListBind(storeList)) {
+        const funcToCall = this.parseCallback(depsCb, store);
+
+        if (funcToCall) {
+          funcToCall.apply(store, storeList);
+          callback.__locked = true;
+        } else {
+          this.showMessage(`${CALLBACK_NAME.BIND} method ${depsCb} not found in "${bindAs}".`, 'error');
+        }
+      }
+
+      // console.log(['handleOnBind', bindAs, depBindAs, callback, this.isListBind(storeList), storeList]);
+    });
+
+    this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND, (depBindAs, callback, store) => {
+      const {
+        storeList,
+      } = this.destructCallback(callback);
+
+      if (this.isListBind(storeList) && callback.__locked) {
+        delete callback.__locked;
+      }
+
+
+      // console.log(['handleOnBind - unbind', bindAs, depBindAs, callback.__locked, store, storeList]);
+    });
+  }
+
+  handleOnUnbind(bindAs) {
+    this.lookOverDeps(bindAs, CALLBACK_NAME.BIND, (depBindAs, callback) => {
+      const {
+        storeList,
+      } = this.destructCallback(callback);
+
+      if (callback.__locked && this.isListUnBind(storeList)) {
+        delete callback.__locked;
+      }
+
+      // console.log(['handleOnBind', bindAs, depBindAs, callback, this.isListBind(storeList), storeList]);
+    });
+
+    this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND, (depBindAs, callback, store) => {
+      const {
+        depsCb,
+        storeList,
+      } = this.destructCallback(callback);
+
+      if (!callback.__locked && this.isListUnBind(storeList)) {
+        const funcToCall = this.parseCallback(depsCb, store);
+
+        if (funcToCall) {
+          funcToCall.apply(store, storeList);
+          callback.__locked = true;
+        } else {
+          this.showMessage(`${CALLBACK_NAME.UNBIND} method ${depsCb} not found in "${bindAs}".`, 'error');
+        }
+      }
+
+      // console.log(['handleOnBind', bindAs, depBindAs, callback, this.isListBind(storeList), storeList]);
+    });
+  }
+
+  lookOverDeps(bindAs, callbackName, cb) {
     const list = this.depsList[callbackName][bindAs];
 
     if (list && list.length) {
@@ -134,41 +202,17 @@ class Binder {
 
         if (callbackList) {
           callbackList.forEach((callback) => {
-            const {
-              depsCb,
-              storeList,
-            } = this.destructCallback(callback);
-
-            if (!callback.__locked && this.isListBind(storeList)) {
-
-              const funcToCall = this.parseCallback(depsCb, store);
-
-              if (funcToCall) {
-                funcToCall.apply(store, storeList);
-                callback.__locked = true;
-              } else {
-                this.showMessage(`${callbackName} method ${depsCb} not found in "${bindAs}".`, 'error');
-              }
+            if (includes(callback, bindAs)) {
+              cb(depBindAs, callback, store);
             }
-
-            console.log(['handleOnBind', depBindAs, callback, this.isListBind(storeList)]);
           });
         }
       });
     }
   }
 
-  lookOverDeps(bindAs, callbackName, cb){
-
-
-  }
-
-
-
 
   parseCallback(depsCb, store) {
-
-    console.log(['parseCallback', depsCb, store]);
     if (typeof depsCb === 'function') {
       return depsCb;
     } else if (typeof store[depsCb] === 'function') {
@@ -187,13 +231,14 @@ class Binder {
     }, true);
   }
 
-  handleOnUnbind(bindAs) {
-
+  isListUnBind(list) {
+    return list.reduce((acc, bindAs) => {
+      if (this.isBind(bindAs)) {
+        acc = false;
+      }
+      return acc;
+    }, true);
   }
-
-
-
-
 
   isBindOnParent(bindAs) {
     return this.parentBinder && this.parentBinder.isBind(bindAs);
@@ -290,7 +335,7 @@ class Binder {
     if (this.isDebug(bindAs)) {
       this.showMessage(`"${bindAs}" unbind.`);
     }
-
+    this.handleOnUnbind(bindAs);
     this.emitter.emit(EMITTER_EVENT.UNBIND, bindAs);
   }
 
