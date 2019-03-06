@@ -24,7 +24,6 @@ class Test1 {
       [StoreName.Test2, 'onBind'],
     ],
     onUnbind: [
-      [StoreName.Test2, 'onUnbind'],
       [StoreName.Test2, StoreName.Test3, 'onUnbind2'],
     ],
   };
@@ -55,12 +54,11 @@ class Test3 {
 binder.bind(new Test1(), Test1.config);
 binder.bind(new Test2(), Test2.config);
 
-
-
 setTimeout(()=>{
   console.log([1]);
   binder.unbind(Test2.config.bindAs);
 });
+
 setTimeout(()=>{
   console.log([2]);
   binder.bind(new Test2(), Test2.config);
@@ -68,22 +66,25 @@ setTimeout(()=>{
 
 setTimeout(()=>{
   console.log([3]);
+  //binder.callbackResolvers.onUnbind.Test2[0]();
+  //binder.callbackResolvers.onUnbind.Test3[0]();
+});
+
+
+
+/*binder.unbind(Test2.config.bindAs);
+binder.bind(new Test2(), Test2.config);
+binder.bind(new Test3(), Test3.config);
+binder.unbind(Test3.config.bindAs);*/
+
+
+/*setTimeout(()=>{
+  console.log([1]);
   binder.unbind(Test2.config.bindAs);
 });
 
 setTimeout(()=>{
-  console.log([4]);
-  binder.bind(new Test2(), Test2.config);
-});
-
-
-setTimeout(()=>{
-  console.log([5]);
-  binder.unbind(Test2.config.bindAs);
-});
-
-setTimeout(()=>{
-  console.log([6]);
+  console.log([2]);
   binder.bind(new Test2(), Test2.config);
 });
 
@@ -95,7 +96,7 @@ setTimeout(()=>{
 setTimeout(()=>{
   console.log([8]);
   binder.unbind(Test3.config.bindAs);
-});
+});*/
 
 setTimeout(()=>{
   console.log(['binder', binder]);

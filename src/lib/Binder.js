@@ -3,6 +3,22 @@ import { toJS } from 'mobx';
 import { protoName } from './helper/util';
 import EventEmitter from './helper/EventEmitter.js';
 
+
+/*
+bind:
+- сохраняем deps [dependency] : [waiter]
+- проходим по колбекам onBind - если колбек не locked и все сервисы isBind выполняем onBind и ставим locked на onBind
+- проходим по колбекам onUnbind (изначально locked) -  если все сервисы в колбеке isBind - делаем колбек unlocked
+
+unbind:
+ - проходим по колбекам onBind если !isBind на всех сервисах и onBind.locked === true ставим onBind.locked = true
+ - проходим по колбекам onUnbind если onUnbind.locked === true выполняем onUnbind и ставим onUnbind.locked = false
+ */
+
+// в bind сохраняем deps
+//
+
+
 const EMITTER_EVENT = {
   BIND: 'BIND',
   UNBIND: 'UNBIND',
@@ -153,7 +169,7 @@ class Binder {
 
   handleCallback(bindAs, list, store, callbackName, checkResolve, immediateResolve) {
     const { depsCb, storeList } = this.destructCallback(list);
-    this.getStoreListAsyncBehavior(storeList, callbackName, immediateResolve).then((stores) => {
+    this.getStoreListAsyncBehavior(storeList, callbackName, bindAs, immediateResolve).then((stores) => {
       if (this.isBind(bindAs)) {
         if (typeof depsCb === 'function') {
           depsCb.apply(store, stores);
@@ -179,12 +195,12 @@ class Binder {
     }
   }
 
-  getStoreListAsyncBehavior(storeList, callbackName, immediateResolve) {
+  getStoreListAsyncBehavior(storeList, callbackName, bindAs, immediateResolve) {
     return Promise.all(storeList.map(bindAsParam =>
-      this.getStoreAsyncBehavior(bindAsParam, callbackName, immediateResolve)));
+      this.getStoreAsyncBehavior(bindAsParam, callbackName, bindAs, immediateResolve)));
   }
 
-  getStoreAsyncBehavior(bindAs, callbackName, immediateResolve) {
+  getStoreAsyncBehavior(bindAs, callbackName, ownerBindAs, immediateResolve) {
     const resolvers = this.callbackResolvers[callbackName];
     return new Promise((resolve) => {
       if (this.isBind(bindAs) && callbackName === CALLBACK_NAME.BIND && immediateResolve) {
