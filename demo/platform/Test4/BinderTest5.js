@@ -54,7 +54,9 @@ class Test3 {
 binder.bind(new Test1(), Test1.config);
 binder.bind(new Test2(), Test2.config);
 
-setTimeout(()=>{
+
+
+/*setTimeout(()=>{
   console.log([1]);
   binder.unbind(Test2.config.bindAs);
 });
@@ -62,7 +64,7 @@ setTimeout(()=>{
 setTimeout(()=>{
   console.log([2]);
   binder.bind(new Test2(), Test2.config);
-});
+});*/
 
 setTimeout(()=>{
   console.log([3]);

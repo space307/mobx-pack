@@ -91,51 +91,109 @@ class Binder {
     /* --/ Legacy -- */
 
 
-    this.handleOnUnbind(bindAs);
-    this.handleOnBind(bindAs);
     this.resolveCallbackPromises(bindAs, CALLBACK_NAME.BIND);
     this.saveDeps(bindAs, CALLBACK_NAME.BIND);
     this.saveDeps(bindAs, CALLBACK_NAME.UNBIND);
+
+    // this.handleOnUnbind(bindAs);
+    this.handleOnBind(bindAs);
+
     this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
   }
 
   addStore(store, options) {
     const { bindAs } = options;
 
+    const optionsCopy = cloneDeep(options);
+
+    if (optionsCopy.onUnbind) {
+      optionsCopy.onUnbind.forEach((item) => {
+        item.__locked = true;
+      });
+    }
+
     this.stores[bindAs] = {
       bindAs,
       store,
-      options: cloneDeep(options),
+      options: optionsCopy,
       disposers: {
         list: [],
         services: {},
       },
     };
   }
-
   handleOnBind(bindAs) {
-    this.handleCallbackList(bindAs, CALLBACK_NAME.BIND);
+    const callbackName = CALLBACK_NAME.BIND;
+    const list = this.depsList[callbackName][bindAs];
+
+    if (list && list.length) {
+      list.forEach((depBindAs) => {
+        const settings = this.getStoreSettings(depBindAs);
+        const callbackList = settings.options && settings.options[callbackName];
+        const store = this.getStore(depBindAs);
+
+        if (callbackList) {
+          callbackList.forEach((callback) => {
+            const {
+              depsCb,
+              storeList,
+            } = this.destructCallback(callback);
+
+            if (!callback.__locked && this.isListBind(storeList)) {
+
+              const funcToCall = this.parseCallback(depsCb, store);
+
+              if (funcToCall) {
+                funcToCall.apply(store, storeList);
+                callback.__locked = true;
+              } else {
+                this.showMessage(`${callbackName} method ${depsCb} not found in "${bindAs}".`, 'error');
+              }
+            }
+
+            console.log(['handleOnBind', depBindAs, callback, this.isListBind(storeList)]);
+          });
+        }
+      });
+    }
+  }
+
+  lookOverDeps(bindAs, callbackName, cb){
+
+
+  }
+
+
+
+
+  parseCallback(depsCb, store) {
+
+    console.log(['parseCallback', depsCb, store]);
+    if (typeof depsCb === 'function') {
+      return depsCb;
+    } else if (typeof store[depsCb] === 'function') {
+      return store[depsCb];
+    }
+    return null;
+  }
+
+
+  isListBind(list) {
+    return list.reduce((acc, bindAs) => {
+      if (!this.isBind(bindAs)) {
+        acc = false;
+      }
+      return acc;
+    }, true);
   }
 
   handleOnUnbind(bindAs) {
-    this.handleCallbackList(bindAs, CALLBACK_NAME.UNBIND);
+
   }
 
-  /*  getBindStoreAsync(bindAs) {
-    return this.getStoreAsyncBehavior(bindAs, this.storeBindWaiter);
-  }
 
-  getBindStoreListAsync(storeList) {
-    return this.getStoreListAsyncBehavior(storeList, this.storeBindWaiter);
-  }
 
-  getUnbindStoreAsync(bindAs) {
-    return this.getStoreAsyncBehavior(bindAs, this.storeUnbindWaiter);
-  }
 
-  getUnbindStoreListAsync(storeList) {
-    return this.getStoreListAsyncBehavior(storeList, this.storeUnbindWaiter);
-  } */
 
   isBindOnParent(bindAs) {
     return this.parentBinder && this.parentBinder.isBind(bindAs);
@@ -150,80 +208,6 @@ class Binder {
       storeList,
       depsCb,
     };
-  }
-
-  handleCallbackList(bindAs, callbackName, checkResolve = true) {
-    if (this.isBindOnParent(bindAs)) {
-      return;
-    }
-    const settings = this.getStoreSettings(bindAs);
-    const store = settings.store;
-    const deps = settings.options && settings.options[callbackName];
-
-    if (deps && deps.length && store) {
-      deps.forEach((list) => {
-        this.handleCallback(bindAs, list, store, callbackName, checkResolve, true);
-      });
-    }
-  }
-
-  handleCallback(bindAs, list, store, callbackName, checkResolve, immediateResolve) {
-    const { depsCb, storeList } = this.destructCallback(list);
-    this.getStoreListAsyncBehavior(storeList, callbackName, bindAs, immediateResolve).then((stores) => {
-      if (this.isBind(bindAs)) {
-        if (typeof depsCb === 'function') {
-          depsCb.apply(store, stores);
-        } else if (typeof store[depsCb] === 'function') {
-          store[depsCb](...stores);
-        } else {
-          this.showMessage(`${callbackName} method ${depsCb} not found in "${bindAs}".`, 'error');
-        }
-
-        this.handleCallback(bindAs, list, store, callbackName, checkResolve, false);
-      }
-    });
-
-    // This timeout is to check if some store required in "onBind/onUnbind" callback is not resolved
-    if (checkResolve) {
-      setTimeout(() => {
-        const pendingStores = this.getPendingStores(storeList, callbackName);
-        if (pendingStores.length && pendingStores.length < storeList.length) {
-          // eslint-disable-next-line max-len
-          console.warn(`"${bindAs}.${typeof depsCb === 'string' ? depsCb : callbackName}" not called, because "${pendingStores.join(',')}" still not resolved.`);
-        }
-      }, 5000);
-    }
-  }
-
-  getStoreListAsyncBehavior(storeList, callbackName, bindAs, immediateResolve) {
-    return Promise.all(storeList.map(bindAsParam =>
-      this.getStoreAsyncBehavior(bindAsParam, callbackName, bindAs, immediateResolve)));
-  }
-
-  getStoreAsyncBehavior(bindAs, callbackName, ownerBindAs, immediateResolve) {
-    const resolvers = this.callbackResolvers[callbackName];
-    return new Promise((resolve) => {
-      if (this.isBind(bindAs) && callbackName === CALLBACK_NAME.BIND && immediateResolve) {
-        resolve(this.getStore(bindAs));
-      } else {
-        if (!resolvers[bindAs]) {
-          resolvers[bindAs] = [];
-        }
-        resolvers[bindAs].push(resolve);
-      }
-    });
-  }
-
-  getPendingStores(storeList, callbackName) {
-    const result = [];
-    const resolvers = this.callbackResolvers[callbackName];
-    storeList.forEach((storeName) => {
-      if (resolvers[storeName] && resolvers[storeName].length) {
-        result.push(storeName);
-      }
-    });
-
-    return result;
   }
 
 
