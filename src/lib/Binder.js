@@ -14,10 +14,13 @@ bind:
 unbind:
  - проходим по колбекам onBind если !isBind на всех сервисах и onBind.locked === true ставим onBind.locked = true
  - проходим по колбекам onUnbind если onUnbind.locked === true выполняем onUnbind и ставим onUnbind.locked = false
+
+ - проверить чтобы среди депсов не было стора
+ - проверить чтобы среди депсов не было стора
+
+
  */
 
-// в bind сохраняем deps
-//
 
 
 const EMITTER_EVENT = {

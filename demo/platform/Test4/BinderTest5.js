@@ -77,56 +77,16 @@ binder.unbind(Test3.config.bindAs);
 binder.bind(new Test3(), Test3.config);
 binder.unbind(Test2.config.bindAs);
 binder.unbind(Test3.config.bindAs);
-/*
 
-
-
+console.log([11111111]);
 binder.bind(new Test3(), Test3.config);
-binder.bind(new Test2(), Test2.config);*/
-
-/*setTimeout(()=>{
-  console.log([1]);
-  binder.unbind(Test2.config.bindAs);
-});
-
-setTimeout(()=>{
-  console.log([2]);
-  binder.bind(new Test2(), Test2.config);
-});*/
-
-setTimeout(()=>{
-  console.log([3]);
-  //binder.callbackResolvers.onUnbind.Test2[0]();
-  //binder.callbackResolvers.onUnbind.Test3[0]();
-});
-
-
-
-/*binder.unbind(Test2.config.bindAs);
 binder.bind(new Test2(), Test2.config);
-binder.bind(new Test3(), Test3.config);
-binder.unbind(Test3.config.bindAs);*/
+binder.unbind(Test3.config.bindAs);
+//binder.unbind(Test2.config.bindAs);
 
 
-/*setTimeout(()=>{
-  console.log([1]);
-  binder.unbind(Test2.config.bindAs);
-});
 
-setTimeout(()=>{
-  console.log([2]);
-  binder.bind(new Test2(), Test2.config);
-});
 
-setTimeout(()=>{
-  console.log([7]);
-  binder.bind(new Test3(), Test3.config);
-});
-
-setTimeout(()=>{
-  console.log([8]);
-  binder.unbind(Test3.config.bindAs);
-});*/
 
 setTimeout(()=>{
   console.log(['binder', binder]);
