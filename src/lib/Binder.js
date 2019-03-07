@@ -1,4 +1,5 @@
-import { isEmpty, each, cloneDeep, includes } from 'lodash';
+/* eslint-disable method-can-be-static, class-methods-use-this, no-console */
+import { each, cloneDeep, includes } from 'lodash';
 import { toJS } from 'mobx';
 import { protoName } from './helper/util';
 import EventEmitter from './helper/EventEmitter.js';
@@ -22,6 +23,7 @@ unbind:
 const EMITTER_EVENT = {
   BIND: 'BIND',
   UNBIND: 'UNBIND',
+  CALLBACK_CALLED: 'CALLBACK_CALLED',
 };
 
 
@@ -95,7 +97,6 @@ class Binder {
     this.saveDeps(bindAs, CALLBACK_NAME.BIND);
     this.saveDeps(bindAs, CALLBACK_NAME.UNBIND);
 
-    // this.handleOnUnbind(bindAs);
     this.handleOnBind(bindAs);
 
     this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
@@ -108,6 +109,7 @@ class Binder {
 
     if (optionsCopy.onUnbind) {
       optionsCopy.onUnbind.forEach((item) => {
+        // eslint-disable-next-line no-param-reassign
         item.__locked = true;
       });
     }
@@ -122,88 +124,105 @@ class Binder {
       },
     };
   }
+
   handleOnBind(bindAs) {
-    this.lookOverDeps(bindAs, CALLBACK_NAME.BIND, (depBindAs, callback, store) => {
+    const settings = this.getStoreSettings(bindAs);
+    const callbackSetList = settings.options && settings.options[CALLBACK_NAME.BIND];
+    this.handleOnBindItem(bindAs);
+
+    this.lookOverCallback(callbackSetList, (serviceName) => {
+      this.handleOnBindItem(serviceName);
+    });
+  }
+
+  lookOverCallback(callbackSetList, cb) {
+    if (callbackSetList) {
+      callbackSetList.forEach((callbackSet) => {
+        const len = callbackSet.length;
+
+        callbackSet.forEach((serviceName, i) => {
+          if (i < len - 1) {
+            cb(serviceName);
+          }
+        });
+      });
+    }
+  }
+
+  handleOnBindItem(bindAs) {
+    this.lookOverDeps(bindAs, CALLBACK_NAME.BIND, (depBindAs, callbackSet, store) => {
       const {
-        depsCb,
+        callback,
         storeList,
-      } = this.destructCallback(callback);
+      } = this.destructCallback(callbackSet);
 
-      if (!callback.__locked && this.isListBind(storeList)) {
-        const funcToCall = this.parseCallback(depsCb, store);
-
-        if (funcToCall) {
-          funcToCall.apply(store, storeList);
-          callback.__locked = true;
-        } else {
-          this.showMessage(`${CALLBACK_NAME.BIND} method ${depsCb} not found in "${bindAs}".`, 'error');
-        }
+      if (!callbackSet.__locked && this.isListBind(storeList)) {
+        this.applyCallback(depBindAs, callbackSet, storeList, callback, store, CALLBACK_NAME.BIND);
       }
-
-      // console.log(['handleOnBind', bindAs, depBindAs, callback, this.isListBind(storeList), storeList]);
     });
 
-    this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND, (depBindAs, callback, store) => {
+    this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND, (depBindAs, callbackSet) => {
       const {
         storeList,
-      } = this.destructCallback(callback);
+      } = this.destructCallback(callbackSet);
 
-      if (this.isListBind(storeList) && callback.__locked) {
-        delete callback.__locked;
+      if (this.isListBind(storeList) && callbackSet.__locked) {
+        // eslint-disable-next-line no-param-reassign
+        delete callbackSet.__locked;
       }
-
-
-      // console.log(['handleOnBind - unbind', bindAs, depBindAs, callback.__locked, store, storeList]);
     });
   }
 
   handleOnUnbind(bindAs) {
-    this.lookOverDeps(bindAs, CALLBACK_NAME.BIND, (depBindAs, callback) => {
+    this.lookOverDeps(bindAs, CALLBACK_NAME.BIND, (depBindAs, callbackSet) => {
       const {
         storeList,
-      } = this.destructCallback(callback);
+      } = this.destructCallback(callbackSet);
 
-      if (callback.__locked && this.isListUnBind(storeList)) {
-        delete callback.__locked;
+      if (callbackSet.__locked && this.isListUnBind(storeList)) {
+        // eslint-disable-next-line no-param-reassign
+        delete callbackSet.__locked;
       }
-
-      // console.log(['handleOnBind', bindAs, depBindAs, callback, this.isListBind(storeList), storeList]);
     });
 
-    this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND, (depBindAs, callback, store) => {
+    this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND, (depBindAs, callbackSet, store) => {
       const {
-        depsCb,
+        callback,
         storeList,
-      } = this.destructCallback(callback);
+      } = this.destructCallback(callbackSet);
 
-      if (!callback.__locked && this.isListUnBind(storeList)) {
-        const funcToCall = this.parseCallback(depsCb, store);
-
-        if (funcToCall) {
-          funcToCall.apply(store, storeList);
-          callback.__locked = true;
-        } else {
-          this.showMessage(`${CALLBACK_NAME.UNBIND} method ${depsCb} not found in "${bindAs}".`, 'error');
-        }
+      if (!callbackSet.__locked && this.isListUnBind(storeList)) {
+        this.applyCallback(depBindAs, callbackSet, storeList, callback, store, CALLBACK_NAME.UNBIND);
       }
-
-      // console.log(['handleOnBind', bindAs, depBindAs, callback, this.isListBind(storeList), storeList]);
     });
   }
 
-  lookOverDeps(bindAs, callbackName, cb) {
-    const list = this.depsList[callbackName][bindAs];
+  applyCallback(bindAs, callbackSet, storeList, callback, store, callbackType) {
+    const funcToCall = this.parseCallback(callback, store);
+
+    if (funcToCall) {
+      funcToCall.apply(store, storeList);
+      // eslint-disable-next-line no-param-reassign
+      callbackSet.__locked = true;
+      this.emitter.emit(EMITTER_EVENT.CALLBACK_CALLED, { bindAs, callbackType, callback, storeList });
+    } else {
+      this.showMessage(`${callbackType} method ${callback} not found in "${bindAs}".`, 'error');
+    }
+  }
+
+  lookOverDeps(bindAs, callbackType, cb) {
+    const list = this.depsList[callbackType][bindAs];
 
     if (list && list.length) {
       list.forEach((depBindAs) => {
         const settings = this.getStoreSettings(depBindAs);
-        const callbackList = settings.options && settings.options[callbackName];
+        const callbackSetList = settings.options && settings.options[callbackType];
         const store = this.getStore(depBindAs);
 
-        if (callbackList) {
-          callbackList.forEach((callback) => {
-            if (includes(callback, bindAs)) {
-              cb(depBindAs, callback, store);
+        if (callbackSetList) {
+          callbackSetList.forEach((callbackSet) => {
+            if (includes(callbackSet, bindAs)) {
+              cb(depBindAs, callbackSet, store);
             }
           });
         }
@@ -212,11 +231,11 @@ class Binder {
   }
 
 
-  parseCallback(depsCb, store) {
-    if (typeof depsCb === 'function') {
-      return depsCb;
-    } else if (typeof store[depsCb] === 'function') {
-      return store[depsCb];
+  parseCallback(callback, store) {
+    if (typeof callback === 'function') {
+      return callback;
+    } else if (typeof store[callback] === 'function') {
+      return store[callback];
     }
     return null;
   }
@@ -225,6 +244,7 @@ class Binder {
   isListBind(list) {
     return list.reduce((acc, bindAs) => {
       if (!this.isBind(bindAs)) {
+        // eslint-disable-next-line no-param-reassign
         acc = false;
       }
       return acc;
@@ -234,6 +254,7 @@ class Binder {
   isListUnBind(list) {
     return list.reduce((acc, bindAs) => {
       if (this.isBind(bindAs)) {
+        // eslint-disable-next-line no-param-reassign
         acc = false;
       }
       return acc;
@@ -246,12 +267,12 @@ class Binder {
 
   destructCallback(list) {
     const len = list && list.length;
-    const depsCb = len && list[len - 1];
+    const callback = len && list[len - 1];
     const storeList = len && list.slice(0, len - 1);
 
     return {
       storeList,
-      depsCb,
+      callback,
     };
   }
 
@@ -264,24 +285,24 @@ class Binder {
     return this.stores[bindAs] || {};
   }
 
-  saveDeps(bindAs, callbackName) {
+  saveDeps(bindAs, callbackType) {
     if (this.isBindOnParent(bindAs)) {
       return;
     }
 
     const settings = this.getStoreSettings(bindAs);
-    const deps = settings.options && settings.options[callbackName];
+    const deps = settings.options && settings.options[callbackType];
 
     if (deps && deps.length) {
       deps.forEach((list) => {
         const len = list && list.length;
         list.forEach((item, i) => {
           if (i < len - 1) {
-            if (!this.depsList[callbackName][item]) {
-              this.depsList[callbackName][item] = [];
+            if (!this.depsList[callbackType][item]) {
+              this.depsList[callbackType][item] = [];
             }
-            if (!includes(this.depsList[callbackName][item], bindAs)) {
-              this.depsList[callbackName][item].push(bindAs);
+            if (!includes(this.depsList[callbackType][item], bindAs)) {
+              this.depsList[callbackType][item].push(bindAs);
             }
           }
         });
@@ -343,12 +364,12 @@ class Binder {
     return this.getStoreSettings(bindAs).store;
   }
 
-  resolveCallbackPromises(bindAs, callbackName) {
+  resolveCallbackPromises(bindAs, callbackType) {
     if (!this.isBind(bindAs)) {
       return;
     }
 
-    const resolvers = this.callbackResolvers[callbackName];
+    const resolvers = this.callbackResolvers[callbackType];
     const resolversList = resolvers[bindAs];
 
     if (resolversList) {
@@ -455,6 +476,7 @@ class Binder {
         store.disposers.services[bindAs].forEach((disposer) => {
           if (typeof store.disposers.list[disposer] === 'function') {
             store.disposers.list[disposer]();
+            // eslint-disable-next-line no-param-reassign
             store.disposers.list[disposer] = undefined;
           }
         });
