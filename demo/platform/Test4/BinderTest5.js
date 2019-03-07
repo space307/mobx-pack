@@ -42,7 +42,13 @@ class Test1 {
 class Test2 {
   static config = {
     bindAs: StoreName.Test2,
+    onBind: [
+      [StoreName.Test1, 'onBind'],
+    ],
   };
+  onBind(...arg) {
+    console.log(['Test2 onBind', arg]);
+  }
 }
 
 class Test3 {
