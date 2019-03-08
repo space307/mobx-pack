@@ -18,9 +18,10 @@ unbind:
  - проверить чтобы среди депсов не было стора
  - проверить чтобы среди депсов не было стора
 
-
+ TODO
+- проверка на parentBinder
+- проверка когда часть сервисов из колбеков не стартовала
  */
-
 
 
 const EMITTER_EVENT = {
@@ -75,6 +76,12 @@ class Binder {
       return;
     }
 
+    if (!this.validateCallback(options, CALLBACK_NAME.BIND) ||
+      !this.validateCallback(options, CALLBACK_NAME.UNBIND)) {
+      return;
+    }
+
+
     if (this.isBind(bindAs)) {
       this.showMessage(`Store "${bindAs}" was already bind.`, 'error');
       return;
@@ -103,6 +110,24 @@ class Binder {
     this.handleOnBind(bindAs);
 
     this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
+  }
+
+  validateCallback(options, callbackName) {
+    const { bindAs } = options;
+
+    const list = options[callbackName];
+    let result = true;
+
+    if (list) {
+      this.lookOverCallback(list, (serviceName) => {
+        if (bindAs === serviceName) {
+          this.showMessage(`Store "${bindAs}" ${callbackName} callback contains 
+          the same name as store name "${bindAs}"`, 'error');
+          result = false;
+        }
+      });
+    }
+    return result;
   }
 
   addStore(store, options) {

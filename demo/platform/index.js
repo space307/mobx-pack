@@ -13,6 +13,8 @@ import BinderTest2 from 'demo/platform/Test4/BinderTest6.js';
 /* import BinderTest from 'demo/platform/Test4/BinderTest.js'; */
 import { isEmpty, each, cloneDeep } from 'lodash';
 
+
+
 /*
 function Test(){
   return new Promise((resolve)=>{

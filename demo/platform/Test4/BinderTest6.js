@@ -32,8 +32,8 @@ class Test1 {
       [t2, 'someMethod'],
     ],
     onUnbind: [
+      [t2,'someMethod'],
       [t2, 'someMethod'],
-      [t1, t2, 'someMethod'],
     ],
   };
 
