@@ -33,6 +33,12 @@ const CALLBACK_NAME = {
   UNBIND: 'onUnbind',
 };
 
+const MESSAGE_TYPES = {
+  ERROR: 'error',
+  WARN: 'warn',
+  INFO: 'info',
+};
+
 class Binder {
   stores = {};
 
@@ -69,7 +75,7 @@ class Binder {
     const { bindAs } = options;
 
     if (typeof bindAs !== 'string' || !bindAs.length) {
-      this.showMessage(`Store "${protoName(store)}" has not valid "bindAs" id "${bindAs}".`, 'error');
+      this.showMessage(`Store "${protoName(store)}" has not valid "bindAs" id "${bindAs}".`, MESSAGE_TYPES.ERROR);
       return;
     }
 
@@ -79,7 +85,7 @@ class Binder {
     }
 
     if (this.isBind(bindAs)) {
-      this.showMessage(`Store "${bindAs}" was already bind.`, 'error');
+      this.showMessage(`Store "${bindAs}" was already bind.`, MESSAGE_TYPES.ERROR);
       return;
     }
 
@@ -117,7 +123,7 @@ class Binder {
       this.lookOverCallback(list, (serviceName) => {
         if (bindAs === serviceName) {
           this.showMessage(`Store "${bindAs}" ${callbackName} callback contains 
-          the same name as store name "${bindAs}"`, 'error');
+          the same name as store name "${bindAs}"`, MESSAGE_TYPES.ERROR);
           result = false;
         }
       });
@@ -201,7 +207,7 @@ class Binder {
 
       if (notBind.length && notBind.length < storeList.length) {
         this.showMessage(`"${bindAs}.${typeof cbName === 'string' ? cbName : CALLBACK_NAME.BIND}" 
-        not called, because "${notBind.join(',')}" still not resolved.`, 'warn');
+        not called, because "${notBind.join(',')}" still not resolved.`, MESSAGE_TYPES.WARN);
       }
       delete callbackSet.__resolveTM;
     }, 1000);
@@ -255,7 +261,7 @@ class Binder {
       callbackSet.__locked = true;
       this.emitter.emit(EMITTER_EVENT.CALLBACK_CALLED, { bindAs, callbackType, callback, storeList });
     } else {
-      this.showMessage(`${callbackType} method ${callback} not found in "${bindAs}".`, 'error');
+      this.showMessage(`${callbackType} method ${callback} not found in "${bindAs}".`, MESSAGE_TYPES.ERROR);
     }
   }
 
@@ -371,12 +377,12 @@ class Binder {
     const storeSettings = this.getStoreSettings(bindAs);
 
     if (!this.isBind(bindAs)) {
-      this.showMessage(`Not bind store "${bindAs}" try to unbind!`, 'warn');
+      this.showMessage(`Not bind store "${bindAs}" try to unbind!`, MESSAGE_TYPES.WARN);
       return;
     }
 
     if (this.isBindOnParent(bindAs) && !this.allowParentOperation) {
-      this.showMessage(`Try to unbind store "${bindAs}" from parent Binder.`, 'error');
+      this.showMessage(`Try to unbind store "${bindAs}" from parent Binder.`, MESSAGE_TYPES.ERROR);
       return;
     }
 
@@ -438,11 +444,11 @@ class Binder {
   }
 
   showMessage(msg, type = 'info') {
-    if (type === 'info') {
+    if (type === MESSAGE_TYPES.INFO) {
       console.log(`Binder. ${msg}`);
-    } else if (type === 'warn') {
+    } else if (type === MESSAGE_TYPES.WARN) {
       console.warn(`Binder. ${msg}`);
-    } else if (type === 'error') {
+    } else if (type === MESSAGE_TYPES.ERROR) {
       console.error(`Binder. ${msg}`);
     }
   }
@@ -456,13 +462,14 @@ class Binder {
         each(importData[from.bindAs], (toVarName, fromVarName) => {
           if (!(fromVarName in from.store)) {
             this.showMessage(`Variable "${fromVarName}" required for "${to.bindAs}" 
-            not found in "${from.bindAs}"`, 'warn');
+            not found in "${from.bindAs}"`, MESSAGE_TYPES.WARN);
             return;
           }
 
           if (toVarName in to.store) {
             this.showMessage(`Trying create link from "${from.bindAs}.${fromVarName}" 
-            to "${to.bindAs}.${toVarName}", but variable "${toVarName}" is already exist in "${to.bindAs}"`, 'warn');
+            to "${to.bindAs}.${toVarName}", but variable "${toVarName}" is already exist in "${to.bindAs}"`,
+            MESSAGE_TYPES.WARN);
             return;
           }
 
@@ -488,7 +495,7 @@ class Binder {
 
     services.forEach((serviceName) => {
       if (!this.isBind(serviceName)) {
-        this.showMessage(`Impossible add disposer for not bind service "${bindAs}".`, 'warn');
+        this.showMessage(`Impossible add disposer for not bind service "${bindAs}".`, MESSAGE_TYPES.WARN);
         pass = false;
       }
     });
