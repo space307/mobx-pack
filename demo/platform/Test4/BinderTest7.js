@@ -64,8 +64,7 @@ class Test5 {
   static config = {
     bindAs: t5,
     onBind: [
-      [t1, t6, 'someMethod'],
-
+      [t1, 'someMethod'],
     ],
   };
   someMethod(){}
@@ -73,9 +72,16 @@ class Test5 {
 class Test6 {
   static config = {
     bindAs: t6,
+    onBind: [
+      [t1, 'someMethod'],
+      [t4, t1, t3, t2, 'someMethod'],
+    ],
   };
+
   someMethod(){}
 }
+
+/*
 binder.emitter.subscribe('CALLBACK_CALLED', ({ bindAs, callbackType, callback, storeList })=>{
   console.log([bindAs, callbackType, storeList.join(','), 1]);
 });
@@ -89,6 +95,7 @@ binder.emitter.subscribe('UNBIND', (data)=>{
 binderLocal.emitter.subscribe('UNBIND', (data)=>{
   console.log(['UNBIND', data, 2]);
 });
+*/
 
 
 
@@ -98,20 +105,29 @@ binderLocal.bind(new Test4(), Test4.config);
 binder.bind(new Test2(), Test2.config);
 binder.unbind(t1);
 binder.bind(new Test1(), Test1.config);
-/*
-binder.bind(new Test5(), Test5.config);*/
+binder.bind(new Test5(), Test5.config);
+binderLocal.bind(new Test6(), Test6.config);
+console.log(['!!!!']);
+binderLocal.unbind(t4);
+binder.unbind(t1);
+binderLocal.bind(new Test4(), Test4.config);
+binder.bind(new Test1(), Test1.config);
+console.log(['!!!!!!!!!!!!']);
+binderLocal.unbind(t4);
+binder.unbind(t2);
+binder.bind(new Test2(), Test2.config);
+binderLocal.bind(new Test4(), Test4.config);
+console.log(['@@@@@@@']);
 
-
-//binder.unbind(t4);
-//binder.bind(new Test4(), Test4.config);
-
-//binder.unbind(t3);
-/*binder.unbind(t4);
-binder.unbind(t5);*/
-
-
-
-
+binderLocal.unbind(t3);
+binderLocal.unbind(t4);
+binder.unbind(t2);
+binder.unbind(t1);
+console.log(['@@@@@@@!!!']);
+binder.bind(new Test1(), Test1.config);
+binderLocal.bind(new Test3(), Test3.config);
+binder.bind(new Test2(), Test2.config);
+binderLocal.bind(new Test4(), Test4.config);
 
 
 

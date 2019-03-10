@@ -51,6 +51,8 @@ class Binder {
 
   emitter:EventEmitter = new EventEmitter();
 
+  allowParentOperation = false;
+
   constructor(parentBinder) {
     if (parentBinder instanceof Binder) {
       this.parentBinder = parentBinder;
@@ -63,7 +65,9 @@ class Binder {
       });
 
       parentBinder.emitter.subscribe(EMITTER_EVENT.UNBIND, (bindAs) => {
+        this.allowParentOperation = true;
         this.unbind(bindAs);
+        this.allowParentOperation = false;
       });
     }
   }
@@ -80,7 +84,6 @@ class Binder {
       !this.validateCallback(options, CALLBACK_NAME.UNBIND)) {
       return;
     }
-
 
     if (this.isBind(bindAs)) {
       this.showMessage(`Store "${bindAs}" was already bind.`, 'error');
@@ -290,7 +293,7 @@ class Binder {
   }
 
   isBindOnParent(bindAs) {
-    return this.parentBinder && this.parentBinder.isBind(bindAs);
+    return !!(this.parentBinder && this.parentBinder.isBind(bindAs));
   }
 
   destructCallback(list) {
@@ -343,6 +346,11 @@ class Binder {
 
     if (!this.isBind(bindAs)) {
       this.showMessage(`Not bind store "${bindAs}" try to unbind!`, 'warn');
+      return;
+    }
+
+    if (this.isBindOnParent(bindAs) && !this.allowParentOperation) {
+      this.showMessage(`Try to unbind store "${bindAs}" from parent Binder.`, 'error');
       return;
     }
 
