@@ -158,11 +158,16 @@ class Binder {
 
   handleOnBind(bindAs) {
     const settings = this.getStoreSettings(bindAs);
-    const callbackSetList = settings.options && settings.options[CALLBACK_NAME.BIND];
+    const onBindCallbackSetList = settings.options && settings.options[CALLBACK_NAME.BIND];
+    const onUnbindCallbackSetList = settings.options && settings.options[CALLBACK_NAME.UNBIND];
     this.handleOnBindItem(bindAs);
+    this.handleOnUnbindItem(bindAs);
 
-    this.lookOverCallback(callbackSetList, (serviceName) => {
+    this.lookOverCallback(onBindCallbackSetList, (serviceName) => {
       this.handleOnBindItem(serviceName);
+    });
+    this.lookOverCallback(onUnbindCallbackSetList, (serviceName) => {
+      this.handleOnUnbindItem(serviceName);
     });
   }
 
@@ -191,7 +196,9 @@ class Binder {
         this.applyCallback(depBindAs, callbackSet, storeList, callback, store, CALLBACK_NAME.BIND);
       }
     });
+  }
 
+  handleOnUnbindItem(bindAs) {
     this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND, (depBindAs, callbackSet) => {
       const {
         storeList,
@@ -204,6 +211,7 @@ class Binder {
     });
   }
 
+
   handleOnUnbind(bindAs) {
     this.lookOverDeps(bindAs, CALLBACK_NAME.BIND, (depBindAs, callbackSet) => {
       const {
@@ -215,6 +223,7 @@ class Binder {
         delete callbackSet.__locked;
       }
     });
+
 
     this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND, (depBindAs, callbackSet, store) => {
       const {
