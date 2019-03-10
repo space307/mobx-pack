@@ -84,19 +84,18 @@ binderLocal.emitter.subscribe('CALLBACK_CALLED', ({ bindAs, callbackType, callba
 });
 
 binder.emitter.subscribe('UNBIND', (data)=>{
-  //console.log(['UNBIND', data, 1]);
+  console.log(['UNBIND', data, 1]);
 });
 binderLocal.emitter.subscribe('UNBIND', (data)=>{
-  //console.log(['UNBIND', data, 2]);
+  console.log(['UNBIND', data, 2]);
 });
-binder.bind(new Test1(), Test1.config);
 
+
+
+binder.bind(new Test1(), Test1.config);
 binderLocal.bind(new Test3(), Test3.config);
 binderLocal.bind(new Test4(), Test4.config);
 binder.bind(new Test2(), Test2.config);
-
-console.log([1212121]);
-
 binder.unbind(t1);
 binder.bind(new Test1(), Test1.config);
 /*
