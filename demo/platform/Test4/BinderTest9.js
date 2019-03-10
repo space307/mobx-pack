@@ -27,8 +27,13 @@ const t6 = 't6';
 class Test1 {
   static config = {
     bindAs: t1,
+    onBind: [
+      [t2, t3, 'someMethod'],
+      [t3, 'someMethod'],
+    ],
     onUnbind: [
       [t2, 'someMethod'],
+      [t2, t3, 'someMethod'],
     ],
   };
 
@@ -38,8 +43,11 @@ class Test1 {
 class Test2 {
   static config = {
     bindAs: t2,
+    onBind: [
+      [t1, t3, 'someMethod'],
+    ],
     onUnbind: [
-      [t1, t5, 'someMethod'],
+      [t1, t3, 'someMethod'],
     ],
   };
   someMethod(){}
@@ -47,13 +55,15 @@ class Test2 {
 class Test3 {
   static config = {
     bindAs: t3,
+    onBind: [
+      [t2, 'someMethod'],
+    ],
     onUnbind: [
-      [t1, t2, t4, 'someMethod'],
+      [t2, t1,'someMethod'],
+      [t1, 'someMethod'],
     ],
   };
-  someMethod(){
-    console.log(['someMethod']);
-  }
+  someMethod(){}
 
 }
 class Test4 {
@@ -65,8 +75,13 @@ class Test4 {
 class Test5 {
   static config = {
     bindAs: t5,
+    onBind: [
+      [t3, 'someMethod'],
+      [t4, t2, 'someMethod'],
+      [t1, t2, 'someMethod'],
+    ],
     onUnbind: [
-      [t1, 'someMethod'],
+      [t1, t4, 'someMethod'],
     ],
   };
   someMethod(){}
@@ -74,6 +89,9 @@ class Test5 {
 class Test6 {
   static config = {
     bindAs: t6,
+    onBind: [
+      [t4, t1, 'someMethod'],
+    ],
     onUnbind: [
       [t1, 'someMethod'],
       [t4, t1, t3, t2, 'someMethod'],
@@ -112,35 +130,63 @@ binderLocal.emitter.subscribe('CALLBACK_CALLED', ({ bindAs, callbackType, callba
 });
 
 binder.emitter.subscribe('UNBIND', (data)=>{
-  console.log(['UNBIND', data, 1]);
+// console.log(['UNBIND', data, 1]);
 });
 /*binderLocal.emitter.subscribe('UNBIND', (data)=>{
   console.log(['UNBIND', data, 2]);
 });*/
 
+// 1(2, 3/ 3)-(2 / 2, 3)
+// 2(1,3)-(1,3)
+// 3(2)-(2,1 / 1)
+
 
 g(1);
 g(2);
-_g(1);
 _g(2);
+g(3);
 g(2);
-g(5);
-g(1);
-_g(5);
 _g(1);
+_g(3);
+g(3);
+_g(3);
 g(1);
-l(4);
-
-l(3);
-console.log(['!!!!!!']);
-_l(4);
-l(4);
-
-_g(1);
-_l(4);
+g(3);
+_g(3);
 _g(2);
-
-
+_g(1);
+g(3);
+g(2);
+g(1);
+_g(1);
+_g(2);
+console.log([11111]);
+l(4);
+l(5);
+l(6);
+g(1);
+g(2);
+console.log([22222]);
+_l(4);
+_g(1);
+g(1);
+_g(3);
+_g(1);
+_g(2);
+console.log([333333]);
+g(2);
+l(4);
+_g(2);
+_l(4);
+l(4);
+g(3);
+g(1);
+g(2);
+console.log([242343]);
+_l(4);
+_g(3);
+_g(1);
+_g(2);
 /*binder.bind(new Test1(), Test1.config);
 binder.bind(new Test2(), Test2.config);
 binder.unbind(t1);
