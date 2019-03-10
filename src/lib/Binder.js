@@ -18,9 +18,6 @@ unbind:
  - проверить чтобы среди депсов не было стора
  - проверить чтобы среди депсов не было стора
 
- TODO
-- проверка на parentBinder
-- проверка когда часть сервисов из колбеков не стартовала
  */
 
 
@@ -38,10 +35,6 @@ const CALLBACK_NAME = {
 
 class Binder {
   stores = {};
-  callbackResolvers = {
-    [CALLBACK_NAME.BIND]: {},
-    [CALLBACK_NAME.UNBIND]: {},
-  };
 
   depsList = {
     [CALLBACK_NAME.BIND]: {},
@@ -106,7 +99,6 @@ class Binder {
     /* --/ Legacy -- */
 
 
-    this.resolveCallbackPromises(bindAs, CALLBACK_NAME.BIND);
     this.saveDeps(bindAs, CALLBACK_NAME.BIND);
     this.saveDeps(bindAs, CALLBACK_NAME.UNBIND);
 
@@ -194,8 +186,25 @@ class Binder {
 
       if (!callbackSet.__locked && this.isListBind(storeList)) {
         this.applyCallback(depBindAs, callbackSet, storeList, callback, store, CALLBACK_NAME.BIND);
+      } else {
+        this.checkCallBackResolved(depBindAs, callbackSet, storeList);
       }
     });
+  }
+  checkCallBackResolved(bindAs, callbackSet, storeList) {
+    if (callbackSet.__resolveTM) {
+      clearTimeout(callbackSet.__resolveTM);
+    }
+    callbackSet.__resolveTM = setTimeout(() => {
+      const notBind = this.getNotBind(storeList);
+      const cbName = callbackSet[callbackSet.length - 1];
+
+      if (notBind.length && notBind.length < storeList.length) {
+        this.showMessage(`"${bindAs}.${typeof cbName === 'string' ? cbName : CALLBACK_NAME.BIND}" 
+        not called, because "${notBind.join(',')}" still not resolved.`, 'warn');
+      }
+      delete callbackSet.__resolveTM;
+    }, 1000);
   }
 
   handleOnUnbindItem(bindAs) {
@@ -290,7 +299,15 @@ class Binder {
       return acc;
     }, true);
   }
-
+  getNotBind(list) {
+    return list.reduce((acc, bindAs) => {
+      if (!this.isBind(bindAs)) {
+        // eslint-disable-next-line no-param-reassign
+        acc.push(bindAs);
+      }
+      return acc;
+    }, []);
+  }
   isListUnBind(list) {
     return list.reduce((acc, bindAs) => {
       if (this.isBind(bindAs)) {
@@ -392,9 +409,6 @@ class Binder {
     this.unbindDisposers(bindAs);
     /* --/ Legacy -- */
 
-    this.resolveCallbackPromises(bindAs, CALLBACK_NAME.UNBIND);
-
-
     // clear store settings in binder
     this.stores[bindAs] = undefined;
 
@@ -409,23 +423,6 @@ class Binder {
     return this.getStoreSettings(bindAs).store;
   }
 
-  resolveCallbackPromises(bindAs, callbackType) {
-    if (!this.isBind(bindAs)) {
-      return;
-    }
-
-    const resolvers = this.callbackResolvers[callbackType];
-    const resolversList = resolvers[bindAs];
-
-    if (resolversList) {
-      resolversList.forEach((resolve) => {
-        resolve(this.getStore(bindAs));
-      });
-
-      resolvers[bindAs] = [];
-    }
-  }
-
   isDebug(bindAs) {
     const s = this.getStoreSettings(bindAs);
     return s && s.options ? s.options.debug : false;
@@ -433,10 +430,6 @@ class Binder {
 
   clear() {
     this.stores = {};
-    this.callbackResolvers = {
-      [CALLBACK_NAME.BIND]: {},
-      [CALLBACK_NAME.UNBIND]: {},
-    };
     this.depsList = {
       [CALLBACK_NAME.BIND]: {},
       [CALLBACK_NAME.UNBIND]: {},
