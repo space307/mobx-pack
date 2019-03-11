@@ -17,6 +17,7 @@
   "dependencies": {
     "@babel/runtime": "^7.2.0",
     "events": "^3.0.0",
+    "jest": "^24.3.1",
     "lodash": "4.x",
     "mobx": "4.x",
     "mobx-react": "5.x",
@@ -50,6 +51,7 @@
     "@babel/preset-flow": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
     "babel-eslint": "^9.0.0",
+    "babel-jest": "^24.3.1",
     "eslint": "^4.6.1",
     "eslint-config-airbnb": "^15.1.0",
     "eslint-config-prettier": "^3.1.0",
@@ -59,7 +61,10 @@
     "eslint-plugin-prettier": "^3.0.0",
     "eslint-plugin-react": "^7.2.1",
     "flow-bin": "0.90.0",
-    "flow-typed": "^2.4.0"
+    "flow-typed": "^2.4.0",
+    "jasmine": "^3.3.1",
+    "jest": "^24.3.1",
+    "jest-simple-dot-reporter": "^1.0.3"
   },
   "babel": {
     "presets": [
@@ -100,5 +105,21 @@
       "@babel/plugin-proposal-do-expressions",
       "@babel/plugin-transform-runtime"
     ]
+  },
+  "jest": {
+    "modulePaths": [
+      "src/lib"
+    ],
+    "modulePathIgnorePatterns": [
+      "src/demo"
+    ],
+    "roots": [
+      "src"
+    ],
+    "reporters": [
+      "jest-simple-dot-reporter"
+    ],
+
+    "testRegex": "(\\.(test|spec)).(js|jsx|json|node)$"
   }
 }

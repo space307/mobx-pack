@@ -37,8 +37,13 @@ class Test1 {
     ],
   };
 
-   someMethod1(){}
-   someMethod2(){}
+   someMethod1(...arg){
+     console.log(['someMethod1', arg]);
+
+   }
+  someMethod2(...arg){
+    console.log(['someMethod2', arg]);
+   }
 }
 
 class Test2 {

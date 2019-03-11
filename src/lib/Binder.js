@@ -4,22 +4,22 @@ import { toJS } from 'mobx';
 import { protoName } from './helper/util';
 import EventEmitter from './helper/EventEmitter.js';
 
-
 /*
+Аглоритм работы биндера
 bind:
 - сохраняем deps [dependency] : [waiter]
-- проходим по колбекам onBind - если колбек не locked и все сервисы isBind выполняем onBind и ставим locked на onBind
-- проходим по колбекам onUnbind (изначально locked) -  если все сервисы в колбеке isBind - делаем колбек unlocked
+- проходим по всем зависимостям onBind и выполняем их (зависимости других сервисов от текущего,
+  а также из списка зависимости текущего сервиса).
+  Если колбек не locked и все сервисы isBind выполняем onBind и ставим locked на onBind.
+- проходим по всем зависимостям onUnbind и выполняем их (зависимости других сервисов от текущего,
+  а также из списка зависимости текущего сервиса).
+  Если колбек не locked и все сервисы isBind выполняем onBind и ставим locked на onBind.
+  Если все сервисы в колбеке isBind - делаем колбек unlocked.
 
 unbind:
  - проходим по колбекам onBind если !isBind на всех сервисах и onBind.locked === true ставим onBind.locked = true
  - проходим по колбекам onUnbind если onUnbind.locked === true выполняем onUnbind и ставим onUnbind.locked = false
-
- - проверить чтобы среди депсов не было стора
- - проверить чтобы среди депсов не было стора
-
  */
-
 
 const EMITTER_EVENT = {
   BIND: 'BIND',
@@ -72,63 +72,50 @@ class Binder {
   }
 
   bind(store, options) {
-    const { bindAs } = options;
+    try {
+      const { bindAs } = options;
 
-    if (typeof bindAs !== 'string' || !bindAs.length) {
-      this.showMessage(`Store "${protoName(store)}" has not valid "bindAs" id "${bindAs}".`, MESSAGE_TYPES.ERROR);
-      return;
-    }
-
-    if (!this.validateCallback(options, CALLBACK_NAME.BIND) ||
-      !this.validateCallback(options, CALLBACK_NAME.UNBIND)) {
-      return;
-    }
-
-    if (this.isBind(bindAs)) {
-      this.showMessage(`Store "${bindAs}" was already bind.`, MESSAGE_TYPES.ERROR);
-      return;
-    }
-
-    this.addStore(store, options);
-
-    if (this.isDebug(bindAs)) {
-      this.showMessage(`"${bindAs}" bind.`);
-    }
-
-    /* -- Legacy -- */
-    each(this.stores, (item) => {
-      if (item) {
-        this.processStore(item, this.getStoreSettings(bindAs));
-        this.processStore(this.getStoreSettings(bindAs), item);
+      if (typeof bindAs !== 'string' || !bindAs.length) {
+        throw new Error(`Store "${protoName(store)}" has not valid "bindAs" id "${bindAs}".`);
       }
-    });
-    /* --/ Legacy -- */
 
+      this.validateCallback(options, CALLBACK_NAME.BIND);
+      this.validateCallback(options, CALLBACK_NAME.UNBIND);
 
-    this.saveDeps(bindAs, CALLBACK_NAME.BIND);
-    this.saveDeps(bindAs, CALLBACK_NAME.UNBIND);
+      if (this.isBind(bindAs)) {
+        throw new Error(`Store "${bindAs}" was already bind.`);
+      }
 
-    this.handleOnBind(bindAs);
+      if (typeof store !== 'object') {
+        throw new Error(`Store bind param is not an object ("${bindAs}").`);
+      }
 
-    this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
-  }
+      this.addStore(store, options);
 
-  validateCallback(options, callbackName) {
-    const { bindAs } = options;
+      if (this.isDebug(bindAs)) {
+        this.showMessage(`"${bindAs}" bind.`);
+      }
 
-    const list = options[callbackName];
-    let result = true;
-
-    if (list) {
-      this.lookOverCallback(list, (serviceName) => {
-        if (bindAs === serviceName) {
-          this.showMessage(`Store "${bindAs}" ${callbackName} callback contains 
-          the same name as store name "${bindAs}"`, MESSAGE_TYPES.ERROR);
-          result = false;
+      /* -- Legacy -- */
+      each(this.stores, (item) => {
+        if (item) {
+          this.processStore(item, this.getStoreSettings(bindAs));
+          this.processStore(this.getStoreSettings(bindAs), item);
         }
       });
+      /* --/ Legacy -- */
+
+      // сохраняем OnBind зависимости текущего сервиса
+      this.saveDeps(bindAs, CALLBACK_NAME.BIND);
+      // сохраняем OnUnbind зависимости текущего сервиса
+      this.saveDeps(bindAs, CALLBACK_NAME.UNBIND);
+      // проверяем и выполняем зависимости на событие OnBind
+      this.handleOnBind(bindAs);
+
+      this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
+    } catch (err) {
+      this.showMessage(err, MESSAGE_TYPES.ERROR);
     }
-    return result;
   }
 
   addStore(store, options) {
@@ -158,12 +145,15 @@ class Binder {
     const settings = this.getStoreSettings(bindAs);
     const onBindCallbackSetList = settings.options && settings.options[CALLBACK_NAME.BIND];
     const onUnbindCallbackSetList = settings.options && settings.options[CALLBACK_NAME.UNBIND];
+    // проверяем и выполняем OnBind зависимости других сервисов от текущего сервиса
     this.handleOnBindItem(bindAs);
+    // проверяем и выполняем OnUnbind зависимости других сервисов от текущего сервиса
     this.handleOnUnbindItem(bindAs);
-
+    // проверяем и выполняем OnBind зависимости из списка зависимостей текущего сервиса
     this.lookOverCallback(onBindCallbackSetList, (serviceName) => {
       this.handleOnBindItem(serviceName);
     });
+    // проверяем и выполняем OnUnbind зависимости из списка зависимостей текущего сервиса
     this.lookOverCallback(onUnbindCallbackSetList, (serviceName) => {
       this.handleOnUnbindItem(serviceName);
     });
@@ -226,7 +216,6 @@ class Binder {
     });
   }
 
-
   handleOnUnbind(bindAs) {
     this.lookOverDeps(bindAs, CALLBACK_NAME.BIND, (depBindAs, callbackSet) => {
       const {
@@ -238,7 +227,6 @@ class Binder {
         delete callbackSet.__locked;
       }
     });
-
 
     this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND, (depBindAs, callbackSet, store) => {
       const {
@@ -256,13 +244,25 @@ class Binder {
     const funcToCall = this.parseCallback(callback, store);
 
     if (funcToCall) {
-      funcToCall.apply(store, storeList);
+      funcToCall.apply(store, callbackType === CALLBACK_NAME.BIND ? this.getStoreList(storeList) : []);
+
+
       // eslint-disable-next-line no-param-reassign
       callbackSet.__locked = true;
       this.emitter.emit(EMITTER_EVENT.CALLBACK_CALLED, { bindAs, callbackType, callback, storeList });
     } else {
       this.showMessage(`${callbackType} method ${callback} not found in "${bindAs}".`, MESSAGE_TYPES.ERROR);
     }
+  }
+
+  getStoreList(storeList) {
+    return storeList.reduce((acc, bindAs) => {
+      const store = this.getStore(bindAs);
+      if (store) {
+        acc.push(store);
+      }
+      return acc;
+    }, []);
   }
 
   lookOverDeps(bindAs, callbackType, cb) {
@@ -285,6 +285,24 @@ class Binder {
     }
   }
 
+  validateCallback(options, callbackName) {
+    const { bindAs } = options;
+
+    const list = options[callbackName];
+    if (list && list.length) {
+      if (!Array.isArray(list[0])) {
+        throw new Error(`Store "${bindAs}" ${callbackName} should contains 
+        Array on callback data"`);
+      } else {
+        this.lookOverCallback(list, (serviceName) => {
+          if (bindAs === serviceName) {
+            throw new Error(`Store "${bindAs}" ${callbackName} callback contains 
+          the same name as store name "${bindAs}"`);
+          }
+        });
+      }
+    }
+  }
 
   parseCallback(callback, store) {
     if (typeof callback === 'function') {
@@ -295,7 +313,6 @@ class Binder {
     return null;
   }
 
-
   isListBind(list) {
     return list.reduce((acc, bindAs) => {
       if (!this.isBind(bindAs)) {
@@ -305,6 +322,7 @@ class Binder {
       return acc;
     }, true);
   }
+
   getNotBind(list) {
     return list.reduce((acc, bindAs) => {
       if (!this.isBind(bindAs)) {
@@ -314,6 +332,7 @@ class Binder {
       return acc;
     }, []);
   }
+
   isListUnBind(list) {
     return list.reduce((acc, bindAs) => {
       if (this.isBind(bindAs)) {
@@ -338,7 +357,6 @@ class Binder {
       callback,
     };
   }
-
 
   isBind(bindAs) {
     return !!(this.stores[bindAs] && this.stores[bindAs].store);
@@ -421,6 +439,7 @@ class Binder {
     if (this.isDebug(bindAs)) {
       this.showMessage(`"${bindAs}" unbind.`);
     }
+    // проверяем и выполняем зависимости на событие OnUnbind
     this.handleOnUnbind(bindAs);
     this.emitter.emit(EMITTER_EVENT.UNBIND, bindAs);
   }
@@ -538,16 +557,6 @@ class Binder {
     });
   }
 
-  /**
-   * Отдаёт значение переменной из стора, привязанного к биндеру
-   * @public
-   * @param {string} storeName
-   * @param {string} varName
-   * @param {string} initiator
-   * @param {boolean} raw
-   * @returns {mixed}
-   */
-
   importVar(storeName, varName, initiator, raw) {
     const s = this.getStoreSettings(storeName);
     const store = s && s.store ? s.store : null;
@@ -575,14 +584,6 @@ class Binder {
     return undefined; // eslint-disable-line
   }
 
-  /**
-   * Вызвает метод описанный в api стора с параметрами
-   * @public
-   * @param {string} storeName
-   * @param {string} actionName
-   * @param {string} initiator
-   * @param {array} arg
-   */
   callApi(storeName, actionName, initiator, ...arg) {
     if (process.env.NODE_ENV === 'test') {
       return;

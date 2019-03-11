@@ -57,7 +57,7 @@ const GarageContainer = Provider(
         counter: garageStore.counter,
       };
     },
-    services: props => [TimeService, [GarageStore, [props.bla]]],
+    services: ( { color }) => [TimeService, [GarageStore, [color]]],
     // services: [TimeService, GarageStore],
     stop: true,
     stub: Loader,
