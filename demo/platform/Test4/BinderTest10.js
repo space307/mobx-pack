@@ -32,8 +32,8 @@ class Test1 {
       [t3, t2, 'someMethod2'],
     ],
     onUnbind: [
-      [t2, 'someMethod'],
-      [t2, t3, 'someMethod'],
+      [t2, 'someMethod1'],
+      [t2, t3, 'someMethod2'],
     ],
   };
 
@@ -41,8 +41,8 @@ class Test1 {
      console.log(['someMethod1', arg]);
 
    }
-  someMethod2(...arg){
-    console.log(['someMethod2', arg]);
+  someMethod2(a){
+    console.log(['someMethod2', a]);
    }
 }
 
@@ -148,10 +148,12 @@ binder.emitter.subscribe('UNBIND', (data)=>{
 
 
 g(1);
-g(2);
+/*g(2);
 g(3);
 
-
+console.log([21212]);
+_g(2);
+_g(3);*/
 
 setTimeout(()=>{
   console.log(['binder', binder]);

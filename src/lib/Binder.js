@@ -246,7 +246,6 @@ class Binder {
     if (funcToCall) {
       funcToCall.apply(store, callbackType === CALLBACK_NAME.BIND ? this.getStoreList(storeList) : []);
 
-
       // eslint-disable-next-line no-param-reassign
       callbackSet.__locked = true;
       this.emitter.emit(EMITTER_EVENT.CALLBACK_CALLED, { bindAs, callbackType, callback, storeList });
@@ -300,6 +299,13 @@ class Binder {
           the same name as store name "${bindAs}"`);
           }
         });
+
+        list.forEach((callback) => {
+          if (callback.length < 2) {
+            throw new Error(`Store "${bindAs}" ${callbackName} should contains 
+        Array this at least 2 items, but ${callback.length} given [${callback.join(',')}]."`);
+          }
+        });
       }
     }
   }
@@ -326,7 +332,6 @@ class Binder {
   getNotBind(list) {
     return list.reduce((acc, bindAs) => {
       if (!this.isBind(bindAs)) {
-        // eslint-disable-next-line no-param-reassign
         acc.push(bindAs);
       }
       return acc;
@@ -463,6 +468,10 @@ class Binder {
   }
 
   showMessage(msg, type = 'info') {
+    if (process.env.NODE_ENV === 'test') {
+      return;
+    }
+
     if (type === MESSAGE_TYPES.INFO) {
       console.log(`Binder. ${msg}`);
     } else if (type === MESSAGE_TYPES.WARN) {
