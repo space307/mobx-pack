@@ -4,7 +4,7 @@ import { Binder } from 'sources.js';
 
 
 const binder = new Binder();
-const binderLocal = new Binder(binder);
+//const binderLocal = new Binder(binder);
 
 const s1 = 's1';
 const s2 = 's2';
@@ -19,21 +19,48 @@ function createConfig(bindAs, onBind, onUnbind) {
   if (onBind) {
     config.onBind = onBind;
   }
-  if (onBind) {
+  if (onUnbind) {
     config.onUnbind = onUnbind;
   }
 
   return config;
 }
 
-const store1 = { onBindS1_23(a, b){
-  console.log(['onBindS1_23', a, b]);
-  }, onBindS1_3(){
-    console.log(['onBindS1_3']);
-  } };
-const store2 = { onBindS2_13(){}, onBindS2_1(){} };
-const store3 = { onBindS3_23(){}, onBindS3_3(){} };
+function createStore() {
+  return {
+    onBind1(...arg){
+      console.log([this, 'onBind1', arg]);
+    },
+    onBind2(...arg){
+      console.log([this, 'onBind2', arg]);
+    },
+    onUnbind1(...arg){
+      console.log([this, 'onUnbind1', arg]);
+    },
+    onUnbind2(...arg){
+      console.log([this, 'onUnbind2', arg]);
+    },
+  };
+}
 
-binder.bind(store1, createConfig(s1, [[s2, s3, 'onBindS1_23'], [s3, 'onBindS1_3']]));
+
+
+const store1 = createStore();
+const store2 = createStore();
+const store3 = createStore();
+
+
+/*
+binder.bind(store1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
+binder.bind(store2, createConfig(s2, null, [[s1, s3, 'onUnbind1'], [s1, 'onUnbind2']]));
+binder.bind(store3, createConfig(s3, null, [[s2, s1, 'onUnbind1'], [s2, 'onUnbind2']]));
+ */
+binder.bind(store1, createConfig(s1, null, [[s2, s3, 'onUnbind1']]));
 binder.bind(store2, createConfig(s2));
 binder.bind(store3, createConfig(s3));
+
+binder.unbind(s2);
+binder.unbind(s3);
+
+
+console.log(['binder', binder, store1]);

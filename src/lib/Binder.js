@@ -72,50 +72,51 @@ class Binder {
   }
 
   bind(store, options) {
-    try {
-      const { bindAs } = options;
-
-      if (typeof bindAs !== 'string' || !bindAs.length) {
-        throw new Error(`Store "${protoName(store)}" has not valid "bindAs" id "${bindAs}".`);
-      }
-
-      this.validateCallback(options, CALLBACK_NAME.BIND);
-      this.validateCallback(options, CALLBACK_NAME.UNBIND);
-
-      if (this.isBind(bindAs)) {
-        throw new Error(`Store "${bindAs}" was already bind.`);
-      }
-
-      if (typeof store !== 'object') {
-        throw new Error(`Store bind param is not an object ("${bindAs}").`);
-      }
-
-      this.addStore(store, options);
-
-      if (this.isDebug(bindAs)) {
-        this.showMessage(`"${bindAs}" bind.`);
-      }
-
-      /* -- Legacy -- */
-      each(this.stores, (item) => {
-        if (item) {
-          this.processStore(item, this.getStoreSettings(bindAs));
-          this.processStore(this.getStoreSettings(bindAs), item);
-        }
-      });
-      /* --/ Legacy -- */
-
-      // сохраняем OnBind зависимости текущего сервиса
-      this.saveDeps(bindAs, CALLBACK_NAME.BIND);
-      // сохраняем OnUnbind зависимости текущего сервиса
-      this.saveDeps(bindAs, CALLBACK_NAME.UNBIND);
-      // проверяем и выполняем зависимости на событие OnBind
-      this.handleOnBind(bindAs);
-
-      this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
-    } catch (err) {
-      this.showMessage(err, MESSAGE_TYPES.ERROR);
+    if (!options) {
+      throw new Error('Binder options is not valid');
     }
+
+    const { bindAs } = options;
+
+
+    if (typeof bindAs !== 'string' || !bindAs.length) {
+      throw new Error(`Store "${protoName(store)}" has not valid "bindAs" id "${bindAs}".`);
+    }
+
+    this.validateCallback(options, CALLBACK_NAME.BIND);
+    this.validateCallback(options, CALLBACK_NAME.UNBIND);
+
+    if (this.isBind(bindAs)) {
+      throw new Error(`Store "${bindAs}" was already bind.`);
+    }
+
+    if (typeof store !== 'object') {
+      throw new Error(`Store bind param is not an object ("${bindAs}").`);
+    }
+
+    this.addStore(store, options);
+
+    if (this.isDebug(bindAs)) {
+      this.showMessage(`"${bindAs}" bind.`);
+    }
+
+    /* -- Legacy -- */
+    each(this.stores, (item) => {
+      if (item) {
+        this.processStore(item, this.getStoreSettings(bindAs));
+        this.processStore(this.getStoreSettings(bindAs), item);
+      }
+    });
+    /* --/ Legacy -- */
+
+    // сохраняем OnBind зависимости текущего сервиса
+    this.saveDeps(bindAs, CALLBACK_NAME.BIND);
+    // сохраняем OnUnbind зависимости текущего сервиса
+    this.saveDeps(bindAs, CALLBACK_NAME.UNBIND);
+    // проверяем и выполняем зависимости на событие OnBind
+    this.handleOnBind(bindAs);
+
+    this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
   }
 
   addStore(store, options) {
@@ -250,7 +251,7 @@ class Binder {
       callbackSet.__locked = true;
       this.emitter.emit(EMITTER_EVENT.CALLBACK_CALLED, { bindAs, callbackType, callback, storeList });
     } else {
-      this.showMessage(`${callbackType} method ${callback} not found in "${bindAs}".`, MESSAGE_TYPES.ERROR);
+      throw new Error(`${callbackType} method ${callback} not found in "${bindAs}".`);
     }
   }
 
@@ -405,8 +406,7 @@ class Binder {
     }
 
     if (this.isBindOnParent(bindAs) && !this.allowParentOperation) {
-      this.showMessage(`Try to unbind store "${bindAs}" from parent Binder.`, MESSAGE_TYPES.ERROR);
-      return;
+      throw new Error(`Try to unbind store "${bindAs}" from parent Binder.`);
     }
 
     /* -- Legacy -- */
