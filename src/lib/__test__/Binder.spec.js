@@ -5,6 +5,7 @@ const s2 = 's2';
 const s3 = 's3';
 const s4 = 's4';
 
+
 function createConfig(bindAs, onBind, onUnbind) {
   const config = {
     bindAs,
@@ -19,7 +20,17 @@ function createConfig(bindAs, onBind, onUnbind) {
 
   return config;
 }
-describe('DealDurationPresetService', () => {
+
+function createStore() {
+  return {
+    onBind1: jest.fn(),
+    onBind2: jest.fn(),
+    onUnbind1: jest.fn(),
+    onUnbind2: jest.fn(),
+  };
+}
+
+describe('Binder test', () => {
   let binder;
   let localBinder;
 
@@ -27,61 +38,6 @@ describe('DealDurationPresetService', () => {
     binder = new Binder();
     localBinder = new Binder(binder);
   });
-
-
-  /*  const t1 = 't1';
-  const t2 = 't2';
-  const t3 = 't3';
-  const t4 = 't4';
-
-  class Test1 {
-    static config = {
-      bindAs: t1,
-      onBind: [
-        [t2, t3, 'someMethod1'],
-        [t3, t2, 'someMethod2'],
-      ],
-      onUnbind: [
-        [t2, 'someMethod'],
-        [t2, t3, 'someMethod'],
-      ],
-    };
-
-    someMethod1() {}
-    someMethod2() {}
-  }
-
-  class Test2 {
-    static config = {
-      bindAs: t2,
-      onBind: [
-        [t1, t3, 'someMethod'],
-      ],
-      onUnbind: [
-        [t1, t3, 'someMethod'],
-      ],
-    };
-    someMethod() {}
-  }
-  class Test3 {
-    static config = {
-      bindAs: t3,
-      onBind: [
-        [t2, 'someMethod'],
-      ],
-      onUnbind: [
-        [t2, t1, 'someMethod'],
-        [t1, 'someMethod'],
-      ],
-    };
-    someMethod() {}
-  }
-  class Test4 {
-    static config = {
-      bindAs: t4,
-    };
-    someMethod() {}
-  } */
 
 
   it('isBind', () => {
@@ -152,5 +108,67 @@ describe('DealDurationPresetService', () => {
   it('saveDeps', () => {
     binder.bind({ someMethod() {} }, createConfig(s1, [[s2, s3, 'someMethod']], [[s3, 'someMethod']]));
     expect(binder.depsList).toMatchSnapshot();
+  });
+
+  it('getStoreList', () => {
+    const store1 = {};
+    const store2 = {};
+    binder.bind(store1, createConfig(s1));
+    binder.bind(store2, createConfig(s2));
+    expect(binder.getStoreList([s1, s2])[0]).toBe(store1);
+    expect(binder.getStoreList([s1, s2])[1]).toBe(store2);
+  });
+
+
+  describe('onBindTest', () => {
+    function expectSimpleOnBindTest(store1, store2, store3) {
+      expect(store1.onBind1).toBeCalledWith(store2, store3);
+      expect(store1.onBind2).toBeCalledWith(store3);
+      expect(store2.onBind1).toBeCalledWith(store1, store3);
+      expect(store2.onBind2).toBeCalledWith(store1);
+      expect(store3.onBind1).toBeCalledWith(store2, store1);
+      expect(store3.onBind2).toBeCalledWith(store2);
+    }
+
+    it('simple onBind test', () => {
+      const store1 = createStore();
+      const store2 = createStore();
+      const store3 = createStore();
+
+      binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
+      binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
+      binder.bind(store3, createConfig(s3, [[s2, s1, 'onBind1'], [s2, 'onBind2']]));
+
+      expectSimpleOnBindTest(store1, store2, store3);
+    });
+
+    it('simple onBind test & different order', () => {
+      const store1 = createStore();
+      const store2 = createStore();
+      const store3 = createStore();
+
+      binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
+      binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
+      binder.bind(store3, createConfig(s3, [[s2, s1, 'onBind1'], [s2, 'onBind2']]));
+
+      expectSimpleOnBindTest(store1, store2, store3);
+    });
+
+    it('simple onBind test & unbind', () => {
+      const store1 = createStore();
+      const store2 = createStore();
+      const store3 = createStore();
+
+      binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
+      binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
+      binder.unbind(s1);
+      binder.bind(store3, createConfig(s3, [[s2, s1, 'onBind1'], [s2, 'onBind2']]));
+      binder.unbind(s2);
+      binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
+      binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
+
+      expectSimpleOnBindTest(store1, store2, store3);
+    });
+
   });
 });
