@@ -1,5 +1,5 @@
 // @flow
-import type { ServiceConnectorOptionsTypes } from 'src/lib/typing/ServiceConnectorTypes.js';
+import type { ServiceConnectorOptionsTypes } from 'src/lib/typing/serviceConnectorTypes.js';
 
 
 function startOk(service: *, options: ServiceConnectorOptionsTypes) {

@@ -9,12 +9,19 @@ export type GlobalContextType = {
 
 export type ServiceConfigBindAsType = string;
 
-export type ServiceConfigCallbackSetType = Array<Array<string>>;
+export type ServiceConfigCallbackSetType = Array<string>;
+
+export type InternalCallbackSetType = ServiceConfigCallbackSetType & {
+  __locked?: boolean,
+  __resolveTM?: TimeoutID
+}
 
 export type BinderConfigType = {
   bindAs: ServiceConfigBindAsType,
-  onBind?: ServiceConfigCallbackSetType,
-  onUnbind?: ServiceConfigCallbackSetType,
+  onBind?: Array<InternalCallbackSetType>,
+  onUnbind?: Array<InternalCallbackSetType>,
+  importData?: *,
+  debug?: boolean
 };
 
 export type ServiceConfigType = {
