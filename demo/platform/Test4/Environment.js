@@ -69,17 +69,17 @@ class GarageStore implements GarageStoreInterface {
     console.log(['onStop', SERVICE_NAMES.GARAGE_STORE]);
   }
 
-  @bindServices([SERVICE_NAMES.TIME_SERVICE])
+  @bindServices(SERVICE_NAMES.TIME_SERVICE)
   onBind(): void {
     console.log(['onBind', SERVICE_NAMES.GARAGE_STORE]);
   }
 
-  @bindServices([SERVICE_NAMES.CAR_STORE])
+  @bindServices(SERVICE_NAMES.CAR_STORE)
   onBindCar(): void {
     console.log(['onBindCar!!!!', SERVICE_NAMES.GARAGE_STORE]);
   }
 
-  @unbindServices([SERVICE_NAMES.CAR_STORE])
+  @unbindServices(SERVICE_NAMES.CAR_STORE)
   onUnbindCar(): void {
     console.log(['onUnbindCar', SERVICE_NAMES.GARAGE_STORE]);
   }
@@ -123,7 +123,7 @@ class CarStore implements CarStoreInterface {
     this.modelName = modelName;
   }
 
-  @bindServices([SERVICE_NAMES.GARAGE_STORE, SERVICE_NAMES.TIME_SERVICE])
+  @bindServices(SERVICE_NAMES.GARAGE_STORE, SERVICE_NAMES.TIME_SERVICE)
   onBind(): void {
     console.log(['onBind', SERVICE_NAMES.CAR_STORE]);
   }

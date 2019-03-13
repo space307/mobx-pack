@@ -69,7 +69,7 @@ export function bindAs(storeName: string): (store: StoreType) => StoreType {
 
 
 export function bindServices(
-  serviceNames: Array<string>,
+  ...serviceNames: Array<string>
 ): (store: StoreType, callbackName: string) => StoreType {
   return (store: StoreType, callbackName: string): StoreType => {
     putServiceNamesToConfig(serviceNames, store, callbackName, 'onBind');
@@ -78,7 +78,7 @@ export function bindServices(
 }
 
 export function unbindServices(
-  serviceNames: Array<string>,
+  ...serviceNames: Array<string>
 ): (store: StoreType, callbackName: string) => StoreType {
   return (store: StoreType, callbackName: string): StoreType => {
     putServiceNamesToConfig(serviceNames, store, callbackName, 'onUnbind');
@@ -101,19 +101,19 @@ export function onStop(store: StoreType, callbackName: string) {
 /* @bindAs('TestStore')
 class Test {
   @onStart
-  onStart() {
+   onStart() {
 
-  }
+   }
 
-  @bindServices(['ImportantService'])
+  @bindServices('ImportantService')
   onBind() {
 
   }
-  @bindServices(['ImportantService2'])
+  @bindServices('ImportantService2')
   onBindService2() {
 
   }
-  @unbindServices(['ImportantService2'])
+  @unbindServices('ImportantService2')
   onUnbind() {
 
   }
@@ -122,5 +122,5 @@ class Test {
   onStop() {
 
   }
-} */
+ } */
 

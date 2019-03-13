@@ -21,13 +21,13 @@ class CarStore {
   @onStart
   onStart(initialState) {}
 
-  @bindServices([SERVICE_NAMES.TIME_SERVICE, SERVICE_NAMES.GARAGE_STORE])
+  @bindServices(SERVICE_NAMES.TIME_SERVICE, SERVICE_NAMES.GARAGE_STORE)
   onBind(timeService, garageStore) {}
 
-  @bindServices([SERVICE_NAMES.GARAGE_STORE])
+  @bindServices(SERVICE_NAMES.GARAGE_STORE)
   onBindOnlyGarageStore(garageStore) {}
 
-  @unbindServices([SERVICE_NAMES.TIME_SERVICE, SERVICE_NAMES.GARAGE_STORE])
+  @unbindServices(SERVICE_NAMES.TIME_SERVICE, SERVICE_NAMES.GARAGE_STORE)
   onUnbind() {}
 
   @onStop
@@ -40,11 +40,11 @@ class GarageStore {
   @onStart
   onStart(initialState) {}
 
-  @bindServices([SERVICE_NAMES.TIME_SERVICE])
+  @bindServices(SERVICE_NAMES.TIME_SERVICE)
   onBind(timeService) {
 
   }
-  @unbindServices([SERVICE_NAMES.TIME_SERVICE])
+  @unbindServices(SERVICE_NAMES.TIME_SERVICE)
   onUnbind() {}
 
   @onStop
