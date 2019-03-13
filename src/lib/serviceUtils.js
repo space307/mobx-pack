@@ -29,9 +29,12 @@ export function startService(serviceStartConfig: ServiceStartConfigType, binder:
     : new Promise(
       (resolve: (data: StartServiceReturnType) => void, reject: (error: Error) => void): void => {
         const service = createService(proto, serviceStartConfig.protoAttrs);
+        const result = { service, started: true, serviceStartConfig };
 
         if (!service[onStartFunctionName]) {
-          reject(new Error(`OnStart method not found! (${proto.name})`));
+          binder.bind(service, config);
+          resolve(result);
+          return;
         }
 
         const onStartResult = service[onStartFunctionName](initialState);
@@ -41,7 +44,7 @@ export function startService(serviceStartConfig: ServiceStartConfigType, binder:
             .then(
               (): void => {
                 binder.bind(service, config);
-                resolve({ service, started: true, serviceStartConfig });
+                resolve(result);
               },
             )
             .catch(
@@ -51,7 +54,7 @@ export function startService(serviceStartConfig: ServiceStartConfigType, binder:
             );
         } else if (onStartResult === true) {
           binder.bind(service, config);
-          resolve({ service, started: true, serviceStartConfig });
+          resolve(result);
         } else {
           reject(new Error(`Service ${bindAs} onStart return "false"`));
         }

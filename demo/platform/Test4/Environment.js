@@ -109,16 +109,16 @@ class CarStore implements CarStoreInterface {
     }
   }
 
-  @onStart
-  onStart(initialService: *): boolean {
+/*  @onStart
+  onStart(initialServices: *): boolean {
     console.log(['onStart', SERVICE_NAMES.CAR_STORE, initialService]);
     return true;
-  }
-  @onStop
+  }*/
+/*  @onStop
   onStop(): boolean {
     console.log(['onStop', SERVICE_NAMES.CAR_STORE]);
     return true;
-  }
+  }*/
   setModelName(modelName: string): void {
     this.modelName = modelName;
   }
