@@ -54,6 +54,9 @@ function putMethodNameToConfig(store: StoreType, callbackName: string, optionNam
 
 
 export function bindAs(storeName: string): (store: StoreType) => StoreType {
+  if (typeof storeName === 'function') {
+    throw new Error(`Wrong attributes passed to bindAs decorator (service:${storeName.name}).`);
+  }
   return (store: StoreType): StoreType => {
     if (!validateName(storeName)) {
       throw new Error(`Wrong name "${storeName}" passed to bindAs decorator (service:${store.name}).`);
