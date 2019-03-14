@@ -4,17 +4,17 @@ import React from 'react';
 import { Binder } from 'sources.js';
 import type { GlobalContextType } from './typing/common';
 
-
 export default function CreateBinderProvider(BinderContext: React$Context<GlobalContextType>) {
-  return function BinderProvider(Component: React$ComponentType<*>, initialState: *): React$ComponentType<*> {
+  return function BinderProvider(Component: React$ComponentType<*>, initialState?: *): React$ComponentType<*> {
     class ComponentWrapper<PropType> extends
       React.Component<{context:GlobalContextType, props:PropType} > {
       newContext:GlobalContextType;
       constructor({ context }) {
         super();
+        const contextInitialState = context && context.initialState;
         this.newContext = {
           binder: new Binder(context && context.binder),
-          initialState,
+          initialState: initialState || contextInitialState,
         };
       }
       render() {

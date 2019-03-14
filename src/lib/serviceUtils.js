@@ -3,8 +3,7 @@
 import Binder from './Binder.js';
 import type { ServiceClassType, ServiceStartConfigType, StartServiceReturnType } from './typing/common.js';
 
-
-function createService(Service: ServiceClassType, protoAttrs?: ?Array<*>): * {
+export function createService(Service: ServiceClassType, protoAttrs?: ?Array<*>): * {
   if (protoAttrs && !Array.isArray(protoAttrs)) {
     throw new Error(`Wrong ServiceParams! (${Service.name})`);
   }

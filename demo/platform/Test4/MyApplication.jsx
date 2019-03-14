@@ -5,7 +5,7 @@ import { observer, Observer } from 'mobx-react';
 import { GarageStore, TimeService, CarStore, initialState } from './Environment.js';
 import { BinderContext, StoreContext, GlobalContext } from './ComponentContext.js';
 import { Provider, BinderProvider } from './Provider.jsx';
-
+import { Binder } from 'sources.js';
 
 
 
@@ -165,18 +165,29 @@ class MyApplication extends React.Component {
   }
 
   render() {
-    console.log(['MyApplication', this.context]);
+    //console.log(['MyApplication', this.context]);
 
     return (
       <div>
         <h1>My Application </h1>
+
+        <BinderContext.Consumer>{(data)=>{
+          console.log(['data', data]);
+          return <div></div>
+        }}</BinderContext.Consumer>
+
         <GarageContainer color={this.state.color} />
       </div>
     );
   }
 }
 
-export default BinderProvider(
-  Provider(MyApplication, { services: [TimeService] }),
-  initialState,
+const WithNewBinder = BinderProvider(
+  Provider(MyApplication, { services: [TimeService] })
 );
+export default ()=>(
+  <BinderContext.Provider value={{binder: new Binder(), initialState:{hello:1}}}>
+    <WithNewBinder />
+  </BinderContext.Provider>)
+
+

@@ -7,7 +7,9 @@
   "license": "MIT",
   "scripts": {
     "build": "babel src/lib/ --out-dir lib --copy-files",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test": "jest --verbose true",
+    "test:watch": "jest --verbose true --watch"
   },
   "repository": {
     "type": "git",
@@ -17,7 +19,6 @@
   "dependencies": {
     "@babel/runtime": "^7.2.0",
     "events": "^3.0.0",
-    "jest": "^24.3.1",
     "lodash": "4.x",
     "mobx": "4.x",
     "mobx-react": "5.x",
@@ -51,7 +52,7 @@
     "@babel/preset-flow": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
     "babel-eslint": "^9.0.0",
-    "babel-jest": "^24.3.1",
+    "babel-jest": "^24.5.0",
     "eslint": "^4.6.1",
     "eslint-config-airbnb": "^15.1.0",
     "eslint-config-prettier": "^3.1.0",
@@ -63,7 +64,7 @@
     "flow-bin": "0.90.0",
     "flow-typed": "^2.4.0",
     "jasmine": "^3.3.1",
-    "jest": "^24.3.1",
+    "jest": "^24.5.0",
     "jest-simple-dot-reporter": "^1.0.3"
   },
   "babel": {
@@ -108,7 +109,7 @@
   },
   "jest": {
     "modulePaths": [
-      "src/lib"
+      "src"
     ],
     "modulePathIgnorePatterns": [
       "src/demo"
@@ -119,7 +120,6 @@
     "reporters": [
       "jest-simple-dot-reporter"
     ],
-
     "testRegex": "(\\.(test|spec)).(js|jsx|json|node)$"
   }
 }

@@ -1,27 +1,18 @@
-import type {ServiceClassType} from "../typing/common";
+import { createService } from '../serviceUtils.js';
 
 
 describe('serviceUtils test', () => {
 
-//createService(Service: ServiceClassType, protoAttrs?: ?Array<*>)
-
-
   it('createService', () => {
-
-
-    class Test{
-      constructor(a, b){
-        ////this.a
-
+    class Test {
+      constructor(a, b) {
+        this.a = a;
+        this.b = b;
       }
-
-
-
     }
-
-    //expect(1).toBe(1);
-
-
+    const service = createService(Test, [1, 2]);
+    expect(service.a).toBe(1);
+    expect(service.b).toBe(2);
   });
 
 
