@@ -1,10 +1,24 @@
 // @flow
+
+import type { ServiceConfigType } from './typing/common.js';
+
 type StoreType = Class<*>;
-function validateName(name) {
-  return /^[A-Za-z][A-Za-z0-9_]+$/.test(name);
+
+
+function validateName(name: string): boolean {
+  return !!(name && typeof name === 'string' && /^[A-Za-z][A-Za-z0-9_]+$/.test(name));
+}
+function validateNameList(list: Array<string>): boolean {
+  return list.reduce((acc, item) => {
+    if (!validateName(item)) {
+      acc = false;
+    }
+    return acc;
+  }, true);
 }
 
-function createConfig() {
+
+function createConfig(): ServiceConfigType {
   return {
     onStart: '',
     onStop: '',
@@ -74,7 +88,13 @@ export function bindAs(storeName: string): (store: StoreType) => StoreType {
 export function bindServices(
   ...serviceNames: Array<string>
 ): (store: StoreType, callbackName: string) => StoreType {
+  if (!serviceNames.length || !validateNameList(serviceNames)) {
+    throw new Error(`Wrong attributes passed to bindServices decorator (${serviceNames.join(',')}).`);
+  }
+
   return (store: StoreType, callbackName: string): StoreType => {
+    // console.log([1, serviceNames, store, callbackName]);
+
     putServiceNamesToConfig(serviceNames, store, callbackName, 'onBind');
     return store;
   };
@@ -83,6 +103,9 @@ export function bindServices(
 export function unbindServices(
   ...serviceNames: Array<string>
 ): (store: StoreType, callbackName: string) => StoreType {
+  if (!serviceNames.length || !validateNameList(serviceNames)) {
+    throw new Error(`Wrong attributes passed to unbindServices decorator (${serviceNames.join(',')}).`);
+  }
   return (store: StoreType, callbackName: string): StoreType => {
     putServiceNamesToConfig(serviceNames, store, callbackName, 'onUnbind');
     return store;
