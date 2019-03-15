@@ -1,5 +1,5 @@
 import React from 'react';
-import '@babel/polyfill';
+//import '@babel/polyfill';
 import ReactDOM from 'react-dom';
 
 import priceService from 'demo/platform/services/PriceService/index.js';
@@ -10,7 +10,7 @@ import balanceService from 'demo/platform/services/BalanceService/index.js';
 import Platform from 'demo/platform/layouts/Platform/index.jsx';
 
 // import MyApplication from 'demo/platform/Test4/MyApplication.jsx';
-import MyApplication from 'demo/platform/Test4/MyApplicationOnStartTest.jsx';
+import MyApplication from 'demo/platform/Test4/MyApplicationEnzime.jsx';
 //import BinderTest2 from 'demo/platform/Test4/BinderTest/BinderTest12.js';
 
 import { isEmpty, each, cloneDeep } from 'lodash';

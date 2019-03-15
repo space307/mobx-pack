@@ -52,7 +52,7 @@ class GarageStore implements GarageStoreInterface {
   counter: number = 0;
 
   @onStart
-  onStart(initialService: *): boolean {
+  onStart(initialService: *): Promise<*> {
     console.log(['onStart', SERVICE_NAMES.GARAGE_STORE, initialService]);
 
     setInterval((): void => {
@@ -110,16 +110,17 @@ class CarStore implements CarStoreInterface {
     }
   }
 
-  /*  @onStart
-  onStart(initialServices: *): boolean {
+  @onStart
+  onStart(initialService: *): boolean {
     console.log(['onStart', SERVICE_NAMES.CAR_STORE, initialService]);
     return true;
-  } */
-  /*  @onStop
+  }
+
+  @onStop
   onStop(): boolean {
     console.log(['onStop', SERVICE_NAMES.CAR_STORE]);
     return true;
-  } */
+  }
   setModelName(modelName: string): void {
     this.modelName = modelName;
   }

@@ -1,7 +1,7 @@
 // @flow
 
 import React from 'react';
-import { Binder } from 'sources.js';
+import Binder from './Binder.js';
 import type { GlobalContextType } from './typing/common';
 
 export default function CreateBinderProvider(BinderContext: React$Context<GlobalContextType>) {
