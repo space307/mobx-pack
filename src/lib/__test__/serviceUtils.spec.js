@@ -1,7 +1,7 @@
 import '@babel/polyfill';
 import { createService, startService, startServices, stopService, stopServices } from '../serviceUtils.js';
 import Binder from '../Binder.js';
-import { onStart, bindAs, onStop } from '../ServiceDecorators.js';
+import { onStart, bindAs, onStop } from '../serviceDecorators.js';
 
 
 function getConfig(ServiceProto) {
