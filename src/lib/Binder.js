@@ -66,6 +66,9 @@ class Binder implements BinderInterface {
     [CALLBACK_NAME.BIND]: {},
     [CALLBACK_NAME.UNBIND]: {},
   };
+
+  pendingStartResolvers:{ [key: ServiceConfigBindAsType]: Promise<*> } = {};
+
   parentBinder: BinderInterface;
 
   emitter: EventEmitter = new EventEmitter();
@@ -441,6 +444,17 @@ class Binder implements BinderInterface {
           });
         });
       }
+    }
+  }
+
+  getPendingStartResolver(bindAs:ServiceConfigBindAsType): ?Promise<*> {
+    return this.pendingStartResolvers[bindAs];
+  }
+  setPendingStartResolver(bindAs:ServiceConfigBindAsType, resolver: ?Promise<*>): void{
+    if (resolver) {
+      this.pendingStartResolvers[bindAs] = resolver;
+    } else {
+      delete this.pendingStartResolvers[bindAs];
     }
   }
 

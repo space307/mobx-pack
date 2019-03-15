@@ -34,7 +34,7 @@ class TimeService implements TimeServiceInterface {
     return true;
   }
   @onStop
-  onStop(){
+  onStop() {
     console.log(['onStop', SERVICE_NAMES.TIME_SERVICE]);
   }
 }
@@ -51,9 +51,6 @@ class GarageStore implements GarageStoreInterface {
   @observable
   counter: number = 0;
 
-  constructor(color: string): void {
-    console.log(['constructor', SERVICE_NAMES.GARAGE_STORE, color]);
-  }
   @onStart
   onStart(initialService: *): boolean {
     console.log(['onStart', SERVICE_NAMES.GARAGE_STORE, initialService]);
@@ -62,10 +59,14 @@ class GarageStore implements GarageStoreInterface {
       this.counter += 1;
     }, 10000);
 
-    return true;
+    return new Promise(
+      (resolve) => {
+        setTimeout(() => resolve(), 2000);
+      },
+    );
   }
   @onStop
-  onStop(){
+  onStop() {
     console.log(['onStop', SERVICE_NAMES.GARAGE_STORE]);
   }
 
@@ -109,16 +110,16 @@ class CarStore implements CarStoreInterface {
     }
   }
 
-/*  @onStart
+  /*  @onStart
   onStart(initialServices: *): boolean {
     console.log(['onStart', SERVICE_NAMES.CAR_STORE, initialService]);
     return true;
-  }*/
-/*  @onStop
+  } */
+  /*  @onStop
   onStop(): boolean {
     console.log(['onStop', SERVICE_NAMES.CAR_STORE]);
     return true;
-  }*/
+  } */
   setModelName(modelName: string): void {
     this.modelName = modelName;
   }
@@ -129,7 +130,7 @@ class CarStore implements CarStoreInterface {
   }
 }
 
-console.log(['environment', CarStore, GarageStore, TimeService]);
+
 export { CarStore, GarageStore, TimeService };
 
 

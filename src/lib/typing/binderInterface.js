@@ -6,4 +6,6 @@ export interface BinderInterface {
   unbind(bindAs: ServiceConfigBindAsType): void;
   clear(): void;
   getStore(bindAs: ServiceConfigBindAsType): *;
+  getPendingStartResolver(bindAs:ServiceConfigBindAsType): ?Promise<*>;
+  setPendingStartResolver(bindAs:ServiceConfigBindAsType, resolver: ?Promise<*>): void;
 }

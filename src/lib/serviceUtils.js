@@ -2,6 +2,7 @@
 
 import Binder from './Binder.js';
 import type { ServiceClassType, ServiceStartConfigType, StartServiceReturnType } from './typing/common.js';
+import type { BinderInterface } from './typing/binderInterface.js';
 
 export function createService(Service: ServiceClassType, protoAttrs?: ?Array<*>): * {
   if (protoAttrs && !Array.isArray(protoAttrs)) {
@@ -11,7 +12,7 @@ export function createService(Service: ServiceClassType, protoAttrs?: ?Array<*>)
   return protoAttrs ? new Service(...protoAttrs) : new Service();
 }
 
-export function startService(serviceStartConfig: ServiceStartConfigType, binder: Binder, initialState: *): Promise<*> {
+export function startService(serviceStartConfig: ServiceStartConfigType, binder: BinderInterface, initialState: *): Promise<*> {
   const { binderConfig, proto } = serviceStartConfig;
   const {
     config,
@@ -19,20 +20,24 @@ export function startService(serviceStartConfig: ServiceStartConfigType, binder:
     onStart,
   } = binderConfig;
 
-
+  let result;
+  const resolver = binder.getPendingStartResolver(bindAs);
   const serviceInBinder = binder.getStore(bindAs);
   const onStartFunctionName = onStart || 'onStart';
 
-  return serviceInBinder
-    ? Promise.resolve({ service: serviceInBinder, started: false, serviceStartConfig })
-    : new Promise(
+  if (serviceInBinder) {
+    result = Promise.resolve({ service: serviceInBinder, started: false, serviceStartConfig });
+  } else if (resolver) {
+    result = resolver;
+  } else {
+    result = new Promise(
       (resolve: (data: StartServiceReturnType) => void, reject: (error: Error) => void): void => {
         const service = createService(proto, serviceStartConfig.protoAttrs);
-        const result = { service, started: true, serviceStartConfig };
+        const resolveData = { service, started: true, serviceStartConfig };
 
         if (!service[onStartFunctionName]) {
           binder.bind(service, config);
-          resolve(result);
+          resolve(resolveData);
           return;
         }
 
@@ -43,7 +48,7 @@ export function startService(serviceStartConfig: ServiceStartConfigType, binder:
             .then(
               (): void => {
                 binder.bind(service, config);
-                resolve(result);
+                resolve(resolveData);
               },
             )
             .catch(
@@ -53,16 +58,26 @@ export function startService(serviceStartConfig: ServiceStartConfigType, binder:
             );
         } else if (onStartResult === true) {
           binder.bind(service, config);
-          resolve(result);
+          resolve(resolveData);
         } else {
           reject(new Error(`Service ${bindAs} onStart return "false"`));
         }
       },
-    );
+    ).finally(() => {
+      binder.setPendingStartResolver(bindAs, null);
+    });
+
+    binder.setPendingStartResolver(bindAs, result);
+  }
+
+  /*  getPendingStartResolver
+  setPendingStartResolver */
+
+  return result;
 }
 
 export function startServices(
-  binder: Binder,
+  binder: BinderInterface,
   initialState: *,
   serviceStartConfigList: Array<ServiceStartConfigType>,
 ): Promise<*> {
@@ -74,7 +89,7 @@ export function startServices(
   );
 }
 
-export function stopService(binder: Binder, serviceStartConfig: ServiceStartConfigType): void {
+export function stopService(binder: BinderInterface, serviceStartConfig: ServiceStartConfigType): void {
   const {
     config: { bindAs },
     onStop,
@@ -91,7 +106,7 @@ export function stopService(binder: Binder, serviceStartConfig: ServiceStartConf
   }
 }
 
-export function stopServices(binder: Binder, serviceStartConfigList: Array<ServiceStartConfigType>): void {
+export function stopServices(binder: BinderInterface, serviceStartConfigList: Array<ServiceStartConfigType>): void {
   if (!serviceStartConfigList || !binder) {
     throw new Error('Wrong stopServices attributes!');
   }
