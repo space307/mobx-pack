@@ -1,3 +1,4 @@
+import '@babel/polyfill';
 import { createService, startService, startServices, stopService, stopServices } from '../serviceUtils.js';
 import Binder from '../Binder.js';
 import { onStart, bindAs, onStop } from '../ServiceDecorators.js';
@@ -154,6 +155,43 @@ describe('serviceUtils test', () => {
       done();
     });
   });
+
+  it('double service start && Promise', (done) => {
+    const storeName = 'test';
+
+    @bindAs(storeName)
+    class ServiceProto {
+      @onStart
+      onStart(initialState) {
+        this.test(initialState);
+        return new Promise(
+          (resolve) => {
+            setTimeout(() => {
+              resolve();
+            });
+          },
+        );
+      }
+      test = jest.fn();
+    }
+
+    let readyService;
+
+    const initialState = {};
+    const binder = new Binder();
+
+
+    startService(getConfig(ServiceProto), binder, initialState).then(({ service }) => {
+      readyService = service;
+    });
+
+    startService(getConfig(ServiceProto), binder, initialState).then(({ service }) => {
+      expect(service).toBe(readyService);
+      expect(service.test).toBeCalledTimes(1);
+      done();
+    });
+  });
+
 
   it('startServices', (done) => {
     @bindAs('test1')

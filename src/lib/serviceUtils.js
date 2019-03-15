@@ -70,9 +70,6 @@ export function startService(serviceStartConfig: ServiceStartConfigType, binder:
     binder.setPendingStartResolver(bindAs, result);
   }
 
-  /*  getPendingStartResolver
-  setPendingStartResolver */
-
   return result;
 }
 

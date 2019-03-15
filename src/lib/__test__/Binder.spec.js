@@ -126,6 +126,19 @@ describe('Binder test', () => {
     expect(binder.getStoreList([s1, s2])[1]).toBe(store2);
   });
 
+  it('setPendingStartResolver', () => {
+    const promise = Promise;
+    binder.setPendingStartResolver(s1, promise);
+    expect(binder.pendingStartResolvers[s1]).toBe(promise);
+    binder.setPendingStartResolver(s1, null);
+    expect(binder.pendingStartResolvers[s1]).toBe(undefined);
+  });
+
+  it('getPendingStartResolver', () => {
+    const promise = Promise;
+    binder.setPendingStartResolver(s1, promise);
+    expect(binder.getPendingStartResolver(s1)).toBe(promise);
+  });
 
   describe('onBindTest', () => {
     function expectSimpleOnBindTest(store1, store2, store3) {
