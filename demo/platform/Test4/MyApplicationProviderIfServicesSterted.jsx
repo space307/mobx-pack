@@ -98,7 +98,7 @@ const TestContainer = Provider(
   ()=>(<div></div>),
   {
     helper(garageStore){
-      //console.log(['CarContainer helper!!!!!!', carStore, timeService]);
+      console.log(['CarContainer helper!!!!!!']);
       console.log(['helper', garageStore]);
 
       return {

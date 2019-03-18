@@ -57,7 +57,7 @@ describe('serviceUtils test', () => {
 
     const binder = new Binder();
 
-    startService(getConfig(ServiceProto), binder, initialState).then(({ service, started, serviceStartConfig }) => {
+    startService(binder, initialState, getConfig(ServiceProto)).then(({ service, started, serviceStartConfig }) => {
       expect(binder.isBind(storeName)).toBe(true);
       expect(serviceStartConfig.proto).toBe(ServiceProto);
       expect(started).toBe(true);
@@ -80,7 +80,7 @@ describe('serviceUtils test', () => {
     const initialState = {};
 
     const binder = new Binder();
-    startService(getConfig(ServiceProto), binder, initialState).then(({ service, started, serviceStartConfig }) => {
+    startService(binder, initialState, getConfig(ServiceProto)).then(({ service, started, serviceStartConfig }) => {
       expect(binder.isBind(storeName)).toBe(true);
       expect(serviceStartConfig.proto).toBe(ServiceProto);
       expect(started).toBe(true);
@@ -107,7 +107,7 @@ describe('serviceUtils test', () => {
     const initialState = {};
 
     const binder = new Binder();
-    startService(getConfig(ServiceProto), binder, initialState).catch((error) => {
+    startService(binder, initialState, getConfig(ServiceProto)).catch((error) => {
       expect(!!error).toBe(true);
       done();
     });
@@ -127,7 +127,7 @@ describe('serviceUtils test', () => {
     const initialState = {};
 
     const binder = new Binder();
-    startService(getConfig(ServiceProto), binder, initialState).catch((error) => {
+    startService(binder, initialState, getConfig(ServiceProto)).catch((error) => {
       expect(!!error).toBe(true);
       done();
     });
@@ -150,7 +150,7 @@ describe('serviceUtils test', () => {
     const initialState = {};
 
     const binder = new Binder();
-    startService(getConfig(ServiceProto), binder, initialState).then(({ service }) => {
+    startService(binder, initialState, getConfig(ServiceProto)).then(({ service }) => {
       expect(service.test).toBeCalledWith(initialState);
       done();
     });
@@ -181,11 +181,11 @@ describe('serviceUtils test', () => {
     const binder = new Binder();
 
 
-    startService(getConfig(ServiceProto), binder, initialState).then(({ service }) => {
+    startService(binder, initialState, getConfig(ServiceProto)).then(({ service }) => {
       readyService = service;
     });
 
-    startService(getConfig(ServiceProto), binder, initialState).then(({ service }) => {
+    startService(binder, initialState, getConfig(ServiceProto)).then(({ service }) => {
       expect(service).toBe(readyService);
       expect(service.test).toBeCalledTimes(1);
       done();

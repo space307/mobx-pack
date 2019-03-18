@@ -13,9 +13,10 @@ export function createService(Service: ServiceClassType, protoAttrs?: ?Array<*>)
 }
 
 export function startService(
-  serviceStartConfig: ServiceStartConfigType,
   binder: BinderInterface,
-  initialState: *): Promise<*> {
+  initialState: *,
+  serviceStartConfig: ServiceStartConfigType,
+  ): Promise<*> {
   const { binderConfig, proto } = serviceStartConfig;
   const {
     config,
@@ -84,7 +85,7 @@ export function startServices(
   return Promise.all(
     serviceStartConfigList.map(
       (serviceStartConfig: ServiceStartConfigType): Promise<*> =>
-        startService(serviceStartConfig, binder, initialState),
+        startService(binder, initialState, serviceStartConfig),
     ),
   );
 }
