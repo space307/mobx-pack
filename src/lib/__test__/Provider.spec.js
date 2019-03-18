@@ -286,8 +286,11 @@ describe('Provider test', () => {
     const binder = new Binder();
     const Component = () => (<div id="count" />);
 
+    const MyStub = () => (<div id="stub">Loading...</div>);
+
     const ComponentWithProvider = Provider(Component, {
       services: [ServiceProto],
+      stub: MyStub,
     });
 
     const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
@@ -296,16 +299,16 @@ describe('Provider test', () => {
 
     const wrapper = mount(<ComponentWithBinderContext />);
 
+
+    expect(wrapper.contains(<div id="stub">Loading...</div>)).toBe(true);
+
     setTimeout(() => {
       wrapper.update();
-
       setTimeout(() => {
-        wrapper.unmount();
-        expect(binder.isBind(storeName)).toBe(true);
+        wrapper.update();
+        expect(wrapper.contains(<div id="stub">Loading...</div>)).toBe(false);
         done();
       });
     });
   });
-
-
 });
