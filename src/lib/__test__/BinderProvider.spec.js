@@ -16,7 +16,7 @@ const BinderProvider = CreateBinderProvider(BinderContext);
 configure({ adapter: new Adapter() });
 
 describe('serviceDecorators test', () => {
-  it('wrong bindAs param', () => {
+  it('wrong bindAs param', (done) => {
     const storeName = 'test';
     @bindAs(storeName)
     class ServiceProto {
@@ -41,7 +41,6 @@ describe('serviceDecorators test', () => {
 
     const ComponentWithProvider = Provider(Component, {
       helper(service) {
-        console.log(['helper']);
         return {
           count: service.count,
         };
@@ -49,14 +48,16 @@ describe('serviceDecorators test', () => {
       services: [ServiceProto],
     });
 
-    const ComponentWithBinderContext = ()=>(<BinderContext.Provider value={{ binder, initialState }}>
+    const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
       <ComponentWithProvider />
     </BinderContext.Provider>);
 
     const wrapper = mount(<ComponentWithBinderContext />);
 
-  /*  const rendererResult = renderer.create(<div><b>important</b></div>);
-    console.log(rendererResult.toJSON());*/
-    expect(1).toBe(1);
+    setTimeout(() => {
+      wrapper.update();
+      expect(1).toBe(1);
+      done();
+    });
   });
 });

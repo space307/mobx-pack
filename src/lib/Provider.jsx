@@ -3,32 +3,32 @@
 import React from 'react';
 import { observer } from 'mobx-react';
 
-import { startServices, stopServices } from './serviceUtils.js';
+import { startServices, stopServices, getStartedServices } from './serviceUtils.js';
 import type { GlobalContextType, ServiceStartConfigType, StartServiceReturnType } from './typing/common.js';
 
 
 type ServiceItemType = Class<*> | Array<*>;
 
-type ConnectorOptionsAttributeType = {
+type ProviderOptionsAttributeType = {
   stop?: boolean,
   services?: Array<ServiceItemType> | (props: *)=> Array<ServiceItemType>,
   helper?: (services: ?Array<*>, props: *) => *,
   stub?: React$ComponentType<*>,
 };
 
-type ConnectorOptionsPropType = {
-  ...ConnectorOptionsAttributeType,
+type ProviderOptionsPropType = {
+  ...ProviderOptionsAttributeType,
   services: Array<ServiceItemType>,
 };
 
-type ConnectorStateTypes = {
+type ProviderStateTypes = {
   error: ?string,
-  result: ?Array<*>,
+  services: ?Array<*>,
 };
 
 type ProviderType = (
   Component: React$ComponentType<*>,
-  options?: ConnectorOptionsAttributeType)=>React$ComponentType<*>
+  options?: ProviderOptionsAttributeType)=>React$ComponentType<*>
 
 function convertToServiceStartConfig(ServiceProtoList: Array<ServiceItemType>): Array<ServiceStartConfigType> {
   return ServiceProtoList.map((ServiceProto: ServiceItemType): ServiceStartConfigType => {
@@ -48,7 +48,7 @@ export default function CreateProvider(
   StoreContext: React$Context<?Array<*>>): ProviderType {
   return function Provider(
     Component: React$ComponentType<*>,
-    options?: ConnectorOptionsAttributeType,
+    options?: ProviderOptionsAttributeType,
   ): React$ComponentType<*> {
     const defaultOptions = {
       stop: false,
@@ -56,21 +56,20 @@ export default function CreateProvider(
     };
 
     return observer(
-      class ConnectorComponent<PropType> extends React.Component<PropType, ConnectorStateTypes> {
-        state = {
+      class ProviderComponent<PropType> extends React.Component<PropType, ProviderStateTypes> {
+        state: ProviderStateTypes = {
           error: null,
-          result: null,
+          services: null,
         };
 
         static contextType = BinderContext;
 
-        options: $Shape<ConnectorOptionsPropType>;
+        options: $Shape<ProviderOptionsPropType>;
 
         serviceToStop: Array<ServiceStartConfigType> = [];
 
-        constructor(props: PropType) {
+        constructor(props: PropType, context) {
           super();
-
 
           if (options) {
             const services = typeof options.services === 'function' ? options.services(props) : options.services;
@@ -79,10 +78,18 @@ export default function CreateProvider(
           } else {
             this.options = { ...defaultOptions };
           }
+
+          if (context && this.options.services) {
+            this.state.services = getStartedServices(
+              context.binder,
+              convertToServiceStartConfig(this.options.services));
+          }
         }
 
         componentDidMount(): void {
-          this.startServices();
+          if (!this.state.services || !this.state.services.length) {
+            this.startServices();
+          }
         }
         componentWillUnmount() {
           if (this.options.stop && this.serviceToStop && this.serviceToStop.length) {
@@ -125,10 +132,10 @@ export default function CreateProvider(
 
               this.serviceToStop = result.toStop;
 
-              this.setState({ result: result.services });
+              this.setState({ services: result.services });
             });
           } else {
-            this.setState({ result: [] });
+            this.setState({ services: [] });
           }
         }
 
@@ -142,15 +149,15 @@ export default function CreateProvider(
         }
 
         render() {
-          const props = this.composeProps(this.state.result, this.props);
+          const props = this.composeProps(this.state.services, this.props);
           const hasService = this.options.services && this.options.services.length;
-          const serviceOk = !hasService || this.state.result;
+          const serviceOk = !hasService || this.state.services;
           const helperOk = !this.options.helper || !!props;
           const Stub = this.options.stub;
 
           if (serviceOk && helperOk) {
             return hasService ? (
-              <StoreContext.Provider value={this.state.result}>
+              <StoreContext.Provider value={this.state.services}>
                 <Component {...props} />
               </StoreContext.Provider>
             ) : (

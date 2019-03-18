@@ -94,6 +94,23 @@ const CarContainer = Provider(
   }
 );
 
+const TestContainer = Provider(
+  ()=>(<div></div>),
+  {
+    helper(garageStore){
+      //console.log(['CarContainer helper!!!!!!', carStore, timeService]);
+      console.log(['helper', garageStore]);
+
+      return {
+        modelName: 1,
+        //time: timeService.time,
+      }
+    },
+    services: [GarageStore],
+    test: 1
+  }
+);
+
 
   class Garage extends React.Component {
     state={
@@ -120,6 +137,7 @@ const CarContainer = Provider(
         <h1>Garage</h1>
         <div>Counter: {counter}</div>
         <div>Color: {color}</div>
+        <TestContainer />
         {
           this.state.cars.map((modelName, index)=><CarContainer key={index} modelName={modelName}/>)
         }
@@ -171,10 +189,9 @@ class MyApplication extends React.Component {
       <div>
         <h1>My Application </h1>
 
-        <BinderContext.Consumer>{(data)=>{
-          console.log(['data', data]);
+{/*        <BinderContext.Consumer>{(data)=>{
           return <div></div>
-        }}</BinderContext.Consumer>
+        }}</BinderContext.Consumer>*/}
 
         <GarageContainer color={this.state.color} />
       </div>

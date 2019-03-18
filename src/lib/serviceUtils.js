@@ -12,7 +12,10 @@ export function createService(Service: ServiceClassType, protoAttrs?: ?Array<*>)
   return protoAttrs ? new Service(...protoAttrs) : new Service();
 }
 
-export function startService(serviceStartConfig: ServiceStartConfigType, binder: BinderInterface, initialState: *): Promise<*> {
+export function startService(
+  serviceStartConfig: ServiceStartConfigType,
+  binder: BinderInterface,
+  initialState: *): Promise<*> {
   const { binderConfig, proto } = serviceStartConfig;
   const {
     config,
@@ -112,4 +115,23 @@ export function stopServices(binder: BinderInterface, serviceStartConfigList: Ar
       stopService(binder, ServiceProto);
     },
   );
+}
+
+export function getStartedServices(
+  binder: BinderInterface,
+  serviceStartConfigList: Array<ServiceStartConfigType>): ?Array<*> {
+  const services = [];
+  serviceStartConfigList.forEach(
+    (ServiceProto: ServiceStartConfigType): void => {
+      const {
+        config: { bindAs },
+      } = ServiceProto.binderConfig;
+      const store = binder.getStore(bindAs);
+
+      if (store) {
+        services.push(store);
+      }
+    },
+  );
+  return services.length === serviceStartConfigList.length ? services : null;
 }

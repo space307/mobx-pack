@@ -120,6 +120,11 @@ const CarContainer = Provider(
         <h1>Garage</h1>
         <div>Counter: {counter}</div>
         <div>Color: {color}</div>
+        {
+          this.state.cars.map((modelName, index)=><CarContainer key={index} modelName={modelName}/>)
+        }
+        <button onClick={this.addCar}>Add car</button>
+        <button onClick={this.removeCar}>Remove Car</button>
       </div>);
     }
 }
@@ -137,18 +142,7 @@ const GarageContainer = Provider(
     },
     services: props => [GarageStore],
   });
-const GarageContainer2 = Provider(
-  Garage,
-  {
-    helper(garageStore, { color }) {
 
-      return {
-        color,
-        counter: garageStore.counter,
-      };
-    },
-    services: props => [GarageStore],
-  });
 
 
 
@@ -183,7 +177,6 @@ class MyApplication extends React.Component {
         }}</BinderContext.Consumer>
 
         <GarageContainer color={this.state.color} />
-        <GarageContainer2 color={this.state.color} />
       </div>
     );
   }
