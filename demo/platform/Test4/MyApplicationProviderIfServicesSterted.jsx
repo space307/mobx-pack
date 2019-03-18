@@ -159,7 +159,10 @@ const GarageContainer = Provider(
       };
     },
     services: props => [GarageStore],
+    test: 1,
+    stub: ()=>(<div>Loafing....</div>)
   });
+
 
 
 

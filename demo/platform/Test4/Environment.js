@@ -61,7 +61,7 @@ class GarageStore implements GarageStoreInterface {
 
     return new Promise(
       (resolve) => {
-        setTimeout(() => resolve(), 2000);
+        setTimeout(() => resolve(), 10000);
       },
     );
   }

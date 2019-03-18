@@ -16,7 +16,7 @@ export function startService(
   binder: BinderInterface,
   initialState: *,
   serviceStartConfig: ServiceStartConfigType,
-  ): Promise<*> {
+): Promise<*> {
   const { binderConfig, proto } = serviceStartConfig;
   const {
     config,

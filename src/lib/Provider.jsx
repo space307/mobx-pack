@@ -73,8 +73,8 @@ export default function CreateProvider(
 
           if (options) {
             const services = typeof options.services === 'function' ? options.services(props) : options.services;
-            const { stop, helper } = options;
-            this.options = { ...defaultOptions, ...{ stop, helper }, ...{ services } };
+            const { stop, helper, stub } = options;
+            this.options = { ...defaultOptions, ...{ stop, helper, stub }, ...{ services } };
           } else {
             this.options = { ...defaultOptions };
           }

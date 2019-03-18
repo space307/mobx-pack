@@ -193,22 +193,66 @@ describe('Provider test', () => {
       }
     }
 
-
     const initialState = {};
-
     const binder = new Binder();
 
     const Component = () => (<div id="count" />);
 
-    startService(binder, initialState, { proto: ServiceProto2, binderConfig: ServiceProto2.binderConfig });
+    startService(binder, initialState, { proto: ServiceProto, binderConfig: ServiceProto.binderConfig }).then(() => {
+      const ComponentWithProvider = Provider(Component, {
+        services: [ServiceProto, ServiceProto2],
+        stop: true,
+      });
 
+      const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
+        <ComponentWithProvider color={1} />
+      </BinderContext.Provider>);
+
+      const wrapper = mount(<ComponentWithBinderContext />);
+
+      setTimeout(() => {
+        wrapper.update();
+
+        setTimeout(() => {
+          const serviceToStop = wrapper.find(ComponentWithProvider).instance().serviceToStop;
+          expect(serviceToStop.length).toBe(1);
+          expect(serviceToStop[0].proto === ServiceProto2).toBe(true);
+
+          wrapper.unmount();
+
+          expect(binder.isBind(storeName)).toBe(true);
+          expect(binder.isBind(storeName2)).toBe(false);
+
+          done();
+        });
+      });
+    });
+  });
+
+  it('not stop if stop option is not defined', (done) => {
+    const storeName = 'test';
+    @bindAs(storeName)
+    class ServiceProto {
+      @onStart
+      onStart() {
+        return new Promise(
+          (resolve) => {
+            setTimeout(() => { resolve(); });
+          },
+        );
+      }
+    }
+
+    const initialState = {};
+    const binder = new Binder();
+    const Component = () => (<div id="count" />);
 
     const ComponentWithProvider = Provider(Component, {
-      services: [ServiceProto, ServiceProto2],
+      services: [ServiceProto],
     });
 
     const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
-      <ComponentWithProvider />
+      <ComponentWithProvider color={1} />
     </BinderContext.Provider>);
 
     const wrapper = mount(<ComponentWithBinderContext />);
@@ -216,9 +260,52 @@ describe('Provider test', () => {
     setTimeout(() => {
       wrapper.update();
 
-      console.log(['wrapper', wrapper]);
-      expect(1).toBe(1);
-      done();
+      setTimeout(() => {
+        wrapper.unmount();
+        expect(binder.isBind(storeName)).toBe(true);
+        done();
+      });
     });
   });
+
+  it('sub test', (done) => {
+    const storeName = 'test';
+    @bindAs(storeName)
+    class ServiceProto {
+      @onStart
+      onStart() {
+        return new Promise(
+          (resolve) => {
+            setTimeout(() => { resolve(); });
+          },
+        );
+      }
+    }
+
+    const initialState = {};
+    const binder = new Binder();
+    const Component = () => (<div id="count" />);
+
+    const ComponentWithProvider = Provider(Component, {
+      services: [ServiceProto],
+    });
+
+    const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
+      <ComponentWithProvider color={1} />
+    </BinderContext.Provider>);
+
+    const wrapper = mount(<ComponentWithBinderContext />);
+
+    setTimeout(() => {
+      wrapper.update();
+
+      setTimeout(() => {
+        wrapper.unmount();
+        expect(binder.isBind(storeName)).toBe(true);
+        done();
+      });
+    });
+  });
+
+
 });
