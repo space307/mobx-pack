@@ -1,6 +1,6 @@
 import React from 'react';
 import '@babel/polyfill';
-import { configure, mount } from 'enzyme';
+import { configure, mount, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import CreateBinderProvider from '../BinderProvider.jsx';
 import Binder from '../Binder.js';
@@ -67,5 +67,12 @@ describe('BinderProvider test', () => {
         done();
       });
     });
+  });
+
+
+  it('wrong attributes test', (done) => {
+    const ComponentWithBinderProvider = BinderProvider();
+    expect(() => { shallow(<ComponentWithBinderProvider />); }).toThrowError();
+    done();
   });
 });

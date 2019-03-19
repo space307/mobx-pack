@@ -148,7 +148,7 @@ const TestContainer = Provider(
 }
 
 
-const GarageContainer = Provider(
+/*const GarageContainer = Provider(
   Garage,
   {
     helper(garageStore, { color }) {
@@ -161,9 +161,10 @@ const GarageContainer = Provider(
     services: props => [GarageStore],
     test: 1,
     stub: ()=>(<div>Loafing....</div>)
-  });
+  });*/
 
 
+const GarageContainer = Provider();
 
 
 

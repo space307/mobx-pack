@@ -35,8 +35,16 @@ type ProviderType = (
 
 function convertToServiceStartConfig(ServiceProtoList: Array<ServiceItemType>): Array<ServiceStartConfigType> {
   return ServiceProtoList.map((ServiceProto: ServiceItemType): ServiceStartConfigType => {
-    const proto = Array.isArray(ServiceProto) ? ServiceProto[0] : ServiceProto;
+    if (Array.isArray(ServiceProto) && ServiceProto.length < 2) {
+      throw Error('ServiceItem passed in Provider is not valid Array');
+    }
+
+    const proto = Array.isArray(ServiceProto) && ServiceProto.length ? ServiceProto[0] : ServiceProto;
     const protoAttrs = Array.isArray(ServiceProto) ? ServiceProto[1] : undefined;
+
+    if (typeof proto !== 'function') {
+      throw Error('Object passed as ServiceItem to Provider is not a constructor');
+    }
 
     return {
       proto,
@@ -74,6 +82,10 @@ export default function CreateProvider(
         constructor(props: PropType, context) {
           super();
 
+          if (!Component || typeof Component !== 'function') {
+            this.state.error = 'Provider wait for "React.Component" in attributes';
+          }
+
           if (options) {
             const services = typeof options.services === 'function' ? options.services(props) : options.services;
             const { stop, helper, stub } = options;
@@ -82,18 +94,22 @@ export default function CreateProvider(
             this.options = { ...defaultOptions };
           }
 
-          if (context && this.options.services) {
-            this.state.services = getStartedServices(
-              context.binder,
-              convertToServiceStartConfig(this.options.services));
+          if (this.options.services) {
+            const config = convertToServiceStartConfig(this.options.services);
+
+            if (context && context.binder) {
+              this.state.services = getStartedServices(context.binder, config);
+            }
           }
         }
 
         componentDidMount(): void {
-          if (!this.state.services || !this.state.services.length) {
+          if ((!this.state.services || !this.state.services.length) &&
+            this.context && this.context.binder && this.context.initialState) {
             this.startServices();
           }
         }
+
         componentWillUnmount() {
           if (this.options.stop && this.serviceToStop && this.serviceToStop.length) {
             const { binder } = this.context;
@@ -104,10 +120,6 @@ export default function CreateProvider(
         startServices() {
           const { services: ServiceProtoList } = this.options;
           const { binder, initialState } = this.context;
-
-          if (!binder || !initialState) {
-            this.setState({ error: 'binder && initialState not received in Container' });
-          }
 
           if (ServiceProtoList && ServiceProtoList.length) {
             const serviceStartConfigList = convertToServiceStartConfig(ServiceProtoList);
@@ -152,6 +164,10 @@ export default function CreateProvider(
         }
 
         render() {
+          if (this.state.error) {
+            throw new Error(this.state.error);
+          }
+
           const props = this.composeProps(this.state.services, this.props);
           const hasService = this.options.services && this.options.services.length;
           const serviceOk = !hasService || this.state.services;

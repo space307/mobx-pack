@@ -1,6 +1,6 @@
 import React from 'react';
 import '@babel/polyfill';
-import { configure, mount } from 'enzyme';
+import { configure, mount, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import CreateProvider from '../Provider.jsx';
 import Binder from '../Binder.js';
@@ -268,7 +268,7 @@ describe('Provider test', () => {
     });
   });
 
-  it('sub test', (done) => {
+  it('stub test', (done) => {
     const storeName = 'test';
     @bindAs(storeName)
     class ServiceProto {
@@ -299,7 +299,6 @@ describe('Provider test', () => {
 
     const wrapper = mount(<ComponentWithBinderContext />);
 
-
     expect(wrapper.contains(<div id="stub">Loading...</div>)).toBe(true);
 
     setTimeout(() => {
@@ -310,5 +309,40 @@ describe('Provider test', () => {
         done();
       });
     });
+  });
+
+
+  it('wrong attributes: no Component passed', (done) => {
+    const ComponentWithProvider = Provider();
+    expect(() => { shallow(<ComponentWithProvider />); }).toThrowError();
+    done();
+  });
+
+  it('wrong attributes: wrong services', (done) => {
+    const storeName = 'test';
+    @bindAs(storeName)
+    class ServiceProto {
+      @onStart
+      onStart() {
+        return true;
+      }
+    }
+
+    const ComponentWithProvider = Provider(() => (<div />), {
+      services: [2],
+    });
+    expect(() => { shallow(<ComponentWithProvider />); }).toThrowError();
+
+    const ComponentWithProvider2 = Provider(() => (<div />), {
+      services: [[ServiceProto]],
+    });
+    expect(() => { shallow(<ComponentWithProvider2 />); }).toThrowError();
+
+    const ComponentWithProvider3 = Provider(() => (<div />), {
+      services: [ServiceProto, {}],
+    });
+    expect(() => { shallow(<ComponentWithProvider3 />); }).toThrowError();
+
+    done();
   });
 });
