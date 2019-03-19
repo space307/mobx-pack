@@ -22,9 +22,9 @@ const Loader = () => (
 );
 
 
-const Car = ({ counter, color, test }) => (
+const Car = ({ time, color, test }) => (
   <div>
-    {counter}
+    {time}
     {color}
     {test}
   </div>
@@ -57,7 +57,7 @@ const GarageContainer = Provider(
         counter: garageStore.counter,
       };
     },
-    services: ( { color }) => [TimeService, [GarageStore, [color]]],
+    services: ({ color }) => [TimeService, [GarageStore, [color]]],
     // services: [TimeService, GarageStore],
     stop: true,
     stub: Loader,
