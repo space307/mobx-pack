@@ -56,7 +56,7 @@ function convertToServiceStartConfig(ServiceProtoList: Array<ServiceItemType>): 
 
 export default function CreateProvider(
   BinderContext: React$Context<GlobalContextType>,
-  StoreContext: React$Context<?Array<*>>): ProviderType {
+  ServiceContext: React$Context<?Array<*>>): ProviderType {
   return function Provider(
     Component: React$ComponentType<*>,
     options?: ProviderOptionsAttributeType,
@@ -176,9 +176,9 @@ export default function CreateProvider(
 
           if (serviceOk && helperOk) {
             return hasService ? (
-              <StoreContext.Provider value={this.state.services}>
+              <ServiceContext.Provider value={this.state.services}>
                 <Component {...props} />
-              </StoreContext.Provider>
+              </ServiceContext.Provider>
             ) : (
               <Component {...props} />
             );

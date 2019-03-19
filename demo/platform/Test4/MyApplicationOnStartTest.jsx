@@ -3,7 +3,7 @@ import React from 'react';
 import { observer, Observer } from 'mobx-react';
 
 import { GarageStore, TimeService, CarStore, initialState } from './Environment.js';
-import { BinderContext, StoreContext, GlobalContext } from './ComponentContext.js';
+import { BinderContext, ServiceContext, GlobalContext } from './ComponentContext.js';
 import { Provider, BinderProvider } from './Provider.jsx';
 import { Binder } from 'sources.js';
 
@@ -41,9 +41,9 @@ class Driver extends React.PureComponent {
   }
 }
 
-const DriverContainer = ({theme})=>(<StoreContext.Consumer>{
+const DriverContainer = ({theme})=>(<ServiceContext.Consumer>{
   ([store])=>(<Observer>{()=>(<Driver theme={theme} timer={store.timer2}/>)}</Observer>)
-}</StoreContext.Consumer>);
+}</ServiceContext.Consumer>);
 */
 
 class Car extends React.PureComponent {

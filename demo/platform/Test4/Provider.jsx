@@ -2,8 +2,8 @@
 
 import { CreateProvider, CreateBinderProvider } from 'sources.js';
 
-import { BinderContext, StoreContext } from './ComponentContext.js';
+import { BinderContext, ServiceContext } from './ComponentContext.js';
 
-export const Provider = CreateProvider(BinderContext, StoreContext);
+export const Provider = CreateProvider(BinderContext, ServiceContext);
 export const BinderProvider = CreateBinderProvider(BinderContext);
 

@@ -8,8 +8,8 @@ import { bindAs, onStart } from '../ServiceDecorators.js';
 import { startService } from '../serviceUtils.js';
 
 const BinderContext = React.createContext();
-const StoreContext = React.createContext();
-const Provider = CreateProvider(BinderContext, StoreContext);
+const ServiceContext = React.createContext();
+const Provider = CreateProvider(BinderContext, ServiceContext);
 
 
 configure({ adapter: new Adapter() });
@@ -141,9 +141,9 @@ describe('Provider test', () => {
 
     const binder = new Binder();
 
-    const Component = () => (<div id="count"><StoreContext.Consumer>{([store]) => {
+    const Component = () => (<div id="count"><ServiceContext.Consumer>{([store]) => {
       consumerMock(store === binder.getStore(storeName));
-    }}</StoreContext.Consumer></div>);
+    }}</ServiceContext.Consumer></div>);
 
 
     const ComponentWithProvider = Provider(Component, {

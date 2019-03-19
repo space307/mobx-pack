@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { Observer } from 'mobx-react';
-import { StoreContext } from './../ComponentContext.js';
+import { ServiceContext } from './../ComponentContext.js';
 import { Provider } from './../Provider.jsx';
 
 
 /*
 Provider - запускает сервисы в контексте биндера который лежит в BinderContext
-1. Запускает сервисы / сторы если они не запущены и кладёт их в StoreContext
+1. Запускает сервисы / сторы если они не запущены и кладёт их в ServiceContext
 2. Опционально отсанавливает сервисы ( только те, что были запущены в нём)
 3. Есть хелпер (observer) котрый прокидыввает пропсы
 3. Есть stub компонент на момент старта сервисов
@@ -33,7 +33,7 @@ const Car = ({ counter, color, test }) => (
 
 const Garage = props => (
   <div>
-    <StoreContext.Cunsumer>{([timeService, garageStore]) => (
+    <ServiceContext.Cunsumer>{([timeService, garageStore]) => (
       <Observer>{() => (
         <Car
           {...props}
@@ -42,7 +42,7 @@ const Garage = props => (
         />
       )}</Observer>
     )
-    }</StoreContext.Cunsumer>
+    }</ServiceContext.Cunsumer>
 
   </div>
 );
