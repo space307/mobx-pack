@@ -2,91 +2,50 @@
 import React from 'react';
 import { observer, Observer } from 'mobx-react';
 
-import { GarageStore, TimeService, CarStore, initialState } from './Environment.js';
-import { BinderContext, ServiceContext, GlobalContext } from './ComponentContext.js';
+import { GarageStore, TimeService, CarStore } from './Environment.js';
+import { BinderContext, ServiceContext } from './ComponentContext.js';
 import { Provider, BinderProvider } from './Provider.jsx';
 import { Binder } from 'sources.js';
 
 
 
 
-
-/*
-
-class Engine extends React.PureComponent {
-  render() {
-    console.log(['Engine render', this.props.timer]);
-    return (<div>Engine!!!</div>);
-  }
-}
-
-
-const EngineConnector = Provider(
-  Engine,
-  {
-    helper([store]) {
-      return { };
-    },
-    services: [TestStoreConfig],
-  },
-
-);
-
 class Driver extends React.PureComponent {
   render() {
-    console.log(['Driver render', this.props.timer]);
-    return (<div>Driver!!! timer:{this.props.timer} theme: {this.props.theme}
-    <Engine />
+    console.log(['Driver render']);
+    return (<div>Driver!!! modelName:{this.props.modelName} time: {this.props.time}
     </div>);
   }
 }
 
-const DriverContainer = ({theme})=>(<ServiceContext.Consumer>{
-  ([store])=>(<Observer>{()=>(<Driver theme={theme} timer={store.timer2}/>)}</Observer>)
+const DriverContainer = ()=>(<ServiceContext.Consumer>{
+  ({carStore, timeService})=>(<Observer>{()=>(<Driver modelName={carStore.modelName} time={timeService.time}/>)}</Observer>)
 }</ServiceContext.Consumer>);
-*/
+
 
 class Car extends React.PureComponent {
   render() {
+    //console.log(['Car render']);
     const {modelName, time} = this.props;
-    console.log(['Car render']);
+
     return (<div>
       <h1>Car</h1>
       <div>modelName: {modelName}</div>
       <div>time: {time}</div>
+      <DriverContainer />
     </div>);
   }
 }
 
-/*
-const CarContainer = BinderProvider(
-  Provider(
-    Car,
-    {
-      helper(carStore, timeService, props){
-        //console.log(['CarContainer helper!!!!!!', carStore, timeService]);
-
-        return {
-          modelName: carStore.modelName,
-          //time: timeService.time,
-        }
-      },
-      services: (props)=>[[CarStore, [props.modelName]], TimeService]
-    }
-    ),
-  initialState
-);
-*/
-
 const CarContainer = Provider(
   Car,
   {
-    helper(carStore, timeService, props){
-      //console.log(['CarContainer helper!!!!!!', carStore, timeService]);
+    helper(carStore, timeService){
+
 
       return {
         modelName: carStore.modelName,
-        //time: timeService.time,
+        time: timeService.time,
       }
     },
     services: (props)=>[[CarStore, [props.modelName]], TimeService],
@@ -140,7 +99,7 @@ const GarageContainer = Provider(
         counter: garageStore.counter,
       };
     },
-    services: props => [GarageStore],
+    services: [GarageStore],
   });
 
 
@@ -165,17 +124,10 @@ class MyApplication extends React.Component {
   }
 
   render() {
-    //console.log(['MyApplication', this.context]);
-
+    //console.log(['MyApplication']);
     return (
       <div>
         <h1>My Application </h1>
-
-        <BinderContext.Consumer>{(data)=>{
-          console.log(['data', data]);
-          return <div></div>
-        }}</BinderContext.Consumer>
-
         <GarageContainer color={this.state.color} />
       </div>
     );

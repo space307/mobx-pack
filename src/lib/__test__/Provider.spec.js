@@ -141,8 +141,8 @@ describe('Provider test', () => {
 
     const binder = new Binder();
 
-    const Component = () => (<div id="count"><ServiceContext.Consumer>{([store]) => {
-      consumerMock(store === binder.getStore(storeName));
+    const Component = () => (<div id="count"><ServiceContext.Consumer>{({ serviceProto }) => {
+      consumerMock(serviceProto === binder.getStore(storeName));
     }}</ServiceContext.Consumer></div>);
 
 

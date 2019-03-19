@@ -61,7 +61,7 @@ class GarageStore implements GarageStoreInterface {
 
     return new Promise(
       (resolve) => {
-        setTimeout(() => resolve(), 10000);
+        setTimeout(() => resolve(), 1000);
       },
     );
   }
@@ -77,7 +77,7 @@ class GarageStore implements GarageStoreInterface {
 
   @bindServices(SERVICE_NAMES.CAR_STORE)
   onBindCar(): void {
-    console.log(['onBindCar!!!!', SERVICE_NAMES.GARAGE_STORE]);
+    console.log(['onBindCar!', SERVICE_NAMES.GARAGE_STORE]);
   }
 
   @unbindServices(SERVICE_NAMES.CAR_STORE)

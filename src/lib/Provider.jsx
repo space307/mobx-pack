@@ -31,8 +31,13 @@ type ProviderStateTypes = {
 
 type ProviderType = (
   Component: React$ComponentType<*>,
-  options?: ProviderOptionsAttributeType)=>React$ComponentType<*>
+  options?: ProviderOptionsAttributeType)=>React$ComponentType<*>;
 
+type servicesForProvider = {[key:string]:*};
+
+/**
+ * Convert incoming param with service list to start service format
+ */
 function convertToServiceStartConfig(ServiceProtoList: Array<ServiceItemType>): Array<ServiceStartConfigType> {
   return ServiceProtoList.map((ServiceProto: ServiceItemType): ServiceStartConfigType => {
     if (Array.isArray(ServiceProto) && ServiceProto.length < 2) {
@@ -54,9 +59,26 @@ function convertToServiceStartConfig(ServiceProtoList: Array<ServiceItemType>): 
   });
 }
 
+
+/**
+ * Convert service Array to object for service context provider
+ */
+function convertServiceListForProvider(list: ?Array<*>): ?servicesForProvider {
+  return list && list.length ?
+    list.reduce((acc, item) => {
+      const name = item.constructor.name;
+
+      if (!name) {
+        throw new Error(`Wrong class name "${name}"`);
+      }
+      acc[name.charAt(0).toLowerCase() + name.slice(1)] = item;
+      return acc;
+    }, {}) : null;
+}
+
 export default function CreateProvider(
   BinderContext: React$Context<GlobalContextType>,
-  ServiceContext: React$Context<?Array<*>>): ProviderType {
+  ServiceContext: React$Context<?servicesForProvider>): ProviderType {
   return function Provider(
     Component: React$ComponentType<*>,
     options?: ProviderOptionsAttributeType,
@@ -79,6 +101,8 @@ export default function CreateProvider(
 
         serviceToStop: Array<ServiceStartConfigType> = [];
 
+        servicesForProvider: ?servicesForProvider = null;
+
         constructor(props: PropType, context) {
           super();
 
@@ -98,9 +122,19 @@ export default function CreateProvider(
             const config = convertToServiceStartConfig(this.options.services);
 
             if (context && context.binder) {
-              this.state.services = getStartedServices(context.binder, config);
+              const serviceList = getStartedServices(context.binder, config);
+              this.state.services = serviceList;
+              this.servicesForProvider = convertServiceListForProvider(serviceList);
             }
           }
+        }
+
+        /**
+         * Ser service list to state && for service context provider
+         */
+        setServices(list) {
+          this.servicesForProvider = convertServiceListForProvider(list);
+          this.setState({ services: list });
         }
 
         componentDidMount(): void {
@@ -117,6 +151,9 @@ export default function CreateProvider(
           }
         }
 
+        /**
+         * Start service procedure
+         */
         startServices() {
           const { services: ServiceProtoList } = this.options;
           const { binder, initialState } = this.context;
@@ -147,13 +184,16 @@ export default function CreateProvider(
 
               this.serviceToStop = result.toStop;
 
-              this.setState({ services: result.services });
+              this.setServices(result.services);
             });
           } else {
-            this.setState({ services: [] });
+            this.setServices([]);
           }
         }
 
+        /**
+         * Merge props for wrapped component and call helper
+         */
         composeProps(result: ?Array<*>, props: PropType) {
           if (result && typeof this.options.helper) {
             const attributes = Array.isArray(result) ? result.slice() : [];
@@ -176,7 +216,7 @@ export default function CreateProvider(
 
           if (serviceOk && helperOk) {
             return hasService ? (
-              <ServiceContext.Provider value={this.state.services}>
+              <ServiceContext.Provider value={this.servicesForProvider}>
                 <Component {...props} />
               </ServiceContext.Provider>
             ) : (

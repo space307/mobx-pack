@@ -1,6 +1,16 @@
 // @flow
-
 /* eslint-disable method-can-be-static, class-methods-use-this, no-console */
+
+/**
+ * Binder - is a DI implementation class. Some classes may to communicate to each other through Binder.
+ * Binder register services and call callback functions to resolve dependencies of one service to another
+ *
+ * Binder operation algorithm
+ *  - While service binding to Binder or unbind it notify other services whose
+ *  are waiting for it and provide the list of callbacks
+ *  which should be called then other services will bind to Binder or unbind too.
+ */
+
 import { each, cloneDeep, includes } from 'lodash';
 import { toJS } from 'mobx';
 import { protoName } from './helper/util';
@@ -11,24 +21,6 @@ import type { ServiceConfigBindAsType,
   BinderConfigType,
 } from './typing/common.js';
 import type { BinderInterface } from './typing/binderInterface.js';
-
-/*
-Аглоритм работы биндера
-bind:
-- сохраняем deps [dependency] : [waiter]
-- проходим по всем зависимостям onBind и выполняем их (зависимости других сервисов от текущего,
-  а также из списка зависимости текущего сервиса).
-  Если колбек не locked и все сервисы isBind выполняем onBind и ставим locked на onBind.
-- проходим по всем зависимостям onUnbind и выполняем их (зависимости других сервисов от текущего,
-  а также из списка зависимости текущего сервиса).
-  Если колбек не locked и все сервисы isBind выполняем onBind и ставим locked на onBind.
-  Если все сервисы в колбеке isBind - делаем колбек unlocked.
-
-unbind:
- - проходим по колбекам onBind если !isBind на всех сервисах и onBind.locked === true ставим onBind.locked = true
- - проходим по колбекам onUnbind если onUnbind.locked === true выполняем onUnbind и ставим onUnbind.locked = false
- */
-
 
 const EMITTER_EVENT = {
   BIND: 'BIND',
@@ -94,6 +86,9 @@ class Binder implements BinderInterface {
     }
   }
 
+  /**
+   * bind service to the binder
+   */
   bind(store: *, options: BinderConfigType): void {
     if (!options) {
       throw new Error('Binder options is not valid');
@@ -142,6 +137,9 @@ class Binder implements BinderInterface {
     this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
   }
 
+  /**
+   * add service to the storage of services
+   */
   addStore(store: *, options: BinderConfigType): void {
     const { bindAs } = options;
 
@@ -165,6 +163,9 @@ class Binder implements BinderInterface {
     };
   }
 
+  /**
+   * look over all OnBind callbacks and resolve dependencies
+   */
   handleOnBind(bindAs: ServiceConfigBindAsType): void {
     const settings = this.getStoreSettings(bindAs);
 
@@ -186,21 +187,9 @@ class Binder implements BinderInterface {
     }
   }
 
-  lookOverCallback(callbackSetList: ?Array<*>,
-    cb: (serviceName: ServiceConfigBindAsType) => void): void {
-    if (callbackSetList) {
-      callbackSetList.forEach((callbackSet: ServiceConfigCallbackSetType): void => {
-        const len = callbackSet.length;
-
-        callbackSet.forEach((serviceName:ServiceConfigBindAsType, i: number): void => {
-          if (i < len - 1) {
-            cb(serviceName);
-          }
-        });
-      });
-    }
-  }
-
+  /**
+   * handle OnBind callback item to resolve it
+   */
   handleOnBindItem(bindAs: ServiceConfigBindAsType): void {
     this.lookOverDeps(bindAs, CALLBACK_NAME.BIND,
       (depBindAs: ServiceConfigBindAsType,
@@ -217,6 +206,57 @@ class Binder implements BinderInterface {
         }
       });
   }
+
+  /**
+   * look over all OnUnbind callbacks and resolve dependencies
+   */
+  handleOnUnbind(bindAs: ServiceConfigBindAsType): void {
+    this.lookOverDeps(bindAs, CALLBACK_NAME.BIND,
+      (depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType): void => {
+        const {
+          storeList,
+        } = this.destructCallback(callbackSet);
+
+        if (callbackSet.__locked && this.isListUnBind(storeList)) {
+          // eslint-disable-next-line no-param-reassign
+          delete callbackSet.__locked;
+        }
+      });
+
+    this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND,
+      (depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType, store: *): void => {
+        const {
+          callback,
+          storeList,
+        } = this.destructCallback(callbackSet);
+
+        if (!callbackSet.__locked && this.isListUnBind(storeList)) {
+          this.applyCallback(depBindAs, callbackSet, storeList, callback, store, CALLBACK_NAME.UNBIND);
+        }
+      });
+  }
+
+  /**
+   * handle OnUnbind callback item to resolve it
+   */
+  handleOnUnbindItem(bindAs: ServiceConfigBindAsType): void {
+    this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND,
+      (depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType) => {
+        const {
+          storeList,
+        } = this.destructCallback(callbackSet);
+
+        if (this.isListBind(storeList) && callbackSet.__locked) {
+          // eslint-disable-next-line no-param-reassign
+          delete callbackSet.__locked;
+        }
+      });
+  }
+
+
+  /**
+   * check if callback was resolved if not send warning to console
+   */
   checkCallBackResolved(bindAs: ServiceConfigBindAsType,
     callbackSet: InternalCallbackSetType,
     storeList: ?Array<ServiceConfigBindAsType>): void {
@@ -237,45 +277,10 @@ class Binder implements BinderInterface {
     }, 1000);
   }
 
-  handleOnUnbindItem(bindAs: ServiceConfigBindAsType): void {
-    this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND,
-      (depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType) => {
-        const {
-          storeList,
-        } = this.destructCallback(callbackSet);
 
-        if (this.isListBind(storeList) && callbackSet.__locked) {
-          // eslint-disable-next-line no-param-reassign
-          delete callbackSet.__locked;
-        }
-      });
-  }
-
-  handleOnUnbind(bindAs: ServiceConfigBindAsType): void {
-    this.lookOverDeps(bindAs, CALLBACK_NAME.BIND,
-      (depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType): void => {
-        const {
-          storeList,
-        } = this.destructCallback(callbackSet);
-
-        if (callbackSet.__locked && this.isListUnBind(storeList)) {
-        // eslint-disable-next-line no-param-reassign
-          delete callbackSet.__locked;
-        }
-      });
-
-    this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND,
-      (depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType, store: *): void => {
-        const {
-          callback,
-          storeList,
-        } = this.destructCallback(callbackSet);
-
-        if (!callbackSet.__locked && this.isListUnBind(storeList)) {
-          this.applyCallback(depBindAs, callbackSet, storeList, callback, store, CALLBACK_NAME.UNBIND);
-        }
-      });
-  }
+  /**
+   * apply callback
+   */
 
   applyCallback(bindAs: ServiceConfigBindAsType,
     callbackSet: InternalCallbackSetType,
@@ -295,6 +300,9 @@ class Binder implements BinderInterface {
     }
   }
 
+  /**
+   * get list of service id and return service instance list
+   */
   getStoreList(storeList: ?Array<ServiceConfigBindAsType>): Array<*> {
     return storeList ? storeList.reduce((acc, bindAs) => {
       const store = this.getStore(bindAs);
@@ -305,6 +313,28 @@ class Binder implements BinderInterface {
     }, [])
       : [];
   }
+
+  /**
+   * look over callback list of the service and every iteration call function which was passed as attribute
+   */
+  lookOverCallback(callbackSetList: ?Array<*>,
+    cb: (serviceName: ServiceConfigBindAsType) => void): void {
+    if (callbackSetList) {
+      callbackSetList.forEach((callbackSet: ServiceConfigCallbackSetType): void => {
+        const len = callbackSet.length;
+
+        callbackSet.forEach((serviceName:ServiceConfigBindAsType, i: number): void => {
+          if (i < len - 1) {
+            cb(serviceName);
+          }
+        });
+      });
+    }
+  }
+
+  /**
+   * look over dependency list of the service and every iteration call function which was passed as attribute
+   */
 
   lookOverDeps(bindAs: ServiceConfigBindAsType, callbackType: $Values<typeof CALLBACK_NAME>,
     cb:(depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType, store: *)=>void) {
@@ -329,6 +359,10 @@ class Binder implements BinderInterface {
       });
     }
   }
+
+  /**
+   * validate callback set data format
+   */
 
   validateCallback(options: BinderConfigType, callbackName: $Values<typeof CALLBACK_NAME>): void {
     const { bindAs } = options;
@@ -356,6 +390,9 @@ class Binder implements BinderInterface {
     }
   }
 
+  /**
+   * parse callback
+   */
   parseCallback(callback: ?string | ()=>void, store: *): ?()=>void {
     if (typeof callback === 'function') {
       return callback;
