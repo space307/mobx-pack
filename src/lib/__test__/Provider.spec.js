@@ -312,6 +312,49 @@ describe('Provider test', () => {
   });
 
 
+  it('in helper do not return an object shows stub', (done) => {
+    const storeName = 'test';
+    @bindAs(storeName)
+    class ServiceProto {
+      @onStart
+      onStart() {
+        return true;
+      }
+    }
+
+    const initialState = {};
+    const binder = new Binder();
+    const Component = () => (<div id="count" />);
+
+    const MyStub = () => (<div id="stub">Loading...</div>);
+
+    const ComponentWithProvider = Provider(Component, {
+      helper() {
+        return undefined;
+      },
+      services: [ServiceProto],
+      stub: MyStub,
+    });
+
+    const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
+      <ComponentWithProvider color={1} />
+    </BinderContext.Provider>);
+
+    const wrapper = mount(<ComponentWithBinderContext />);
+
+    expect(wrapper.contains(<div id="stub">Loading...</div>)).toBe(true);
+
+    setTimeout(() => {
+      wrapper.update();
+      setTimeout(() => {
+        wrapper.update();
+        expect(wrapper.contains(<div id="stub">Loading...</div>)).toBe(true);
+        done();
+      });
+    });
+  });
+
+
   it('wrong attributes: no Component passed', (done) => {
     const ComponentWithProvider = Provider();
     expect(() => { shallow(<ComponentWithProvider />); }).toThrowError();
