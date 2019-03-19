@@ -1,4 +1,7 @@
 // @flow
+/**
+ * Provider start services (or get it from binder context) and pass it to ServiceContext to a child components
+ */
 
 import React from 'react';
 import { observer } from 'mobx-react';

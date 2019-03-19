@@ -1,5 +1,9 @@
 // @flow
 
+/**
+ * BinderProvider creates new binder context and provide in to child components through react context
+ */
+
 import React from 'react';
 import Binder from './Binder.js';
 import type { GlobalContextType } from './typing/common';
@@ -8,8 +12,10 @@ export default function CreateBinderProvider(BinderContext: React$Context<Global
   return function BinderProvider(Component: React$ComponentType<*>, initialState?: *): React$ComponentType<*> {
     class ComponentWrapper<PropType> extends
       React.Component<{context:GlobalContextType, props:PropType} > {
+      static contextType = BinderContext;
+
       newContext:GlobalContextType;
-      constructor({ context }) {
+      constructor(props, context) {
         super();
         const contextInitialState = context && context.initialState;
         this.newContext = {
@@ -24,11 +30,7 @@ export default function CreateBinderProvider(BinderContext: React$Context<Global
       }
     }
 
-    return <Props>(props: Props) => (
-      <BinderContext.Consumer>
-        {context => <ComponentWrapper context={context} props={props} /> }
-      </BinderContext.Consumer>
-    );
+    return ComponentWrapper;
   };
 }
 

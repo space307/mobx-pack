@@ -1,6 +1,6 @@
 import React from 'react';
 import '@babel/polyfill';
-import { shallow, configure, mount } from 'enzyme';
+import { configure, mount } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import CreateProvider from '../Provider.jsx';
 import Binder from '../Binder.js';
