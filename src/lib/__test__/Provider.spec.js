@@ -16,9 +16,9 @@ configure({ adapter: new Adapter() });
 
 describe('Provider test', () => {
   it('calls helper && start service normally && pass props to child', (done) => {
-    const storeName = 'test';
+    const serviceName = 'test';
     const countValue = 1;
-    @bindAs(storeName)
+    @bindAs(serviceName)
     class ServiceProto {
          count = countValue;
         @onStart
@@ -45,7 +45,7 @@ describe('Provider test', () => {
 
     const ComponentWithProvider = Provider(Component, {
       helper(service, { pass }) {
-        helperMock(binder.getService(storeName) === service && pass);
+        helperMock(binder.getService(serviceName) === service && pass);
         return {
           pass,
           count: service.count,
@@ -66,7 +66,7 @@ describe('Provider test', () => {
       setTimeout(() => {
         expect(helperMock).toHaveBeenCalledWith(true);
         expect(childPropsMock).toHaveBeenCalledWith(true, true);
-        expect(binder.isBind(storeName)).toBe(true);
+        expect(binder.isBind(serviceName)).toBe(true);
         done();
       });
     });
@@ -76,9 +76,9 @@ describe('Provider test', () => {
     const constructorMock = jest.fn();
 
     const attributeToConstructor = 3;
-    const storeName = 'test';
+    const serviceName = 'test';
 
-    @bindAs(storeName)
+    @bindAs(serviceName)
     class ServiceProto {
       count = 1;
       constructor(count) {
@@ -123,9 +123,9 @@ describe('Provider test', () => {
   it('put services to context', (done) => {
     const consumerMock = jest.fn();
 
-    const storeName = 'test';
+    const serviceName = 'test';
 
-    @bindAs(storeName)
+    @bindAs(serviceName)
     class ServiceProto {
       @onStart
       onStart() {
@@ -142,7 +142,7 @@ describe('Provider test', () => {
     const binder = new Binder();
 
     const Component = () => (<div id="count"><ServiceContext.Consumer>{({ serviceProto }) => {
-      consumerMock(serviceProto === binder.getService(storeName));
+      consumerMock(serviceProto === binder.getService(serviceName));
     }}</ServiceContext.Consumer></div>);
 
 
@@ -167,8 +167,8 @@ describe('Provider test', () => {
 
 
   it('stop only started service', (done) => {
-    const storeName = 'test';
-    @bindAs(storeName)
+    const serviceName = 'test';
+    @bindAs(serviceName)
     class ServiceProto {
       @onStart
       onStart() {
@@ -180,8 +180,8 @@ describe('Provider test', () => {
       }
     }
 
-    const storeName2 = 'test2';
-    @bindAs(storeName2)
+    const serviceName2 = 'test2';
+    @bindAs(serviceName2)
     class ServiceProto2 {
       @onStart
       onStart() {
@@ -220,8 +220,8 @@ describe('Provider test', () => {
 
           wrapper.unmount();
 
-          expect(binder.isBind(storeName)).toBe(true);
-          expect(binder.isBind(storeName2)).toBe(false);
+          expect(binder.isBind(serviceName)).toBe(true);
+          expect(binder.isBind(serviceName2)).toBe(false);
 
           done();
         });
@@ -230,8 +230,8 @@ describe('Provider test', () => {
   });
 
   it('not stop if stop option is not defined', (done) => {
-    const storeName = 'test';
-    @bindAs(storeName)
+    const serviceName = 'test';
+    @bindAs(serviceName)
     class ServiceProto {
       @onStart
       onStart() {
@@ -262,15 +262,15 @@ describe('Provider test', () => {
 
       setTimeout(() => {
         wrapper.unmount();
-        expect(binder.isBind(storeName)).toBe(true);
+        expect(binder.isBind(serviceName)).toBe(true);
         done();
       });
     });
   });
 
   it('stub test', (done) => {
-    const storeName = 'test';
-    @bindAs(storeName)
+    const serviceName = 'test';
+    @bindAs(serviceName)
     class ServiceProto {
       @onStart
       onStart() {
@@ -313,8 +313,8 @@ describe('Provider test', () => {
 
 
   it('in helper do not return an object shows stub', (done) => {
-    const storeName = 'test';
-    @bindAs(storeName)
+    const serviceName = 'test';
+    @bindAs(serviceName)
     class ServiceProto {
       @onStart
       onStart() {
@@ -362,8 +362,8 @@ describe('Provider test', () => {
   });
 
   it('wrong attributes: wrong services', (done) => {
-    const storeName = 'test';
-    @bindAs(storeName)
+    const serviceName = 'test';
+    @bindAs(serviceName)
     class ServiceProto {
       @onStart
       onStart() {

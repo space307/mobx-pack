@@ -59,7 +59,7 @@ describe('serviceDecorators test', () => {
       onBind() {}
 
       @bindServices('test1', 'test2')
-      onBindOnlyGarageStore() {}
+      onBindOnlyGarageService() {}
 
       @unbindServices('test1', 'test2')
       onUnbind() {}

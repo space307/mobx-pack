@@ -33,9 +33,9 @@ function createService() {
   };
 }
 
-function clearServiceMocks(...stores) {
-  stores.forEach((store) => {
-    each(store, (prop) => {
+function clearServiceMocks(...services) {
+  services.forEach((service) => {
+    each(service, (prop) => {
       if (typeof prop === 'function') {
         prop.mockClear();
       }
@@ -75,9 +75,9 @@ describe('Binder test', () => {
   });
 
   it('getService', () => {
-    const store = {};
-    binder.bind(store, createConfig(s1));
-    expect(binder.getService(s1)).toBe(store);
+    const service = {};
+    binder.bind(service, createConfig(s1));
+    expect(binder.getService(s1)).toBe(service);
   });
 
   it('isListBind', () => {
@@ -118,12 +118,12 @@ describe('Binder test', () => {
   });
 
   it('getServiceList', () => {
-    const store1 = {};
-    const store2 = {};
-    binder.bind(store1, createConfig(s1));
-    binder.bind(store2, createConfig(s2));
-    expect(binder.getServiceList([s1, s2])[0]).toBe(store1);
-    expect(binder.getServiceList([s1, s2])[1]).toBe(store2);
+    const service1 = {};
+    const service2 = {};
+    binder.bind(service1, createConfig(s1));
+    binder.bind(service2, createConfig(s2));
+    expect(binder.getServiceList([s1, s2])[0]).toBe(service1);
+    expect(binder.getServiceList([s1, s2])[1]).toBe(service2);
   });
 
   it('setPendingStartResolver', () => {
@@ -141,189 +141,189 @@ describe('Binder test', () => {
   });
 
   describe('onBindTest', () => {
-    function expectSimpleOnBindTest(store1, store2, store3) {
-      expect(store1.onBind1).toBeCalledWith(store2, store3);
-      expect(store1.onBind2).toBeCalledWith(store3);
-      expect(store2.onBind1).toBeCalledWith(store1, store3);
-      expect(store2.onBind2).toBeCalledWith(store1);
-      expect(store3.onBind1).toBeCalledWith(store2, store1);
-      expect(store3.onBind2).toBeCalledWith(store2);
+    function expectSimpleOnBindTest(service1, service2, service3) {
+      expect(service1.onBind1).toBeCalledWith(service2, service3);
+      expect(service1.onBind2).toBeCalledWith(service3);
+      expect(service2.onBind1).toBeCalledWith(service1, service3);
+      expect(service2.onBind2).toBeCalledWith(service1);
+      expect(service3.onBind1).toBeCalledWith(service2, service1);
+      expect(service3.onBind2).toBeCalledWith(service2);
     }
 
     it('simple onBind test', () => {
-      const store1 = createService();
-      const store2 = createService();
-      const store3 = createService();
+      const service1 = createService();
+      const service2 = createService();
+      const service3 = createService();
 
-      binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
-      binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
-      binder.bind(store3, createConfig(s3, [[s2, s1, 'onBind1'], [s2, 'onBind2']]));
+      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
+      binder.bind(service2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
+      binder.bind(service3, createConfig(s3, [[s2, s1, 'onBind1'], [s2, 'onBind2']]));
 
-      expectSimpleOnBindTest(store1, store2, store3);
+      expectSimpleOnBindTest(service1, service2, service3);
     });
 
     it('simple onBind test & different order', () => {
-      const store1 = createService();
-      const store2 = createService();
-      const store3 = createService();
+      const service1 = createService();
+      const service2 = createService();
+      const service3 = createService();
 
-      binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
-      binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
-      binder.bind(store3, createConfig(s3, [[s2, s1, 'onBind1'], [s2, 'onBind2']]));
+      binder.bind(service2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
+      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
+      binder.bind(service3, createConfig(s3, [[s2, s1, 'onBind1'], [s2, 'onBind2']]));
 
-      expectSimpleOnBindTest(store1, store2, store3);
+      expectSimpleOnBindTest(service1, service2, service3);
     });
 
     it('simple onBind test & unbind', () => {
-      const store1 = createService();
-      const store2 = createService();
-      const store3 = createService();
+      const service1 = createService();
+      const service2 = createService();
+      const service3 = createService();
 
-      binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
-      binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
+      binder.bind(service2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
+      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
       binder.unbind(s1);
-      binder.bind(store3, createConfig(s3, [[s2, s1, 'onBind1'], [s2, 'onBind2']]));
+      binder.bind(service3, createConfig(s3, [[s2, s1, 'onBind1'], [s2, 'onBind2']]));
       binder.unbind(s2);
-      binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
-      binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
+      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
+      binder.bind(service2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
 
-      expectSimpleOnBindTest(store1, store2, store3);
+      expectSimpleOnBindTest(service1, service2, service3);
     });
 
 
     it('repeat onBind if service unbind', () => {
-      const store1 = createService();
-      const store2 = createService();
-      const store3 = createService();
+      const service1 = createService();
+      const service2 = createService();
+      const service3 = createService();
 
-      binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1']]));
-      binder.bind(store2, createConfig(s2));
-      binder.bind(store3, createConfig(s3));
+      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1']]));
+      binder.bind(service2, createConfig(s2));
+      binder.bind(service3, createConfig(s3));
       binder.unbind(s2);
       binder.unbind(s3);
-      binder.bind(store2, createConfig(s2));
+      binder.bind(service2, createConfig(s2));
 
-      expect(store1.onBind1).toBeCalledTimes(1);
-      binder.bind(store3, createConfig(s3));
-      expect(store1.onBind1).toBeCalledTimes(2);
+      expect(service1.onBind1).toBeCalledTimes(1);
+      binder.bind(service3, createConfig(s3));
+      expect(service1.onBind1).toBeCalledTimes(2);
     });
 
     it('simple onUnbind test', () => {
-      const store1 = createService();
-      const store2 = createService();
-      const store3 = createService();
+      const service1 = createService();
+      const service2 = createService();
+      const service3 = createService();
 
-      binder.bind(store1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
-      binder.bind(store2, createConfig(s2, null, [[s1, s3, 'onUnbind1'], [s1, 'onUnbind2']]));
-      binder.bind(store3, createConfig(s3, null, [[s2, s1, 'onUnbind1'], [s2, 'onUnbind2']]));
+      binder.bind(service1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
+      binder.bind(service2, createConfig(s2, null, [[s1, s3, 'onUnbind1'], [s1, 'onUnbind2']]));
+      binder.bind(service3, createConfig(s3, null, [[s2, s1, 'onUnbind1'], [s2, 'onUnbind2']]));
 
       binder.unbind(s2);
       binder.unbind(s3);
       binder.unbind(s1);
 
-      expect(store1.onUnbind1).toBeCalled();
-      expect(store1.onUnbind2).toBeCalled();
-      expect(store3.onUnbind2).toBeCalled();
+      expect(service1.onUnbind1).toBeCalled();
+      expect(service1.onUnbind2).toBeCalled();
+      expect(service3.onUnbind2).toBeCalled();
     });
 
     it('simple onUnbind test if service bind', () => {
-      const store1 = createService();
-      const store2 = createService();
-      const store3 = createService();
+      const service1 = createService();
+      const service2 = createService();
+      const service3 = createService();
 
-      binder.bind(store1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
-      binder.bind(store2, createConfig(s2, null, [[s1, s3, 'onUnbind1'], [s1, 'onUnbind2']]));
-      binder.bind(store3, createConfig(s3, null, [[s2, s1, 'onUnbind1'], [s1, 'onUnbind2']]));
+      binder.bind(service1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
+      binder.bind(service2, createConfig(s2, null, [[s1, s3, 'onUnbind1'], [s1, 'onUnbind2']]));
+      binder.bind(service3, createConfig(s3, null, [[s2, s1, 'onUnbind1'], [s1, 'onUnbind2']]));
       binder.unbind(s1);
       binder.unbind(s2);
-      binder.bind(store1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
+      binder.bind(service1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
       binder.unbind(s1);
-      binder.bind(store1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
-      binder.bind(store2, createConfig(s2, null, [[s1, s3, 'onUnbind1'], [s1, 'onUnbind2']]));
+      binder.bind(service1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
+      binder.bind(service2, createConfig(s2, null, [[s1, s3, 'onUnbind1'], [s1, 'onUnbind2']]));
       binder.unbind(s1);
       binder.unbind(s2);
 
-      expect(store3.onUnbind1).toBeCalledTimes(2);
-      expect(store3.onUnbind2).toBeCalledTimes(3);
+      expect(service3.onUnbind1).toBeCalledTimes(2);
+      expect(service3.onUnbind2).toBeCalledTimes(3);
     });
 
     it('localBinder test', () => {
-      const store1 = createService();
-      const store2 = createService();
+      const service1 = createService();
+      const service2 = createService();
 
-      binder.bind(store1, createConfig(s1));
-      localBinder.bind(store2, createConfig(s2, [[s1, 'onBind1']], [[s1, 'onUnbind1']]));
+      binder.bind(service1, createConfig(s1));
+      localBinder.bind(service2, createConfig(s2, [[s1, 'onBind1']], [[s1, 'onUnbind1']]));
       binder.unbind(s1);
-      binder.bind(store1, createConfig(s1));
+      binder.bind(service1, createConfig(s1));
 
-      expect(store2.onBind1).toBeCalledWith(store1);
-      expect(store2.onBind1).toBeCalledTimes(2);
-      expect(store2.onUnbind1).toBeCalledTimes(1);
+      expect(service2.onBind1).toBeCalledWith(service1);
+      expect(service2.onBind1).toBeCalledTimes(2);
+      expect(service2.onUnbind1).toBeCalledTimes(1);
     });
 
 
     it('common binder + localBinder test', () => {
-      const store1 = createService();
-      const store2 = createService();
-      const store3 = createService();
-      const store4 = createService();
-      const store5 = createService();
+      const service1 = createService();
+      const service2 = createService();
+      const service3 = createService();
+      const service4 = createService();
+      const service5 = createService();
 
-      binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s2, 'onBind2']]));
-      binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
-      binder.bind(store3, createConfig(s3, [[s2, s1, 'onBind1'], [s1, 'onBind2']],
+      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s2, 'onBind2']]));
+      binder.bind(service2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
+      binder.bind(service3, createConfig(s3, [[s2, s1, 'onBind1'], [s1, 'onBind2']],
         [[s2, s1, 'onUnbind1'], [s1, 'onUnbind2']]));
-      localBinder.bind(store4, createConfig(s4, [[s5, s1, 'onBind1'], [s1, 'onBind2']]));
-      localBinder.bind(store5, createConfig(s5, [[s4, s2, 'onBind1'], [s2, 'onBind2']],
+      localBinder.bind(service4, createConfig(s4, [[s5, s1, 'onBind1'], [s1, 'onBind2']]));
+      localBinder.bind(service5, createConfig(s5, [[s4, s2, 'onBind1'], [s2, 'onBind2']],
         [[s4, s2, 'onUnbind1'], [s2, 'onUnbind2']]));
 
-      expect(store1.onBind1).toBeCalledWith(store2, store3);
-      expect(store1.onBind1).toBeCalledTimes(1);
-      expect(store1.onBind2).toBeCalledWith(store2);
-      expect(store1.onBind2).toBeCalledTimes(1);
+      expect(service1.onBind1).toBeCalledWith(service2, service3);
+      expect(service1.onBind1).toBeCalledTimes(1);
+      expect(service1.onBind2).toBeCalledWith(service2);
+      expect(service1.onBind2).toBeCalledTimes(1);
 
-      expect(store2.onBind1).toBeCalledWith(store1, store3);
-      expect(store2.onBind1).toBeCalledTimes(1);
-      expect(store2.onBind2).toBeCalledWith(store1);
-      expect(store2.onBind2).toBeCalledTimes(1);
+      expect(service2.onBind1).toBeCalledWith(service1, service3);
+      expect(service2.onBind1).toBeCalledTimes(1);
+      expect(service2.onBind2).toBeCalledWith(service1);
+      expect(service2.onBind2).toBeCalledTimes(1);
 
-      expect(store3.onBind1).toBeCalledWith(store2, store1);
-      expect(store3.onBind1).toBeCalledTimes(1);
-      expect(store3.onBind2).toBeCalledWith(store1);
-      expect(store3.onBind2).toBeCalledTimes(1);
+      expect(service3.onBind1).toBeCalledWith(service2, service1);
+      expect(service3.onBind1).toBeCalledTimes(1);
+      expect(service3.onBind2).toBeCalledWith(service1);
+      expect(service3.onBind2).toBeCalledTimes(1);
 
-      expect(store4.onBind1).toBeCalledWith(store5, store1);
-      expect(store4.onBind1).toBeCalledTimes(1);
-      expect(store4.onBind2).toBeCalledWith(store1);
-      expect(store4.onBind2).toBeCalledTimes(1);
+      expect(service4.onBind1).toBeCalledWith(service5, service1);
+      expect(service4.onBind1).toBeCalledTimes(1);
+      expect(service4.onBind2).toBeCalledWith(service1);
+      expect(service4.onBind2).toBeCalledTimes(1);
 
-      expect(store5.onBind1).toBeCalledWith(store4, store2);
-      expect(store5.onBind1).toBeCalledTimes(1);
-      expect(store5.onBind2).toBeCalledWith(store2);
-      expect(store5.onBind2).toBeCalledTimes(1);
+      expect(service5.onBind1).toBeCalledWith(service4, service2);
+      expect(service5.onBind1).toBeCalledTimes(1);
+      expect(service5.onBind2).toBeCalledWith(service2);
+      expect(service5.onBind2).toBeCalledTimes(1);
 
-      clearServiceMocks(store1, store2, store3, store4, store5);
+      clearServiceMocks(service1, service2, service3, service4, service5);
 
       binder.unbind(s1);
       binder.unbind(s2);
-      binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s2, 'onBind2']]));
+      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s2, 'onBind2']]));
       binder.unbind(s1);
-      binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s2, 'onBind2']]));
-      expect(store3.onUnbind1).toBeCalledTimes(1);
-      expect(store3.onUnbind2).toBeCalledTimes(2);
-      binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
+      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s2, 'onBind2']]));
+      expect(service3.onUnbind1).toBeCalledTimes(1);
+      expect(service3.onUnbind2).toBeCalledTimes(2);
+      binder.bind(service2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
 
-      expect(store3.onBind1).toBeCalledWith(store2, store1);
-      expect(store3.onBind1).toBeCalledTimes(1);
-      expect(store3.onBind2).toBeCalledWith(store1);
-      expect(store3.onBind2).toBeCalledTimes(2);
+      expect(service3.onBind1).toBeCalledWith(service2, service1);
+      expect(service3.onBind1).toBeCalledTimes(1);
+      expect(service3.onBind2).toBeCalledWith(service1);
+      expect(service3.onBind2).toBeCalledTimes(2);
 
-      clearServiceMocks(store1, store2, store3, store4, store5);
+      clearServiceMocks(service1, service2, service3, service4, service5);
       binder.unbind(s2);
       localBinder.unbind(s4);
 
-      expect(store5.onUnbind1).toBeCalledTimes(1);
-      expect(store5.onUnbind2).toBeCalledTimes(1);
+      expect(service5.onUnbind1).toBeCalledTimes(1);
+      expect(service5.onUnbind2).toBeCalledTimes(1);
     });
   });
 });

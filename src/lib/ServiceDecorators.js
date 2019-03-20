@@ -2,7 +2,7 @@
 
 import type { ServiceConfigType } from './typing/common.js';
 
-type StoreType = Class<*>;
+type ServiceType = Class<*>;
 
 
 function validateName(name: string): boolean {
@@ -32,10 +32,10 @@ function createConfig(): ServiceConfigType {
 
 function putServiceNamesToConfig(
   serviceNames: Array<string>,
-  store: StoreType,
+  service: ServiceType,
   callbackName: string,
   optionName: string): void {
-  const proto = store.constructor;
+  const proto = service.constructor;
   if (!proto.binderConfig || !proto.binderConfig.config) {
     proto.binderConfig = createConfig();
   }
@@ -58,8 +58,8 @@ function putServiceNamesToConfig(
 }
 
 
-function putMethodNameToConfig(store: StoreType, callbackName: string, optionName: string): void {
-  const proto = store.constructor;
+function putMethodNameToConfig(service: ServiceType, callbackName: string, optionName: string): void {
+  const proto = service.constructor;
   if (!proto.binderConfig) {
     proto.binderConfig = createConfig();
   }
@@ -67,64 +67,64 @@ function putMethodNameToConfig(store: StoreType, callbackName: string, optionNam
 }
 
 
-export function bindAs(storeName: string): (store: StoreType) => StoreType {
-  if (typeof storeName === 'function') {
-    throw new Error(`Wrong attributes passed to bindAs decorator (service:${storeName.name}).`);
+export function bindAs(serviceName: string): (service: ServiceType) => ServiceType {
+  if (typeof serviceName === 'function') {
+    throw new Error(`Wrong attributes passed to bindAs decorator (service:${serviceName.name}).`);
   }
-  return (store: StoreType): StoreType => {
-    if (!validateName(storeName)) {
-      throw new Error(`Wrong name "${storeName}" passed to bindAs decorator (service:${store.name}).`);
+  return (service: ServiceType): ServiceType => {
+    if (!validateName(serviceName)) {
+      throw new Error(`Wrong name "${serviceName}" passed to bindAs decorator (service:${service.name}).`);
     }
 
-    if (!store.binderConfig || !store.binderConfig.config) {
-      store.binderConfig = createConfig();
+    if (!service.binderConfig || !service.binderConfig.config) {
+      service.binderConfig = createConfig();
     }
-    store.binderConfig.config.bindAs = storeName;
-    return store;
+    service.binderConfig.config.bindAs = serviceName;
+    return service;
   };
 }
 
 
 export function bindServices(
   ...serviceNames: Array<string>
-): (store: StoreType, callbackName: string) => StoreType {
+): (service: ServiceType, callbackName: string) => ServiceType {
   if (!serviceNames.length || !validateNameList(serviceNames)) {
     throw new Error(`Wrong attributes passed to bindServices decorator (${serviceNames.join(',')}).`);
   }
 
-  return (store: StoreType, callbackName: string): StoreType => {
-    // console.log([1, serviceNames, store, callbackName]);
+  return (service: ServiceType, callbackName: string): ServiceType => {
+    // console.log([1, serviceNames, service, callbackName]);
 
-    putServiceNamesToConfig(serviceNames, store, callbackName, 'onBind');
-    return store;
+    putServiceNamesToConfig(serviceNames, service, callbackName, 'onBind');
+    return service;
   };
 }
 
 export function unbindServices(
   ...serviceNames: Array<string>
-): (store: StoreType, callbackName: string) => StoreType {
+): (service: ServiceType, callbackName: string) => ServiceType {
   if (!serviceNames.length || !validateNameList(serviceNames)) {
     throw new Error(`Wrong attributes passed to unbindServices decorator (${serviceNames.join(',')}).`);
   }
-  return (store: StoreType, callbackName: string): StoreType => {
-    putServiceNamesToConfig(serviceNames, store, callbackName, 'onUnbind');
-    return store;
+  return (service: ServiceType, callbackName: string): ServiceType => {
+    putServiceNamesToConfig(serviceNames, service, callbackName, 'onUnbind');
+    return service;
   };
 }
 
 
-export function onStart(store: StoreType, callbackName: string) {
-  putMethodNameToConfig(store, callbackName, 'onStart');
-  return store;
+export function onStart(service: ServiceType, callbackName: string) {
+  putMethodNameToConfig(service, callbackName, 'onStart');
+  return service;
 }
 
-export function onStop(store: StoreType, callbackName: string) {
-  putMethodNameToConfig(store, callbackName, 'onStop');
-  return store;
+export function onStop(service: ServiceType, callbackName: string) {
+  putMethodNameToConfig(service, callbackName, 'onStop');
+  return service;
 }
 
 
-/* @bindAs('TestStore')
+/* @bindAs('TestService')
 class Test {
   @onStart
    onStart() {

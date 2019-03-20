@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Binder test addStore 1`] = `
+exports[`Binder test addService 1`] = `
 Array [
   "s1",
   Object {

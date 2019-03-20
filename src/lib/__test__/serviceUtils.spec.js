@@ -39,9 +39,9 @@ describe('serviceUtils test', () => {
   });
 
   it('startService async', (done) => {
-    const storeName = 'test';
+    const serviceName = 'test';
 
-    @bindAs(storeName)
+    @bindAs(serviceName)
     class ServiceProto {
       @onStart
       onStart() {
@@ -58,18 +58,18 @@ describe('serviceUtils test', () => {
     const binder = new Binder();
 
     startService(binder, initialState, getConfig(ServiceProto)).then(({ service, started, serviceStartConfig }) => {
-      expect(binder.isBind(storeName)).toBe(true);
+      expect(binder.isBind(serviceName)).toBe(true);
       expect(serviceStartConfig.proto).toBe(ServiceProto);
       expect(started).toBe(true);
-      expect(service).toBe(binder.getService(storeName));
+      expect(service).toBe(binder.getService(serviceName));
       done();
     });
   });
 
   it('startService async', (done) => {
-    const storeName = 'test';
+    const serviceName = 'test';
 
-    @bindAs(storeName)
+    @bindAs(serviceName)
     class ServiceProto {
       @onStart
       onStart() {
@@ -81,18 +81,18 @@ describe('serviceUtils test', () => {
 
     const binder = new Binder();
     startService(binder, initialState, getConfig(ServiceProto)).then(({ service, started, serviceStartConfig }) => {
-      expect(binder.isBind(storeName)).toBe(true);
+      expect(binder.isBind(serviceName)).toBe(true);
       expect(serviceStartConfig.proto).toBe(ServiceProto);
       expect(started).toBe(true);
-      expect(service).toBe(binder.getService(storeName));
+      expect(service).toBe(binder.getService(serviceName));
       done();
     });
   });
 
   it('startService negative start async', (done) => {
-    const storeName = 'test';
+    const serviceName = 'test';
 
-    @bindAs(storeName)
+    @bindAs(serviceName)
     class ServiceProto {
       @onStart
       onStart() {
@@ -114,9 +114,9 @@ describe('serviceUtils test', () => {
   });
 
   it('startService negative start sync', (done) => {
-    const storeName = 'test';
+    const serviceName = 'test';
 
-    @bindAs(storeName)
+    @bindAs(serviceName)
     class ServiceProto {
       @onStart
       onStart() {
@@ -135,9 +135,9 @@ describe('serviceUtils test', () => {
 
 
   it('onStart callback', (done) => {
-    const storeName = 'test';
+    const serviceName = 'test';
 
-    @bindAs(storeName)
+    @bindAs(serviceName)
     class ServiceProto {
       @onStart
       onStart(initialState) {
@@ -157,9 +157,9 @@ describe('serviceUtils test', () => {
   });
 
   it('double service start && Promise', (done) => {
-    const storeName = 'test';
+    const serviceName = 'test';
 
-    @bindAs(storeName)
+    @bindAs(serviceName)
     class ServiceProto {
       @onStart
       onStart(initialState) {
@@ -250,8 +250,8 @@ describe('serviceUtils test', () => {
   });
 
   it('stopService', () => {
-    const storeName = 'test';
-    @bindAs(storeName)
+    const serviceName = 'test';
+    @bindAs(serviceName)
     class ServiceProto {
       @onStop
       onStop(initialState) {
@@ -266,16 +266,16 @@ describe('serviceUtils test', () => {
     const config = getConfig(ServiceProto);
 
     binder.bind(service, config.binderConfig.config);
-    expect(binder.isBind(storeName)).toBe(true);
+    expect(binder.isBind(serviceName)).toBe(true);
     stopService(binder, getConfig(ServiceProto));
 
-    expect(binder.isBind(storeName)).toBe(false);
+    expect(binder.isBind(serviceName)).toBe(false);
     expect(service.test).toBeCalled();
   });
 
   it('stopServices', () => {
-    const storeName1 = 'test1';
-    @bindAs(storeName1)
+    const serviceName1 = 'test1';
+    @bindAs(serviceName1)
     class ServiceProto1 {
       @onStop
       onStop(initialState) {
@@ -285,8 +285,8 @@ describe('serviceUtils test', () => {
       test = jest.fn();
     }
 
-    const storeName2 = 'test2';
-    @bindAs(storeName2)
+    const serviceName2 = 'test2';
+    @bindAs(serviceName2)
     class ServiceProto2 {
       @onStop
       onStop(initialState) {
@@ -305,12 +305,12 @@ describe('serviceUtils test', () => {
 
     binder.bind(service1, config1.binderConfig.config);
     binder.bind(service2, config2.binderConfig.config);
-    expect(binder.isBind(storeName1)).toBe(true);
-    expect(binder.isBind(storeName2)).toBe(true);
+    expect(binder.isBind(serviceName1)).toBe(true);
+    expect(binder.isBind(serviceName2)).toBe(true);
     stopServices(binder, [getConfig(ServiceProto1), getConfig(ServiceProto2)]);
-    expect(binder.isBind(storeName1)).toBe(false);
+    expect(binder.isBind(serviceName1)).toBe(false);
     expect(service1.test).toBeCalled();
-    expect(binder.isBind(storeName2)).toBe(false);
+    expect(binder.isBind(serviceName2)).toBe(false);
     expect(service2.test).toBeCalled();
   });
 });

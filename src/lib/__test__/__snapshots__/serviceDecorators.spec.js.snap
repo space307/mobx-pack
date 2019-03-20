@@ -13,7 +13,7 @@ Object {
       Array [
         "test1",
         "test2",
-        "onBindOnlyGarageStore",
+        "onBindOnlyGarageService",
       ],
     ],
     "onUnbind": Array [
