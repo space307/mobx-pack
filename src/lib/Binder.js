@@ -335,7 +335,6 @@ class Binder implements BinderInterface {
   /**
    * look over dependency list of the service and every iteration call function which was passed as attribute
    */
-
   lookOverDeps(bindAs: ServiceConfigBindAsType, callbackType: $Values<typeof CALLBACK_NAME>,
     cb:(depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType, store: *)=>void) {
     const list = this.depsList[callbackType][bindAs];
@@ -363,7 +362,6 @@ class Binder implements BinderInterface {
   /**
    * validate callback set data format
    */
-
   validateCallback(options: BinderConfigType, callbackName: $Values<typeof CALLBACK_NAME>): void {
     const { bindAs } = options;
 
@@ -402,6 +400,9 @@ class Binder implements BinderInterface {
     return null;
   }
 
+  /**
+   * return true if all services from list are bind
+   */
   isListBind(list: ?Array<ServiceConfigBindAsType>): boolean {
     return list ? list.reduce((acc, bindAs) => {
       if (!this.isBind(bindAs)) {
@@ -413,6 +414,9 @@ class Binder implements BinderInterface {
       : false;
   }
 
+  /**
+   * return list of ids for not bind services
+   */
   getNotBind(list: ?Array<ServiceConfigBindAsType>): Array<ServiceConfigBindAsType> {
     return list ? list.reduce((acc, bindAs) => {
       if (!this.isBind(bindAs)) {
@@ -422,6 +426,9 @@ class Binder implements BinderInterface {
     }, []) : [];
   }
 
+  /**
+   * return true if all services from list are unbind
+   */
   isListUnBind(list: ?Array<ServiceConfigBindAsType>): boolean {
     return list ? list.reduce((acc, bindAs) => {
       if (this.isBind(bindAs)) {
@@ -432,10 +439,16 @@ class Binder implements BinderInterface {
     }, true) : true;
   }
 
+  /**
+   * return true if service bind to parent Binder
+   */
   isBindOnParent(bindAs: ServiceConfigBindAsType): boolean {
     return !!(this.parentBinder && this.parentBinder.isBind(bindAs));
   }
 
+  /**
+   * destruct callback set to service list and callback function or function name
+   */
   destructCallback(list: InternalCallbackSetType):
     {callback: ?string | ()=>void, storeList: ?Array<ServiceConfigBindAsType>} {
     const len = list && list.length;
@@ -448,14 +461,23 @@ class Binder implements BinderInterface {
     };
   }
 
+  /**
+   * return true if service bind
+   */
   isBind(bindAs: ServiceConfigBindAsType): boolean {
     return !!(this.stores[bindAs] && this.stores[bindAs].store);
   }
 
+  /**
+   * return settings of the service
+   */
   getStoreSettings(bindAs: ServiceConfigBindAsType): ?StoreSettingsType {
     return this.stores[bindAs];
   }
 
+  /**
+   * save hash of dependencies of one service to another
+   */
   saveDeps(bindAs: ServiceConfigBindAsType, callbackType: $Values<typeof CALLBACK_NAME>): void {
     if (this.isBindOnParent(bindAs)) {
       return;
@@ -484,9 +506,16 @@ class Binder implements BinderInterface {
     }
   }
 
+  /**
+   * return promise resolve for starting service
+   */
   getPendingStartResolver(bindAs:ServiceConfigBindAsType): ?Promise<*> {
     return this.pendingStartResolvers[bindAs];
   }
+
+  /**
+   * save promise resolve for starting service to avoid double call of onStart function
+   */
   setPendingStartResolver(bindAs:ServiceConfigBindAsType, resolver: ?Promise<*>): void{
     if (resolver) {
       this.pendingStartResolvers[bindAs] = resolver;
@@ -495,6 +524,9 @@ class Binder implements BinderInterface {
     }
   }
 
+  /**
+   * unbind service
+   */
   unbind(bindAs: ServiceConfigBindAsType): void {
     const storeSettings = this.getStoreSettings(bindAs);
 
@@ -553,16 +585,17 @@ class Binder implements BinderInterface {
     this.emitter.emit(EMITTER_EVENT.UNBIND, bindAs);
   }
 
+  /**
+   * return bind service
+   */
   getStore(bindAs: ServiceConfigBindAsType): * {
     const settings = this.getStoreSettings(bindAs);
     return settings && settings.store;
   }
 
-  isDebug(bindAs: ServiceConfigBindAsType): ?boolean {
-    const settings = this.getStoreSettings(bindAs);
-    return settings && settings.options ? settings.options.debug : false;
-  }
-
+  /**
+   * clear all binder data
+   */
   clear(): void {
     this.stores = {};
     this.depsList = {
@@ -572,6 +605,10 @@ class Binder implements BinderInterface {
     this.emitter.clear();
   }
 
+
+  /**
+   * show message to console
+   */
   showMessage(msg: string, type: string = 'info'): void {
     if (process.env.NODE_ENV === 'test') {
       return;
@@ -587,6 +624,12 @@ class Binder implements BinderInterface {
   }
 
   /* -- Legacy -- */
+
+  isDebug(bindAs: ServiceConfigBindAsType): ?boolean {
+    const settings = this.getStoreSettings(bindAs);
+    return settings && settings.options ? settings.options.debug : false;
+  }
+
   processStore(from: *, to: *) {
     if (from.bindAs !== to.bindAs) {
       const { importData } = to.options;
