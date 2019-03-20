@@ -1,0 +1,6 @@
+// @flow
+
+export type { BinderInterface } from 'src/lib/typing/binderInterface.js';
+export type { ServiceConnectorOptionsTypes } from 'src/lib/typing/serviceConnectorTypes.js';
+export type { BinderConfigType, ServiceConfigType,
+  ServiceClassType, ServiceStartConfigType, StartServiceReturnType } from 'src/lib/typing/common.js';

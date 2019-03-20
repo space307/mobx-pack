@@ -1,10 +1,9 @@
 // @flow
 import React from 'react';
 import { Binder } from 'sources.js';
-import { initialState } from './Environment.js';
+import type { ServiceInterfaces } from './typing/types.js';
 
+type BinderContextType = ?{ binder: Binder, initialState: * };
 
-export const GlobalContext = { binder: new Binder(), initialState };
-export const BinderContext: React$Context<*> = React.createContext();
-export const ServiceContext: React$Context<?{[key:string]:*}> = React.createContext();
-
+export const BinderContext: React$Context<BinderContextType> = React.createContext();
+export const ServiceContext: React$Context<ServiceInterfaces> = React.createContext();

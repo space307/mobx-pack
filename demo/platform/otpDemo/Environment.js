@@ -2,7 +2,8 @@
 /* eslint-disable no-console */
 import { observable } from 'mobx';
 import { onStop, onStart, unbindServices, bindServices, bindAs } from 'sources.js';
-
+import type { CarStoreInterface, GarageStoreInterface,
+  TimeServiceInterface, InitialStateInterface } from './typing/types.js';
 
 const SERVICE_NAMES = {
   GARAGE_STORE: 'GARAGE_STORE',
@@ -12,10 +13,6 @@ const SERVICE_NAMES = {
 
 
 /* -- TimeService --*/
-
-interface TimeServiceInterface {
-  +time: string;
-}
 
 @bindAs(SERVICE_NAMES.TIME_SERVICE)
 class TimeService implements TimeServiceInterface {
@@ -41,15 +38,11 @@ class TimeService implements TimeServiceInterface {
 /* --/ TimeService --*/
 
 /* -- GarageStore --*/
-interface GarageStoreInterface {
-  +counter: number;
-  setCount(count: number): void;
-}
-
 @bindAs(SERVICE_NAMES.GARAGE_STORE)
 class GarageStore implements GarageStoreInterface {
   @observable
   counter: number = 0;
+  privateField: number = 0;
 
   @onStart
   onStart(initialService: *): Promise<*> {
@@ -94,11 +87,6 @@ class GarageStore implements GarageStoreInterface {
 
 
 /* -- CarStore --*/
-interface CarStoreInterface {
-  +modelName: string;
-  setModelName(modelName: string): void
-}
-
 @bindAs(SERVICE_NAMES.CAR_STORE)
 class CarStore implements CarStoreInterface {
   @observable
@@ -130,20 +118,12 @@ class CarStore implements CarStoreInterface {
     console.log(['onBind', SERVICE_NAMES.CAR_STORE]);
   }
 }
-
+/* --/ CarStore --*/
 
 export { CarStore, GarageStore, TimeService };
 
 
-/* --/ CarStore --*/
-
-
 /* -- InitialState --*/
-interface InitialStateInterface {
-  +vip: boolean;
-  +abTest: boolean;
-}
-
 class InitialState implements InitialStateInterface {
   vip: boolean = false;
   abTest: boolean = true;

@@ -1,32 +1,42 @@
-/*  eslint-disable */
+// @flow
+/* eslint-disable react/no-multi-comp */
 import React from 'react';
-import { observer, Observer } from 'mobx-react';
+import { Observer } from 'mobx-react';
+import { Binder } from 'sources.js';
 
 import { GarageStore, TimeService, CarStore } from './Environment.js';
 import { BinderContext, ServiceContext } from './ComponentContext.js';
 import { Provider, BinderProvider } from './Provider.jsx';
-import { Binder } from 'sources.js';
+import type { ServiceInterfaces } from './typing/types.js';
 
+type DriverPropType = {
+  modelName: string,
+  time: string,
+}
 
-
-
-class Driver extends React.PureComponent {
+class Driver extends React.PureComponent<DriverPropType> {
   render() {
-    console.log(['Driver render']);
+    // console.log(['Driver render']);
     return (<div>Driver!!! modelName:{this.props.modelName} time: {this.props.time}
     </div>);
   }
 }
 
-const DriverContainer = ()=>(<ServiceContext.Consumer>{
-  ({carStore, timeService})=>(<Observer>{()=>(<Driver modelName={carStore.modelName} time={timeService.time}/>)}</Observer>)
+const DriverContainer = () => (<ServiceContext.Consumer>{
+  ({ carStore, timeService }: $Shape<ServiceInterfaces>) =>
+    (<Observer>{() => (<Driver modelName={carStore.modelName} time={timeService.time} />)}</Observer>)
 }</ServiceContext.Consumer>);
 
 
-class Car extends React.PureComponent {
+type CarPropType = {
+  modelName: string,
+  time: string,
+}
+
+class Car extends React.PureComponent<CarPropType> {
   render() {
-    //console.log(['Car render']);
-    const {modelName, time} = this.props;
+    // console.log(['Car render']);
+    const { modelName, time } = this.props;
 
     return (<div>
       <h1>Car</h1>
@@ -40,24 +50,30 @@ class Car extends React.PureComponent {
 const CarContainer = Provider(
   Car,
   {
-    helper({carStore, timeService}){
-
-
+    helper({ carStore, timeService }: $Shape<ServiceInterfaces>): CarPropType {
       return {
         modelName: carStore.modelName,
         time: timeService.time,
-      }
+      };
     },
-    services: (props)=>[[CarStore, [props.modelName]], TimeService],
-    stop: true
-  }
+    services: props => [[CarStore, [props.modelName]], TimeService],
+    stop: true,
+  },
 );
 
+type GarageStateType = {
+  visible: boolean,
+  cars: Array<string>,
+}
+type GaragePropType = {
+  counter: number,
+  color: number,
+}
 
-  class Garage extends React.Component {
+class Garage extends React.Component<GaragePropType, GarageStateType > {
     state={
       visible: false,
-      cars:[]
+      cars: [],
     };
 
     addCar = () => {
@@ -71,29 +87,29 @@ const CarContainer = Provider(
     this.setState({ cars });
   };
 
-    render() {
-      const {counter, color} = this.props;
-      //console.log(['Garage render', counter, color]);
+  render() {
+    // console.log(['Garage render']);
 
-      return (<div>
-        <h1>Garage</h1>
-        <div>Counter: {counter}</div>
-        <div>Color: {color}</div>
-        {
-          this.state.cars.map((modelName, index)=><CarContainer key={index} modelName={modelName}/>)
-        }
-        <button onClick={this.addCar}>Add car</button>
-        <button onClick={this.removeCar}>Remove Car</button>
-      </div>);
-    }
+    const { counter, color } = this.props;
+
+    return (<div>
+      <h1>Garage</h1>
+      <div>Counter: {counter}</div>
+      <div>Color: {color}</div>
+      {
+        this.state.cars.map((modelName, index) => <CarContainer key={index} modelName={modelName} />)
+      }
+      <button onClick={this.addCar}>Add car</button>
+      <button onClick={this.removeCar}>Remove Car</button>
+    </div>);
+  }
 }
 
 
 const GarageContainer = Provider(
   Garage,
   {
-    helper({garageStore}, { color }) {
-
+    helper({ garageStore }: $Shape<ServiceInterfaces>, { color }): GaragePropType {
       return {
         color,
         counter: garageStore.counter,
@@ -103,9 +119,11 @@ const GarageContainer = Provider(
   });
 
 
-
-
-class MyApplication extends React.Component {
+type MyApplicationStateType = {
+  timer: number,
+  color: string,
+}
+class MyApplication extends React.Component<{}, MyApplicationStateType> {
   state = {
     timer: 0,
     color: 'dark',
@@ -115,7 +133,7 @@ class MyApplication extends React.Component {
 
   componentDidMount() {
     setInterval(() => {
-      this.setState({timer: this.state.timer += 1});
+      this.setState({ timer: this.state.timer += 1 });
     }, 1000);
 
     setTimeout(() => {
@@ -124,7 +142,7 @@ class MyApplication extends React.Component {
   }
 
   render() {
-    //console.log(['MyApplication']);
+    // console.log(['MyApplication']);
     return (
       <div>
         <h1>My Application </h1>
@@ -135,13 +153,11 @@ class MyApplication extends React.Component {
 }
 
 const WithNewBinder = BinderProvider(
-  Provider(MyApplication, { services: [TimeService] })
+  Provider(MyApplication, { services: [TimeService] }),
 );
 
 
-export default ()=>(
-  <BinderContext.Provider value={{binder: new Binder(), initialState:{hello:1}}}>
+export default () => (
+  <BinderContext.Provider value={{ binder: new Binder(), initialState: { hello: 1 } }}>
     <WithNewBinder />
-  </BinderContext.Provider>)
-
-
+  </BinderContext.Provider>);

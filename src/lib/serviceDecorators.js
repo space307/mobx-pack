@@ -93,8 +93,6 @@ export function bindServices(
   }
 
   return (service: ServiceType, callbackName: string): ServiceType => {
-    // console.log([1, serviceNames, service, callbackName]);
-
     putServiceNamesToConfig(serviceNames, service, callbackName, 'onBind');
     return service;
   };
@@ -122,31 +120,3 @@ export function onStop(service: ServiceType, callbackName: string) {
   putMethodNameToConfig(service, callbackName, 'onStop');
   return service;
 }
-
-
-/* @bindAs('TestService')
-class Test {
-  @onStart
-   onStart() {
-
-   }
-
-  @bindServices('ImportantService')
-  onBind() {
-
-  }
-  @bindServices('ImportantService2')
-  onBindService2() {
-
-  }
-  @unbindServices('ImportantService2')
-  onUnbind() {
-
-  }
-
-  @onStop
-  onStop() {
-
-  }
- } */
-

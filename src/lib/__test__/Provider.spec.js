@@ -4,7 +4,7 @@ import { configure, mount, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import CreateProvider from '../Provider.jsx';
 import Binder from '../Binder.js';
-import { bindAs, onStart } from '../ServiceDecorators.js';
+import { bindAs, onStart } from '../serviceDecorators.js';
 import { startService } from '../serviceUtils.js';
 
 const BinderContext = React.createContext();
