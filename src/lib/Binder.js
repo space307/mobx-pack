@@ -41,9 +41,9 @@ const MESSAGE_TYPES = {
 };
 
 
-type StoreSettingsType = {
+type ServiceSettingsType = {
   bindAs: ServiceConfigBindAsType,
-  store: *,
+  service: *,
   options: BinderConfigType,
   disposers:{
     list: Array<*>,
@@ -52,7 +52,7 @@ type StoreSettingsType = {
 };
 
 class Binder implements BinderInterface {
-  stores: { [key: ServiceConfigBindAsType]: ?StoreSettingsType } = {};
+  services: { [key: ServiceConfigBindAsType]: ?ServiceSettingsType } = {};
 
   depsList: { [key: string]: { [key: ServiceConfigBindAsType]: Array<ServiceConfigBindAsType> } } = {
     [CALLBACK_NAME.BIND]: {},
@@ -70,12 +70,12 @@ class Binder implements BinderInterface {
   constructor(parentBinder: BinderInterface): void {
     if (parentBinder instanceof Binder) {
       this.parentBinder = parentBinder;
-      each(parentBinder.stores, ({ store, options }: {store: *, options: BinderConfigType}): void => {
-        this.addStore(store, options);
+      each(parentBinder.services, ({ service, options }: {service: *, options: BinderConfigType}): void => {
+        this.addService(service, options);
       });
 
-      parentBinder.emitter.subscribe(EMITTER_EVENT.BIND, ({ store, options }): void => {
-        this.bind(store, options);
+      parentBinder.emitter.subscribe(EMITTER_EVENT.BIND, ({ service, options }): void => {
+        this.bind(service, options);
       });
 
       parentBinder.emitter.subscribe(EMITTER_EVENT.UNBIND, (bindAs: ServiceConfigBindAsType): void => {
@@ -89,7 +89,7 @@ class Binder implements BinderInterface {
   /**
    * bind service to the binder
    */
-  bind(store: *, options: BinderConfigType): void {
+  bind(service: *, options: BinderConfigType): void {
     if (!options) {
       throw new Error('Binder options is not valid');
     }
@@ -98,31 +98,31 @@ class Binder implements BinderInterface {
 
 
     if (typeof bindAs !== 'string' || !bindAs.length) {
-      throw new Error(`Store "${protoName(store)}" has not valid "bindAs" id "${bindAs}".`);
+      throw new Error(`Service "${protoName(service)}" has not valid "bindAs" id "${bindAs}".`);
     }
 
     this.validateCallback(options, CALLBACK_NAME.BIND);
     this.validateCallback(options, CALLBACK_NAME.UNBIND);
 
     if (this.isBind(bindAs)) {
-      throw new Error(`Store "${bindAs}" was already bind.`);
+      throw new Error(`Service "${bindAs}" was already bind.`);
     }
 
-    if (typeof store !== 'object') {
-      throw new Error(`Store bind param is not an object ("${bindAs}").`);
+    if (typeof service !== 'object') {
+      throw new Error(`Service bind param is not an object ("${bindAs}").`);
     }
 
-    this.addStore(store, options);
+    this.addService(service, options);
 
     /* -- Legacy -- */
 
     if (this.isDebug(bindAs)) {
       this.showMessage(`"${bindAs}" bind.`);
     }
-    each(this.stores, (item) => {
+    each(this.services, (item) => {
       if (item) {
-        this.processStore(item, this.getStoreSettings(bindAs));
-        this.processStore(this.getStoreSettings(bindAs), item);
+        this.processService(item, this.getServiceSettings(bindAs));
+        this.processService(this.getServiceSettings(bindAs), item);
       }
     });
     /* --/ Legacy -- */
@@ -134,13 +134,13 @@ class Binder implements BinderInterface {
     // проверяем и выполняем зависимости на событие OnBind
     this.handleOnBind(bindAs);
     // кидаем событие для дочерних биндеров
-    this.emitter.emit(EMITTER_EVENT.BIND, { store, options });
+    this.emitter.emit(EMITTER_EVENT.BIND, { service, options });
   }
 
   /**
    * add service to the storage of services
    */
-  addStore(store: *, options: BinderConfigType): void {
+  addService(service: *, options: BinderConfigType): void {
     const { bindAs } = options;
 
     const optionsCopy = cloneDeep(options);
@@ -152,9 +152,9 @@ class Binder implements BinderInterface {
       });
     }
 
-    this.stores[bindAs] = {
+    this.services[bindAs] = {
       bindAs,
-      store,
+      service,
       options: optionsCopy,
       disposers: {
         list: [],
@@ -167,7 +167,7 @@ class Binder implements BinderInterface {
    * look over all OnBind callbacks and resolve dependencies
    */
   handleOnBind(bindAs: ServiceConfigBindAsType): void {
-    const settings = this.getStoreSettings(bindAs);
+    const settings = this.getServiceSettings(bindAs);
 
     if (settings) {
       const onBindCallbackSetList = settings.options && settings.options[CALLBACK_NAME.BIND];
@@ -193,16 +193,16 @@ class Binder implements BinderInterface {
   handleOnBindItem(bindAs: ServiceConfigBindAsType): void {
     this.lookOverDeps(bindAs, CALLBACK_NAME.BIND,
       (depBindAs: ServiceConfigBindAsType,
-        callbackSet: InternalCallbackSetType, store: *): void => {
+        callbackSet: InternalCallbackSetType, service: *): void => {
         const {
           callback,
-          storeList,
+          serviceList,
         } = this.destructCallback(callbackSet);
 
-        if (!callbackSet.__locked && this.isListBind(storeList)) {
-          this.applyCallback(depBindAs, callbackSet, storeList, callback, store, CALLBACK_NAME.BIND);
+        if (!callbackSet.__locked && this.isListBind(serviceList)) {
+          this.applyCallback(depBindAs, callbackSet, serviceList, callback, service, CALLBACK_NAME.BIND);
         } else {
-          this.checkCallBackResolved(depBindAs, callbackSet, storeList);
+          this.checkCallBackResolved(depBindAs, callbackSet, serviceList);
         }
       });
   }
@@ -214,24 +214,24 @@ class Binder implements BinderInterface {
     this.lookOverDeps(bindAs, CALLBACK_NAME.BIND,
       (depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType): void => {
         const {
-          storeList,
+          serviceList,
         } = this.destructCallback(callbackSet);
 
-        if (callbackSet.__locked && this.isListUnBind(storeList)) {
+        if (callbackSet.__locked && this.isListUnBind(serviceList)) {
           // eslint-disable-next-line no-param-reassign
           delete callbackSet.__locked;
         }
       });
 
     this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND,
-      (depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType, store: *): void => {
+      (depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType, service: *): void => {
         const {
           callback,
-          storeList,
+          serviceList,
         } = this.destructCallback(callbackSet);
 
-        if (!callbackSet.__locked && this.isListUnBind(storeList)) {
-          this.applyCallback(depBindAs, callbackSet, storeList, callback, store, CALLBACK_NAME.UNBIND);
+        if (!callbackSet.__locked && this.isListUnBind(serviceList)) {
+          this.applyCallback(depBindAs, callbackSet, serviceList, callback, service, CALLBACK_NAME.UNBIND);
         }
       });
   }
@@ -243,10 +243,10 @@ class Binder implements BinderInterface {
     this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND,
       (depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType) => {
         const {
-          storeList,
+          serviceList,
         } = this.destructCallback(callbackSet);
 
-        if (this.isListBind(storeList) && callbackSet.__locked) {
+        if (this.isListBind(serviceList) && callbackSet.__locked) {
           // eslint-disable-next-line no-param-reassign
           delete callbackSet.__locked;
         }
@@ -259,16 +259,16 @@ class Binder implements BinderInterface {
    */
   checkCallBackResolved(bindAs: ServiceConfigBindAsType,
     callbackSet: InternalCallbackSetType,
-    storeList: ?Array<ServiceConfigBindAsType>): void {
+    serviceList: ?Array<ServiceConfigBindAsType>): void {
     if (callbackSet.__resolveTM) {
       clearTimeout(callbackSet.__resolveTM);
     }
     // eslint-disable-next-line no-param-reassign
     callbackSet.__resolveTM = setTimeout(() => {
-      const notBind = this.getNotBind(storeList);
+      const notBind = this.getNotBind(serviceList);
       const cbName = callbackSet[callbackSet.length - 1];
 
-      if (storeList && notBind.length && notBind.length < storeList.length) {
+      if (serviceList && notBind.length && notBind.length < serviceList.length) {
         this.showMessage(`"${bindAs}.${typeof cbName === 'string' ? cbName : CALLBACK_NAME.BIND}" 
         not called, because "${notBind.join(',')}" still not resolved.`, MESSAGE_TYPES.WARN);
       }
@@ -284,16 +284,16 @@ class Binder implements BinderInterface {
 
   applyCallback(bindAs: ServiceConfigBindAsType,
     callbackSet: InternalCallbackSetType,
-    storeList: ?Array<ServiceConfigBindAsType>,
-    callback: ?string | ()=>void, store: *, callbackType: $Values<typeof CALLBACK_NAME>): void {
-    const funcToCall = this.parseCallback(callback, store);
+    serviceList: ?Array<ServiceConfigBindAsType>,
+    callback: ?string | ()=>void, service: *, callbackType: $Values<typeof CALLBACK_NAME>): void {
+    const funcToCall = this.parseCallback(callback, service);
 
     if (funcToCall) {
-      funcToCall.apply(store, callbackType === CALLBACK_NAME.BIND ? this.getStoreList(storeList) : []);
+      funcToCall.apply(service, callbackType === CALLBACK_NAME.BIND ? this.getServiceList(serviceList) : []);
 
       // eslint-disable-next-line no-param-reassign
       callbackSet.__locked = true;
-      this.emitter.emit(EMITTER_EVENT.CALLBACK_CALLED, { bindAs, callbackType, callback, storeList });
+      this.emitter.emit(EMITTER_EVENT.CALLBACK_CALLED, { bindAs, callbackType, callback, serviceList });
     } else {
       throw new Error(`${callbackType} method 
       ${typeof callback === 'string' ? callback : ''} not found in "${bindAs}".`);
@@ -303,11 +303,11 @@ class Binder implements BinderInterface {
   /**
    * get list of service id and return service instance list
    */
-  getStoreList(storeList: ?Array<ServiceConfigBindAsType>): Array<*> {
-    return storeList ? storeList.reduce((acc, bindAs) => {
-      const store = this.getStore(bindAs);
-      if (store) {
-        acc.push(store);
+  getServiceList(serviceList: ?Array<ServiceConfigBindAsType>): Array<*> {
+    return serviceList ? serviceList.reduce((acc, bindAs) => {
+      const service = this.getService(bindAs);
+      if (service) {
+        acc.push(service);
       }
       return acc;
     }, [])
@@ -336,21 +336,21 @@ class Binder implements BinderInterface {
    * look over dependency list of the service and every iteration call function which was passed as attribute
    */
   lookOverDeps(bindAs: ServiceConfigBindAsType, callbackType: $Values<typeof CALLBACK_NAME>,
-    cb:(depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType, store: *)=>void) {
+    cb:(depBindAs: ServiceConfigBindAsType, callbackSet: InternalCallbackSetType, service: *)=>void) {
     const list = this.depsList[callbackType][bindAs];
 
     if (list && list.length) {
       list.forEach((depBindAs: ServiceConfigBindAsType): void => {
-        const settings = this.getStoreSettings(depBindAs);
+        const settings = this.getServiceSettings(depBindAs);
 
         if (settings) {
           const callbackSetList = settings.options && settings.options[callbackType];
-          const store = this.getStore(depBindAs);
+          const service = this.getService(depBindAs);
 
           if (callbackSetList) {
             callbackSetList.forEach((callbackSet) => {
               if (includes(callbackSet, bindAs)) {
-                cb(depBindAs, callbackSet, store);
+                cb(depBindAs, callbackSet, service);
               }
             });
           }
@@ -368,19 +368,19 @@ class Binder implements BinderInterface {
     const list = options[callbackName];
     if (list && list.length) {
       if (!Array.isArray(list[0])) {
-        throw new Error(`Store "${bindAs}" ${callbackName} should contains 
+        throw new Error(`Service "${bindAs}" ${callbackName} should contains 
         Array on callback data"`);
       } else {
         this.lookOverCallback(list, (serviceName: ServiceConfigBindAsType): void => {
           if (bindAs === serviceName) {
-            throw new Error(`Store "${bindAs}" ${callbackName} callback contains 
-          the same name as store name "${bindAs}"`);
+            throw new Error(`Service "${bindAs}" ${callbackName} callback contains 
+          the same name as service name "${bindAs}"`);
           }
         });
 
         list.forEach((callback: ServiceConfigCallbackSetType) => {
           if (callback.length < 2) {
-            throw new Error(`Store "${bindAs}" ${callbackName} should contains 
+            throw new Error(`Service "${bindAs}" ${callbackName} should contains 
         Array this at least 2 items, but ${callback.length} given [${callback.join(',')}]."`);
           }
         });
@@ -391,11 +391,11 @@ class Binder implements BinderInterface {
   /**
    * parse callback
    */
-  parseCallback(callback: ?string | ()=>void, store: *): ?()=>void {
+  parseCallback(callback: ?string | ()=>void, service: *): ?()=>void {
     if (typeof callback === 'function') {
       return callback;
-    } else if (typeof store[callback] === 'function') {
-      return store[callback];
+    } else if (typeof service[callback] === 'function') {
+      return service[callback];
     }
     return null;
   }
@@ -450,13 +450,13 @@ class Binder implements BinderInterface {
    * destruct callback set to service list and callback function or function name
    */
   destructCallback(list: InternalCallbackSetType):
-    {callback: ?string | ()=>void, storeList: ?Array<ServiceConfigBindAsType>} {
+    {callback: ?string | ()=>void, serviceList: ?Array<ServiceConfigBindAsType>} {
     const len = list && list.length;
     const callback = len ? list[len - 1] : null;
-    const storeList = len ? list.slice(0, len - 1) : null;
+    const serviceList = len ? list.slice(0, len - 1) : null;
 
     return {
-      storeList,
+      serviceList,
       callback,
     };
   }
@@ -465,14 +465,14 @@ class Binder implements BinderInterface {
    * return true if service bind
    */
   isBind(bindAs: ServiceConfigBindAsType): boolean {
-    return !!(this.stores[bindAs] && this.stores[bindAs].store);
+    return !!(this.services[bindAs] && this.services[bindAs].service);
   }
 
   /**
    * return settings of the service
    */
-  getStoreSettings(bindAs: ServiceConfigBindAsType): ?StoreSettingsType {
-    return this.stores[bindAs];
+  getServiceSettings(bindAs: ServiceConfigBindAsType): ?ServiceSettingsType {
+    return this.services[bindAs];
   }
 
   /**
@@ -483,7 +483,7 @@ class Binder implements BinderInterface {
       return;
     }
 
-    const settings = this.getStoreSettings(bindAs);
+    const settings = this.getServiceSettings(bindAs);
 
     if (settings) {
       const deps = settings.options && settings.options[callbackType];
@@ -528,46 +528,46 @@ class Binder implements BinderInterface {
    * unbind service
    */
   unbind(bindAs: ServiceConfigBindAsType): void {
-    const storeSettings = this.getStoreSettings(bindAs);
+    const serviceSettings = this.getServiceSettings(bindAs);
 
     if (!this.isBind(bindAs)) {
-      this.showMessage(`Not bind store "${bindAs}" try to unbind!`, MESSAGE_TYPES.WARN);
+      this.showMessage(`Not bind service "${bindAs}" try to unbind!`, MESSAGE_TYPES.WARN);
       return;
     }
 
     if (this.isBindOnParent(bindAs) && !this.allowParentOperation) {
-      throw new Error(`Try to unbind store "${bindAs}" from parent Binder.`);
+      throw new Error(`Try to unbind service "${bindAs}" from parent Binder.`);
     }
 
     /* -- Legacy -- */
-    // unbind data exporting to other stores
-    each(this.stores, (item) => {
+    // unbind data exporting to other services
+    each(this.services, (item) => {
       if (item) {
         const importData = item.options.importData && item.options.importData[bindAs];
         if (importData) {
-          // console.log(['unbind data exporting to other stores', item.bindAs, importData]);
+          // console.log(['unbind data exporting to other services', item.bindAs, importData]);
           this.unbindData(item.bindAs, importData);
         }
       }
     });
 
-    // unbind data importing from other stores
-    if (storeSettings && storeSettings.options.importData) {
-      each(storeSettings.options.importData, (importData) => {
+    // unbind data importing from other services
+    if (serviceSettings && serviceSettings.options.importData) {
+      each(serviceSettings.options.importData, (importData) => {
         this.unbindData(bindAs, importData);
       });
     }
 
-    // unbind disposers in this store
-    if (storeSettings && storeSettings.disposers) {
-      storeSettings.disposers.list.forEach((disposer) => {
+    // unbind disposers in this service
+    if (serviceSettings && serviceSettings.disposers) {
+      serviceSettings.disposers.list.forEach((disposer) => {
         if (typeof disposer === 'function') {
           disposer();
         }
       });
     }
 
-    // unbind disposers in other stores
+    // unbind disposers in other services
     this.unbindDisposers(bindAs);
 
     if (this.isDebug(bindAs)) {
@@ -576,8 +576,8 @@ class Binder implements BinderInterface {
 
     /* --/ Legacy -- */
 
-    // clear store settings in binder
-    this.stores[bindAs] = undefined;
+    // clear service settings in binder
+    this.services[bindAs] = undefined;
 
     // проверяем и выполняем зависимости на событие OnUnbind
     this.handleOnUnbind(bindAs);
@@ -588,16 +588,16 @@ class Binder implements BinderInterface {
   /**
    * return bind service
    */
-  getStore(bindAs: ServiceConfigBindAsType): * {
-    const settings = this.getStoreSettings(bindAs);
-    return settings && settings.store;
+  getService(bindAs: ServiceConfigBindAsType): * {
+    const settings = this.getServiceSettings(bindAs);
+    return settings && settings.service;
   }
 
   /**
    * clear all binder data
    */
   clear(): void {
-    this.stores = {};
+    this.services = {};
     this.depsList = {
       [CALLBACK_NAME.BIND]: {},
       [CALLBACK_NAME.UNBIND]: {},
@@ -626,37 +626,37 @@ class Binder implements BinderInterface {
   /* -- Legacy -- */
 
   isDebug(bindAs: ServiceConfigBindAsType): ?boolean {
-    const settings = this.getStoreSettings(bindAs);
+    const settings = this.getServiceSettings(bindAs);
     return settings && settings.options ? settings.options.debug : false;
   }
 
-  processStore(from: *, to: *) {
+  processService(from: *, to: *) {
     if (from.bindAs !== to.bindAs) {
       const { importData } = to.options;
 
       if (importData && importData[from.bindAs]) {
         each(importData[from.bindAs], (toVarName, fromVarName) => {
-          if (!(fromVarName in from.store)) {
+          if (!(fromVarName in from.service)) {
             this.showMessage(`Variable "${fromVarName}" required for "${to.bindAs}" 
             not found in "${from.bindAs}"`, MESSAGE_TYPES.WARN);
             return;
           }
 
-          if (toVarName in to.store) {
+          if (toVarName in to.service) {
             this.showMessage(`Trying create link from "${from.bindAs}.${fromVarName}" 
             to "${to.bindAs}.${toVarName}", but variable "${toVarName}" is already exist in "${to.bindAs}"`,
             MESSAGE_TYPES.WARN);
             return;
           }
 
-          Object.defineProperty(to.store, toVarName, {
+          Object.defineProperty(to.service, toVarName, {
             get: () => {
               if (this.isDebug(to.bindAs)) {
                 this.showMessage(`Variable "${fromVarName}" from "${from.bindAs}" 
               was taken by "${to.bindAs}" with name "${toVarName}"`);
               }
 
-              return from.store[fromVarName];
+              return from.service[fromVarName];
             },
             configurable: true,
           });
@@ -666,7 +666,7 @@ class Binder implements BinderInterface {
   }
 
   addDisposer(bindAs: ServiceConfigBindAsType, services: *, obsr: *) {
-    const storeSettings = this.getStoreSettings(bindAs);
+    const serviceSettings = this.getServiceSettings(bindAs);
     let pass = true;
 
     services.forEach((serviceName) => {
@@ -676,15 +676,15 @@ class Binder implements BinderInterface {
       }
     });
 
-    if (pass && storeSettings) {
-      storeSettings.disposers.list.push(obsr);
+    if (pass && serviceSettings) {
+      serviceSettings.disposers.list.push(obsr);
 
       services.forEach((serviceName) => {
-        if (!storeSettings.disposers.services[serviceName]) {
-          storeSettings.disposers.services[serviceName] = [];
+        if (!serviceSettings.disposers.services[serviceName]) {
+          serviceSettings.disposers.services[serviceName] = [];
         }
 
-        storeSettings.disposers.services[serviceName].push(storeSettings.disposers.list.length - 1);
+        serviceSettings.disposers.services[serviceName].push(serviceSettings.disposers.list.length - 1);
       });
     }
 
@@ -692,13 +692,13 @@ class Binder implements BinderInterface {
   }
 
   unbindDisposers(bindAs: ServiceConfigBindAsType) {
-    each(this.stores, (store) => {
-      if (store && store.disposers.services[bindAs]) {
-        store.disposers.services[bindAs].forEach((disposer) => {
-          if (typeof store.disposers.list[disposer] === 'function') {
-            store.disposers.list[disposer]();
+    each(this.services, (service) => {
+      if (service && service.disposers.services[bindAs]) {
+        service.disposers.services[bindAs].forEach((disposer) => {
+          if (typeof service.disposers.list[disposer] === 'function') {
+            service.disposers.list[disposer]();
             // eslint-disable-next-line no-param-reassign
-            store.disposers.list[disposer] = undefined;
+            service.disposers.list[disposer] = undefined;
           }
         });
       }
@@ -706,24 +706,24 @@ class Binder implements BinderInterface {
   }
 
   unbindData(bindAs: ServiceConfigBindAsType, importData: *) {
-    const settings = this.getStoreSettings(bindAs);
+    const settings = this.getServiceSettings(bindAs);
     if (settings) {
-      const { store } = settings;
+      const { service } = settings;
       each(importData, (toVarName) => {
-        if (toVarName in store) {
-          Object.defineProperty(store, toVarName, { value: undefined });
+        if (toVarName in service) {
+          Object.defineProperty(service, toVarName, { value: undefined });
         }
       });
     }
   }
 
-  importVar(storeName: ServiceConfigBindAsType, varName: string, initiator: string, raw: *) {
-    const s = this.getStoreSettings(storeName);
-    const store = s && s.store ? s.store : null;
+  importVar(serviceName: ServiceConfigBindAsType, varName: string, initiator: string, raw: *) {
+    const s = this.getServiceSettings(serviceName);
+    const service = s && s.service ? s.service : null;
     let val;
     let exportData;
 
-    if (s && s.store && store) {
+    if (s && s.service && service) {
       exportData = s.options.exportData;
 
       if (exportData && !exportData[varName]) {
@@ -732,40 +732,40 @@ class Binder implements BinderInterface {
         return;
       }
 
-      val = store[varName];
+      val = service[varName];
       if (s.debug) {
-        console.log(`Binder. "${initiator}" import variable "${varName}" from "${storeName}".`, val);
+        console.log(`Binder. "${initiator}" import variable "${varName}" from "${serviceName}".`, val);
       }
       return raw ? val : toJS(val); // eslint-disable-line
     }
 
-    console.warn(`Warnning! importVar form "${protoName(this)}" to "${initiator}". "${storeName}" store not found.`);
+    console.warn(`Warnning! importVar form "${protoName(this)}" to "${initiator}". "${serviceName}" service not found.`);
 
     return undefined; // eslint-disable-line
   }
 
-  callApi(storeName: ServiceConfigBindAsType,
+  callApi(serviceName: ServiceConfigBindAsType,
     actionName: ServiceConfigBindAsType,
     initiator: ServiceConfigBindAsType, ...arg: Array<*>) {
     if (process.env.NODE_ENV === 'test') {
       return;
     }
-    const s = this.getStoreSettings(storeName);
-    let storeInst;
+    const s = this.getServiceSettings(serviceName);
+    let serviceInst;
 
-    if (s && s.store) {
-      storeInst = s.store;
+    if (s && s.service) {
+      serviceInst = s.service;
 
       if (s.options.debug) {
-        console.log(`Binder callApi. "${initiator}" calls method "${actionName}" from "${storeName}".`, arg);
+        console.log(`Binder callApi. "${initiator}" calls method "${actionName}" from "${serviceName}".`, arg);
       }
 
-      if (storeInst.api && storeInst.api[actionName]) {
-        return storeInst.api[actionName].apply(storeInst, arg); // eslint-disable-line
+      if (serviceInst.api && serviceInst.api[actionName]) {
+        return serviceInst.api[actionName].apply(serviceInst, arg); // eslint-disable-line
       }
-      console.warn(`CallApi warn. "${initiator}" calls unknown method "${actionName}" found in store "${storeName}".`);
+      console.warn(`CallApi warn. "${initiator}" calls unknown method "${actionName}" found in service "${serviceName}".`);
     } else {
-      console.warn(`CallApi warn. "${initiator}" calls method "${actionName}" from not bind store "${storeName}".`);
+      console.warn(`CallApi warn. "${initiator}" calls method "${actionName}" from not bind service "${serviceName}".`);
     }
   }
   /* --/ Legacy -- */

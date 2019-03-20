@@ -61,7 +61,7 @@ describe('serviceUtils test', () => {
       expect(binder.isBind(storeName)).toBe(true);
       expect(serviceStartConfig.proto).toBe(ServiceProto);
       expect(started).toBe(true);
-      expect(service).toBe(binder.getStore(storeName));
+      expect(service).toBe(binder.getService(storeName));
       done();
     });
   });
@@ -84,7 +84,7 @@ describe('serviceUtils test', () => {
       expect(binder.isBind(storeName)).toBe(true);
       expect(serviceStartConfig.proto).toBe(ServiceProto);
       expect(started).toBe(true);
-      expect(service).toBe(binder.getStore(storeName));
+      expect(service).toBe(binder.getService(storeName));
       done();
     });
   });

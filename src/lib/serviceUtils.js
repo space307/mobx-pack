@@ -1,6 +1,5 @@
 // @flow
 
-import Binder from './Binder.js';
 import type { ServiceClassType, ServiceStartConfigType, StartServiceReturnType } from './typing/common.js';
 import type { BinderInterface } from './typing/binderInterface.js';
 
@@ -26,7 +25,7 @@ export function startService(
 
   let result;
   const resolver = binder.getPendingStartResolver(bindAs);
-  const serviceInBinder = binder.getStore(bindAs);
+  const serviceInBinder = binder.getService(bindAs);
   const onStartFunctionName = onStart || 'onStart';
 
   if (serviceInBinder) {
@@ -96,7 +95,7 @@ export function stopService(binder: BinderInterface, serviceStartConfig: Service
     onStop,
   } = serviceStartConfig.binderConfig;
 
-  const serviceInBinder = binder.getStore(bindAs);
+  const serviceInBinder = binder.getService(bindAs);
   const onStopFunctionName = onStop || 'onStop';
 
   if (serviceInBinder) {
@@ -127,10 +126,10 @@ export function getStartedServices(
       const {
         config: { bindAs },
       } = ServiceProto.binderConfig;
-      const store = binder.getStore(bindAs);
+      const service = binder.getService(bindAs);
 
-      if (store) {
-        services.push(store);
+      if (service) {
+        services.push(service);
       }
     },
   );

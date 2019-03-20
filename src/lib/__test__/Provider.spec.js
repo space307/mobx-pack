@@ -45,7 +45,7 @@ describe('Provider test', () => {
 
     const ComponentWithProvider = Provider(Component, {
       helper(service, { pass }) {
-        helperMock(binder.getStore(storeName) === service && pass);
+        helperMock(binder.getService(storeName) === service && pass);
         return {
           pass,
           count: service.count,
@@ -142,7 +142,7 @@ describe('Provider test', () => {
     const binder = new Binder();
 
     const Component = () => (<div id="count"><ServiceContext.Consumer>{({ serviceProto }) => {
-      consumerMock(serviceProto === binder.getStore(storeName));
+      consumerMock(serviceProto === binder.getService(storeName));
     }}</ServiceContext.Consumer></div>);
 
 

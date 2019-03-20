@@ -24,7 +24,7 @@ function createConfig(bindAs, onBind, onUnbind) {
   return config;
 }
 
-function createStore() {
+function createService() {
   return {
     onBind1: jest.fn(),
     onBind2: jest.fn(),
@@ -33,7 +33,7 @@ function createStore() {
   };
 }
 
-function clearStoreMocks(...stores) {
+function clearServiceMocks(...stores) {
   stores.forEach((store) => {
     each(store, (prop) => {
       if (typeof prop === 'function') {
@@ -74,10 +74,10 @@ describe('Binder test', () => {
     expect(() => { binder.bind(s1, createConfig(s1, [[s2]])); }).toThrow();
   });
 
-  it('getStore', () => {
+  it('getService', () => {
     const store = {};
     binder.bind(store, createConfig(s1));
-    expect(binder.getStore(s1)).toBe(store);
+    expect(binder.getService(s1)).toBe(store);
   });
 
   it('isListBind', () => {
@@ -104,10 +104,10 @@ describe('Binder test', () => {
     expect(binder.getNotBind([s1, s2, s3])).toEqual([s2, s3]);
   });
 
-  it('addStore', () => {
+  it('addService', () => {
     // expect(t).toThrow(TypeError);
-    binder.addStore({ someMethod() {} }, createConfig(s1, [[s2, s3, 'someMethod']], [[s2, 'someMethod']]));
-    const settings = binder.getStoreSettings(s1);
+    binder.addService({ someMethod() {} }, createConfig(s1, [[s2, s3, 'someMethod']], [[s2, 'someMethod']]));
+    const settings = binder.getServiceSettings(s1);
     expect([settings.bindAs, settings.options]).toMatchSnapshot();
     expect(settings.options.onUnbind[0].__locked).toBe(true);
   });
@@ -117,13 +117,13 @@ describe('Binder test', () => {
     expect(binder.depsList).toMatchSnapshot();
   });
 
-  it('getStoreList', () => {
+  it('getServiceList', () => {
     const store1 = {};
     const store2 = {};
     binder.bind(store1, createConfig(s1));
     binder.bind(store2, createConfig(s2));
-    expect(binder.getStoreList([s1, s2])[0]).toBe(store1);
-    expect(binder.getStoreList([s1, s2])[1]).toBe(store2);
+    expect(binder.getServiceList([s1, s2])[0]).toBe(store1);
+    expect(binder.getServiceList([s1, s2])[1]).toBe(store2);
   });
 
   it('setPendingStartResolver', () => {
@@ -151,9 +151,9 @@ describe('Binder test', () => {
     }
 
     it('simple onBind test', () => {
-      const store1 = createStore();
-      const store2 = createStore();
-      const store3 = createStore();
+      const store1 = createService();
+      const store2 = createService();
+      const store3 = createService();
 
       binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
       binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
@@ -163,9 +163,9 @@ describe('Binder test', () => {
     });
 
     it('simple onBind test & different order', () => {
-      const store1 = createStore();
-      const store2 = createStore();
-      const store3 = createStore();
+      const store1 = createService();
+      const store2 = createService();
+      const store3 = createService();
 
       binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
       binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
@@ -175,9 +175,9 @@ describe('Binder test', () => {
     });
 
     it('simple onBind test & unbind', () => {
-      const store1 = createStore();
-      const store2 = createStore();
-      const store3 = createStore();
+      const store1 = createService();
+      const store2 = createService();
+      const store3 = createService();
 
       binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
       binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
@@ -192,9 +192,9 @@ describe('Binder test', () => {
 
 
     it('repeat onBind if service unbind', () => {
-      const store1 = createStore();
-      const store2 = createStore();
-      const store3 = createStore();
+      const store1 = createService();
+      const store2 = createService();
+      const store3 = createService();
 
       binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1']]));
       binder.bind(store2, createConfig(s2));
@@ -209,9 +209,9 @@ describe('Binder test', () => {
     });
 
     it('simple onUnbind test', () => {
-      const store1 = createStore();
-      const store2 = createStore();
-      const store3 = createStore();
+      const store1 = createService();
+      const store2 = createService();
+      const store3 = createService();
 
       binder.bind(store1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
       binder.bind(store2, createConfig(s2, null, [[s1, s3, 'onUnbind1'], [s1, 'onUnbind2']]));
@@ -227,9 +227,9 @@ describe('Binder test', () => {
     });
 
     it('simple onUnbind test if service bind', () => {
-      const store1 = createStore();
-      const store2 = createStore();
-      const store3 = createStore();
+      const store1 = createService();
+      const store2 = createService();
+      const store3 = createService();
 
       binder.bind(store1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
       binder.bind(store2, createConfig(s2, null, [[s1, s3, 'onUnbind1'], [s1, 'onUnbind2']]));
@@ -248,8 +248,8 @@ describe('Binder test', () => {
     });
 
     it('localBinder test', () => {
-      const store1 = createStore();
-      const store2 = createStore();
+      const store1 = createService();
+      const store2 = createService();
 
       binder.bind(store1, createConfig(s1));
       localBinder.bind(store2, createConfig(s2, [[s1, 'onBind1']], [[s1, 'onUnbind1']]));
@@ -263,11 +263,11 @@ describe('Binder test', () => {
 
 
     it('common binder + localBinder test', () => {
-      const store1 = createStore();
-      const store2 = createStore();
-      const store3 = createStore();
-      const store4 = createStore();
-      const store5 = createStore();
+      const store1 = createService();
+      const store2 = createService();
+      const store3 = createService();
+      const store4 = createService();
+      const store5 = createService();
 
       binder.bind(store1, createConfig(s1, [[s2, s3, 'onBind1'], [s2, 'onBind2']]));
       binder.bind(store2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
@@ -302,7 +302,7 @@ describe('Binder test', () => {
       expect(store5.onBind2).toBeCalledWith(store2);
       expect(store5.onBind2).toBeCalledTimes(1);
 
-      clearStoreMocks(store1, store2, store3, store4, store5);
+      clearServiceMocks(store1, store2, store3, store4, store5);
 
       binder.unbind(s1);
       binder.unbind(s2);
@@ -318,7 +318,7 @@ describe('Binder test', () => {
       expect(store3.onBind2).toBeCalledWith(store1);
       expect(store3.onBind2).toBeCalledTimes(2);
 
-      clearStoreMocks(store1, store2, store3, store4, store5);
+      clearServiceMocks(store1, store2, store3, store4, store5);
       binder.unbind(s2);
       localBinder.unbind(s4);
 
