@@ -9,13 +9,14 @@ import { observer } from 'mobx-react';
 import { startServices, stopServices, getStartedServices } from './serviceUtils.js';
 import type { GlobalContextType, ServiceStartConfigType, StartServiceReturnType } from './typing/common.js';
 
+type servicesHashType = {[key:string]:*};
 
 type ServiceItemType = Class<*> | Array<*>;
 
 type ProviderOptionsAttributeType = {
   stop?: boolean,
   services?: Array<ServiceItemType> | (props: *)=> Array<ServiceItemType>,
-  helper?: (services: ?Array<*>, props: *) => *,
+  helper?: (services: ?servicesHashType, props: *) => *,
   stub?: React$ComponentType<*>,
 };
 
@@ -26,14 +27,13 @@ type ProviderOptionsPropType = {
 
 type ProviderStateTypes = {
   error: ?string,
-  services: ?Array<*>,
+  services: ?servicesHashType,
 };
 
 type ProviderType = (
   Component: React$ComponentType<*>,
   options?: ProviderOptionsAttributeType)=>React$ComponentType<*>;
 
-type servicesForProvider = {[key:string]:*};
 
 /**
  * Convert incoming param with service list to start service format
@@ -63,7 +63,7 @@ function convertToServiceStartConfig(ServiceProtoList: Array<ServiceItemType>): 
 /**
  * Convert service Array to object for service context provider
  */
-function convertServiceListForProvider(list: ?Array<*>): ?servicesForProvider {
+function convertServiceListForProvider(list: ?Array<*>): ?servicesHashType {
   return list && list.length ?
     list.reduce((acc, item) => {
       const name = item.constructor.name;
@@ -78,7 +78,7 @@ function convertServiceListForProvider(list: ?Array<*>): ?servicesForProvider {
 
 export default function CreateProvider(
   BinderContext: React$Context<GlobalContextType>,
-  ServiceContext: React$Context<?servicesForProvider>): ProviderType {
+  ServiceContext: React$Context<?servicesHashType>): ProviderType {
   return function Provider(
     Component: React$ComponentType<*>,
     options?: ProviderOptionsAttributeType,
@@ -101,8 +101,6 @@ export default function CreateProvider(
 
         serviceToStop: Array<ServiceStartConfigType> = [];
 
-        servicesForProvider: ?servicesForProvider = null;
-
         constructor(props: PropType, context) {
           super();
 
@@ -123,8 +121,7 @@ export default function CreateProvider(
 
             if (context && context.binder) {
               const serviceList = getStartedServices(context.binder, config);
-              this.state.services = serviceList;
-              this.servicesForProvider = convertServiceListForProvider(serviceList);
+              this.state.services = convertServiceListForProvider(serviceList);
             }
           }
         }
@@ -133,8 +130,7 @@ export default function CreateProvider(
          * Ser service list to state && for service context provider
          */
         setServices(list) {
-          this.servicesForProvider = convertServiceListForProvider(list);
-          this.setState({ services: list });
+          this.setState({ services: convertServiceListForProvider(list) });
         }
 
         componentDidMount(): void {
@@ -194,11 +190,9 @@ export default function CreateProvider(
         /**
          * Merge props for wrapped component and call helper
          */
-        composeProps(result: ?Array<*>, props: PropType) {
-          if (result && typeof this.options.helper) {
-            const attributes = Array.isArray(result) ? result.slice() : [];
-            attributes.push(props);
-            return this.options.helper ? this.options.helper(...attributes) : props;
+        composeProps(services: ?servicesHashType, props: PropType) {
+          if (services && typeof this.options.helper) {
+            return this.options.helper ? this.options.helper(services, props) : props;
           }
           return props;
         }
@@ -216,7 +210,7 @@ export default function CreateProvider(
 
           if (serviceOk && helperOk) {
             return hasService ? (
-              <ServiceContext.Provider value={this.servicesForProvider}>
+              <ServiceContext.Provider value={this.state.services}>
                 <Component {...props} />
               </ServiceContext.Provider>
             ) : (

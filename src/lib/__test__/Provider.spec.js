@@ -44,11 +44,11 @@ describe('Provider test', () => {
     };
 
     const ComponentWithProvider = Provider(Component, {
-      helper(service, { pass }) {
-        helperMock(binder.getService(serviceName) === service && pass);
+      helper({ serviceProto }, { pass }) {
+        helperMock(binder.getService(serviceName) === serviceProto && pass);
         return {
           pass,
-          count: service.count,
+          count: serviceProto.count,
         };
       },
       services: [ServiceProto],

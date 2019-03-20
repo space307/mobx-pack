@@ -40,7 +40,7 @@ class Car extends React.PureComponent {
 const CarContainer = Provider(
   Car,
   {
-    helper(carStore, timeService){
+    helper({carStore, timeService}){
 
 
       return {
@@ -92,7 +92,7 @@ const CarContainer = Provider(
 const GarageContainer = Provider(
   Garage,
   {
-    helper(garageStore, { color }) {
+    helper({garageStore}, { color }) {
 
       return {
         color,
