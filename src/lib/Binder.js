@@ -127,13 +127,13 @@ class Binder implements BinderInterface {
     });
     /* --/ Legacy -- */
 
-    // сохраняем OnBind зависимости текущего сервиса
+    // save OnBind dependencies of the current service
     this.saveDeps(bindAs, CALLBACK_NAME.BIND);
-    // сохраняем OnUnbind зависимости текущего сервиса
+    // save OnUnbind dependencies of the current service
     this.saveDeps(bindAs, CALLBACK_NAME.UNBIND);
-    // проверяем и выполняем зависимости на событие OnBind
+    // check anf resolve dependencies for OnBind events
     this.handleOnBind(bindAs);
-    // кидаем событие для дочерних биндеров
+    // emmit event for child Binders
     this.emitter.emit(EMITTER_EVENT.BIND, { service, options });
   }
 
@@ -172,15 +172,15 @@ class Binder implements BinderInterface {
     if (settings) {
       const onBindCallbackSetList = settings.options && settings.options[CALLBACK_NAME.BIND];
       const onUnbindCallbackSetList = settings.options && settings.options[CALLBACK_NAME.UNBIND];
-      // проверяем и выполняем OnBind зависимости других сервисов от текущего сервиса
+      // check and execute OnBind dependencies of other services on the current service
       this.handleOnBindItem(bindAs);
-      // проверяем и выполняем OnUnbind зависимости других сервисов от текущего сервиса
+      // check and execute OnUnbind dependencies of other services on the current service
       this.handleOnUnbindItem(bindAs);
-      // проверяем и выполняем OnBind зависимости из списка зависимостей текущего сервиса
+      // check and execute OnBind dependencies from the list of dependencies of the current service
       this.lookOverCallback(onBindCallbackSetList, (serviceName) => {
         this.handleOnBindItem(serviceName);
       });
-      // проверяем и выполняем OnUnbind зависимости из списка зависимостей текущего сервиса
+      // check and execute OnUnbind dependencies from the list of dependencies of the current service
       this.lookOverCallback(onUnbindCallbackSetList, (serviceName) => {
         this.handleOnUnbindItem(serviceName);
       });
@@ -545,7 +545,6 @@ class Binder implements BinderInterface {
       if (item) {
         const importData = item.options.importData && item.options.importData[bindAs];
         if (importData) {
-          // console.log(['unbind data exporting to other services', item.bindAs, importData]);
           this.unbindData(item.bindAs, importData);
         }
       }
@@ -579,9 +578,9 @@ class Binder implements BinderInterface {
     // clear service settings in binder
     this.services[bindAs] = undefined;
 
-    // проверяем и выполняем зависимости на событие OnUnbind
+    // check and execute dependencies on the OnUnbind event
     this.handleOnUnbind(bindAs);
-    // кидаем событие для дочерних биндеров
+    // emmit event for child services
     this.emitter.emit(EMITTER_EVENT.UNBIND, bindAs);
   }
 
