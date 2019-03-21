@@ -41,7 +41,7 @@ export default function CreateBinderProvider(BinderContext: React$Context<Global
           throw new Error(this.state.error);
         }
         return (<BinderContext.Provider value={this.newContext}>
-          <Component {...this.props.props} />
+          <Component {...this.props} />
         </BinderContext.Provider>);
       }
     }

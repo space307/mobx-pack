@@ -388,4 +388,11 @@ describe('Provider test', () => {
 
     done();
   });
+
+  it('pass props through provider without helper', () => {
+    const Component = () => (<div id="count" />);
+    const ComponentWithProvider = Provider(Component);
+    const wrapper = mount(<ComponentWithProvider test={1} />);
+    expect(wrapper.find(Component).props().test).toBe(1);
+  });
 });

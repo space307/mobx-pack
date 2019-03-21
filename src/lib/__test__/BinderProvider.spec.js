@@ -75,4 +75,11 @@ describe('BinderProvider test', () => {
     expect(() => { shallow(<ComponentWithBinderProvider />); }).toThrowError();
     done();
   });
+
+  it('pass props through provider', () => {
+    const Component = () => (<div id="count" />);
+    const ComponentWithBinderProvider = BinderProvider(Component, { test: 1 });
+    const wrapper = mount(<ComponentWithBinderProvider test={1} />);
+    expect(wrapper.find(Component).props().test).toBe(1);
+  });
 });

@@ -59,7 +59,7 @@ function convertToServiceStartConfig(ServiceProtoList) {
  */
 
 
-function convertServiceListForProvider(list) {
+function convertToServiceHash(list) {
   return list && list.length ? list.reduce(function (acc, item) {
     var name = item.constructor.name;
 
@@ -70,6 +70,14 @@ function convertServiceListForProvider(list) {
     acc[name.charAt(0).toLowerCase() + name.slice(1)] = item;
     return acc;
   }, {}) : null;
+}
+/**
+ * return name of React.Component
+ */
+
+
+function getComponentName(Component) {
+  return Component && typeof Component.name === 'string' ? Component.name : 'unknown';
 }
 
 function CreateProvider(BinderContext, ServiceContext) {
@@ -101,6 +109,10 @@ function CreateProvider(BinderContext, ServiceContext) {
           _this.state.error = 'Provider wait for "React.Component" in attributes';
         }
 
+        if (options && options.helper && typeof options.helper !== 'function') {
+          _this.state.error = "Helper put to Provider \n            (component: ".concat(getComponentName(Component), ") should be a function");
+        }
+
         if (options) {
           var _services = typeof options.services === 'function' ? options.services(props) : options.services;
 
@@ -119,11 +131,17 @@ function CreateProvider(BinderContext, ServiceContext) {
         }
 
         if (_this.options.services) {
-          var config = convertToServiceStartConfig(_this.options.services);
+          var config;
 
-          if (context && context.binder) {
+          try {
+            config = convertToServiceStartConfig(_this.options.services);
+          } catch (err) {
+            _this.state.error = "".concat(err.message, " (component: ").concat(getComponentName(Component), ")");
+          }
+
+          if (context && context.binder && config) {
             var serviceList = (0, _serviceUtils.getStartedServices)(context.binder, config);
-            _this.state.services = convertServiceListForProvider(serviceList);
+            _this.state.services = convertToServiceHash(serviceList);
           }
         }
 
@@ -138,7 +156,7 @@ function CreateProvider(BinderContext, ServiceContext) {
         key: "setServices",
         value: function setServices(list) {
           this.setState({
-            services: convertServiceListForProvider(list)
+            services: convertToServiceHash(list)
           });
         }
       }, {
@@ -171,28 +189,39 @@ function CreateProvider(BinderContext, ServiceContext) {
               initialState = _this$context.initialState;
 
           if (ServiceProtoList && ServiceProtoList.length) {
-            var serviceStartConfigList = convertToServiceStartConfig(ServiceProtoList);
-            (0, _serviceUtils.startServices)(binder, initialState, serviceStartConfigList).then(function (services) {
-              var result = {
-                toStop: [],
-                services: []
-              };
-              services.reduce(function (acc, _ref) {
-                var service = _ref.service,
-                    started = _ref.started,
-                    serviceStartConfig = _ref.serviceStartConfig;
+            var serviceStartConfigList;
 
-                if (started) {
-                  acc.toStop.push(serviceStartConfig);
-                }
+            try {
+              serviceStartConfigList = convertToServiceStartConfig(ServiceProtoList);
+            } catch (err) {
+              this.setState({
+                error: "".concat(err.message, " (component: ").concat(getComponentName(Component), ")")
+              });
+            }
 
-                acc.services.push(service);
-                return acc;
-              }, result);
-              _this2.serviceToStop = result.toStop;
+            if (serviceStartConfigList) {
+              (0, _serviceUtils.startServices)(binder, initialState, serviceStartConfigList).then(function (services) {
+                var result = {
+                  toStop: [],
+                  services: []
+                };
+                services.reduce(function (acc, _ref) {
+                  var service = _ref.service,
+                      started = _ref.started,
+                      serviceStartConfig = _ref.serviceStartConfig;
 
-              _this2.setServices(result.services);
-            });
+                  if (started) {
+                    acc.toStop.push(serviceStartConfig);
+                  }
+
+                  acc.services.push(service);
+                  return acc;
+                }, result);
+                _this2.serviceToStop = result.toStop;
+
+                _this2.setServices(result.services);
+              });
+            }
           } else {
             this.setServices([]);
           }
