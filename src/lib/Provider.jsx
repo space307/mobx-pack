@@ -59,11 +59,10 @@ function convertToServiceStartConfig(ServiceProtoList: Array<ServiceItemType>): 
   });
 }
 
-
 /**
  * Convert service Array to object for service context provider
  */
-function convertServiceListForProvider(list: ?Array<*>): ?servicesHashType {
+function convertToServiceHash(list: ?Array<*>): ?servicesHashType {
   return list && list.length ?
     list.reduce((acc, item) => {
       const name = item.constructor.name;
@@ -74,6 +73,13 @@ function convertServiceListForProvider(list: ?Array<*>): ?servicesHashType {
       acc[name.charAt(0).toLowerCase() + name.slice(1)] = item;
       return acc;
     }, {}) : null;
+}
+
+/**
+ * return name of React.Component
+ */
+function getComponentName(Component: React$ComponentType<*>): string {
+  return Component && typeof Component.name === 'string' ? Component.name : 'unknown';
 }
 
 export default function CreateProvider(
@@ -108,6 +114,11 @@ export default function CreateProvider(
             this.state.error = 'Provider wait for "React.Component" in attributes';
           }
 
+          if (options && options.helper && typeof options.helper !== 'function') {
+            this.state.error = `Helper put to Provider 
+            (component: ${getComponentName(Component)}) should be a function`;
+          }
+
           if (options) {
             const services = typeof options.services === 'function' ? options.services(props) : options.services;
             const { stop, helper, stub } = options;
@@ -117,11 +128,17 @@ export default function CreateProvider(
           }
 
           if (this.options.services) {
-            const config = convertToServiceStartConfig(this.options.services);
+            let config;
 
-            if (context && context.binder) {
+            try {
+              config = convertToServiceStartConfig(this.options.services);
+            } catch (err) {
+              this.state.error = `${err.message} (component: ${getComponentName(Component)})`;
+            }
+
+            if (context && context.binder && config) {
               const serviceList = getStartedServices(context.binder, config);
-              this.state.services = convertServiceListForProvider(serviceList);
+              this.state.services = convertToServiceHash(serviceList);
             }
           }
         }
@@ -130,7 +147,7 @@ export default function CreateProvider(
          * Ser service list to state && for service context provider
          */
         setServices(list) {
-          this.setState({ services: convertServiceListForProvider(list) });
+          this.setState({ services: convertToServiceHash(list) });
         }
 
         componentDidMount(): void {
@@ -155,33 +172,40 @@ export default function CreateProvider(
           const { binder, initialState } = this.context;
 
           if (ServiceProtoList && ServiceProtoList.length) {
-            const serviceStartConfigList = convertToServiceStartConfig(ServiceProtoList);
+            let serviceStartConfigList;
+            try {
+              serviceStartConfigList = convertToServiceStartConfig(ServiceProtoList);
+            } catch (err) {
+              this.setState({ error: `${err.message} (component: ${getComponentName(Component)})` });
+            }
 
-            startServices(binder, initialState, serviceStartConfigList).then((services: *) => {
-              type ResultType = {
-                toStop: Array<ServiceStartConfigType>,
-                services: Array<*>,
-              };
-              const result = {
-                toStop: [],
-                services: [],
-              };
+            if (serviceStartConfigList) {
+              startServices(binder, initialState, serviceStartConfigList).then((services: *) => {
+                type ResultType = {
+                  toStop: Array<ServiceStartConfigType>,
+                  services: Array<*>,
+                };
+                const result = {
+                  toStop: [],
+                  services: [],
+                };
 
-              services.reduce(
-                (acc: ResultType, { service, started, serviceStartConfig }: StartServiceReturnType): ResultType => {
-                  if (started) {
-                    acc.toStop.push(serviceStartConfig);
-                  }
-                  acc.services.push(service);
-                  return acc;
-                },
-                result,
-              );
+                services.reduce(
+                  (acc: ResultType, { service, started, serviceStartConfig }: StartServiceReturnType): ResultType => {
+                    if (started) {
+                      acc.toStop.push(serviceStartConfig);
+                    }
+                    acc.services.push(service);
+                    return acc;
+                  },
+                  result,
+                );
 
-              this.serviceToStop = result.toStop;
+                this.serviceToStop = result.toStop;
 
-              this.setServices(result.services);
-            });
+                this.setServices(result.services);
+              });
+            }
           } else {
             this.setServices([]);
           }
