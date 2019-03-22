@@ -54,9 +54,7 @@ declare export function createProvider(
 declare export function ServiceConnector(service: *, options: ServiceConnectorOptionsTypes): *;
 
 
-declare export class Binder{
-  bind(service: *, options: BinderConfigType): void
-}
+declare export class Binder{}
 
 declare export class BaseComponent {}
 declare export class BaseStore {}
