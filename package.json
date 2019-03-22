@@ -1,8 +1,9 @@
 {
   "name": "mobx-pack",
-  "version": "1.1.10-otp.2",
+  "version": "1.1.10-otp.19",
   "description": "Library for creating application based on Mobx",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "jsnext:main": "src/lib/index.js",
   "author": "Space307",
   "license": "MIT",
   "scripts": {

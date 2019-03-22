@@ -9,14 +9,14 @@ import { observer } from 'mobx-react';
 import { startServices, stopServices, getStartedServices } from './serviceUtils.js';
 import type { GlobalContextType, ServiceStartConfigType, StartServiceReturnType } from './typing/common.js';
 
-type servicesHashType = {[key:string]:*};
+export type ServicesHashType = {[key:string]:*};
 
 type ServiceItemType = Class<*> | Array<*>;
 
 type ProviderOptionsAttributeType = {
   stop?: boolean,
   services?: Array<ServiceItemType> | (props: *)=> Array<ServiceItemType>,
-  helper?: (services: ?servicesHashType, props: *) => *,
+  helper?: (services: ?ServicesHashType, props: *) => *,
   stub?: React$ComponentType<*>,
 };
 
@@ -27,13 +27,12 @@ type ProviderOptionsPropType = {
 
 type ProviderStateTypes = {
   error: ?string,
-  services: ?servicesHashType,
+  services: ?ServicesHashType,
 };
 
-type ProviderType = (
+export type ProviderType = (
   Component: React$ComponentType<*>,
   options?: ProviderOptionsAttributeType)=>React$ComponentType<*>;
-
 
 /**
  * Convert incoming param with service list to start service format
@@ -62,7 +61,7 @@ function convertToServiceStartConfig(ServiceProtoList: Array<ServiceItemType>): 
 /**
  * Convert service Array to object for service context provider
  */
-function convertToServiceHash(list: ?Array<*>): ?servicesHashType {
+function convertToServiceHash(list: ?Array<*>): ?ServicesHashType {
   return list && list.length ?
     list.reduce((acc, item) => {
       const name = item.constructor.name;
@@ -82,9 +81,9 @@ function getComponentName(Component: React$ComponentType<*>): string {
   return Component && typeof Component.name === 'string' ? Component.name : 'unknown';
 }
 
-export default function CreateProvider(
+export default function createProvider(
   BinderContext: React$Context<GlobalContextType>,
-  ServiceContext: React$Context<?servicesHashType>): ProviderType {
+  ServiceContext: React$Context<?ServicesHashType>): ProviderType {
   return function Provider(
     Component: React$ComponentType<*>,
     options?: ProviderOptionsAttributeType,
@@ -214,7 +213,7 @@ export default function CreateProvider(
         /**
          * Merge props for wrapped component and call helper
          */
-        composeProps(services: ?servicesHashType, props: PropType) {
+        composeProps(services: ?ServicesHashType, props: PropType) {
           if (services && typeof this.options.helper) {
             return this.options.helper ? this.options.helper(services, props) : props;
           }

@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = CreateBinderProvider;
+exports.default = createBinderProvider;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
@@ -24,7 +24,7 @@ var _Binder = _interopRequireDefault(require("./Binder.js"));
 /**
  * BinderProvider creates new binder context and provide in to child components through react context
  */
-function CreateBinderProvider(BinderContext) {
+function createBinderProvider(BinderContext) {
   return function BinderProvider(Component, initialState) {
     var ComponentWrapper =
     /*#__PURE__*/
@@ -62,7 +62,7 @@ function CreateBinderProvider(BinderContext) {
 
           return _react.default.createElement(BinderContext.Provider, {
             value: this.newContext
-          }, _react.default.createElement(Component, this.props.props));
+          }, _react.default.createElement(Component, this.props));
         }
       }]);
       return ComponentWrapper;

@@ -1,9 +1,9 @@
 // @flow
 
-import { CreateProvider, CreateBinderProvider } from 'sources.js';
+import { createProvider, createBinderProvider } from 'sources.js';
 
 import { BinderContext, ServiceContext } from './ComponentContext.js';
 
-export const Provider = CreateProvider(BinderContext, ServiceContext);
-export const BinderProvider = CreateBinderProvider(BinderContext);
+export const Provider = createProvider(BinderContext, ServiceContext);
+export const BinderProvider = createBinderProvider(BinderContext);
 

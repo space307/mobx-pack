@@ -2,14 +2,14 @@ import React from 'react';
 import '@babel/polyfill';
 import { configure, mount, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import CreateProvider from '../Provider.jsx';
+import createProvider from '../Provider.js';
 import Binder from '../Binder.js';
 import { bindAs, onStart } from '../serviceDecorators.js';
 import { startService } from '../serviceUtils.js';
 
 const BinderContext = React.createContext();
 const ServiceContext = React.createContext();
-const Provider = CreateProvider(BinderContext, ServiceContext);
+const Provider = createProvider(BinderContext, ServiceContext);
 
 
 configure({ adapter: new Adapter() });

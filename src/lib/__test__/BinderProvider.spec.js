@@ -2,11 +2,11 @@ import React from 'react';
 import '@babel/polyfill';
 import { configure, mount, shallow } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
-import CreateBinderProvider from '../BinderProvider.jsx';
+import createBinderProvider from '../BinderProvider.js';
 import Binder from '../Binder.js';
 
 const BinderContext = React.createContext();
-const BinderProvider = CreateBinderProvider(BinderContext);
+const BinderProvider = createBinderProvider(BinderContext);
 
 configure({ adapter: new Adapter() });
 

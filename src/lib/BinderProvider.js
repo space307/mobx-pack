@@ -13,7 +13,8 @@ type BinderProviderStateTypes = {
 };
 
 
-export default function CreateBinderProvider(BinderContext: React$Context<GlobalContextType>) {
+export default function createBinderProvider(BinderContext: React$Context<GlobalContextType>):
+  (Component: React$ComponentType<*>, initialState?: *)=>React$ComponentType<*> {
   return function BinderProvider(Component: React$ComponentType<*>, initialState?: *): React$ComponentType<*> {
     class ComponentWrapper<PropType> extends
       React.Component<{context:GlobalContextType, props:PropType}, BinderProviderStateTypes > {

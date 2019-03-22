@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = CreateProvider;
+exports.default = createProvider;
 
 var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
@@ -80,7 +80,7 @@ function getComponentName(Component) {
   return Component && typeof Component.name === 'string' ? Component.name : 'unknown';
 }
 
-function CreateProvider(BinderContext, ServiceContext) {
+function createProvider(BinderContext, ServiceContext) {
   return function Provider(Component, options) {
     var _class, _temp;
 

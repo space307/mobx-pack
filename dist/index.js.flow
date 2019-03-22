@@ -1,0 +1,64 @@
+// @flow
+
+import type {GlobalContextType, ServiceClassType, ServiceStartConfigType, BinderConfigType} from 'src/lib/typing/common.js';
+import type {ProviderType, ServicesHashType} from 'src/lib/Provider.js';
+import type { BinderInterface } from 'src/lib/typing/binderInterface.js';
+import type { ServiceType } from './serviceDecorators.js';
+import type { ServiceConnectorOptionsTypes } from 'src/lib/typing/serviceConnectorTypes.js';
+
+
+export type { BinderInterface } from 'src/lib/typing/binderInterface.js';
+export type { ServiceConnectorOptionsTypes } from 'src/lib/typing/serviceConnectorTypes.js';
+export type { BinderConfigType, ServiceConfigType,
+  ServiceClassType, ServiceStartConfigType, StartServiceReturnType } from 'src/lib/typing/common.js';
+
+// ./serviceDecorators.js
+declare export function bindAs(serviceName: string): (service: ServiceType) => ServiceType;
+declare export function bindServices(
+  ...serviceNames: Array<string>
+): (service: ServiceType, callbackName: string) => ServiceType;
+declare export function unbindServices(
+  ...serviceNames: Array<string>
+): (service: ServiceType, callbackName: string) => ServiceType;
+declare export function onStart(service: ServiceType, callbackName: string): ServiceType;
+declare export function onStop(service: ServiceType, callbackName: string): ServiceType;
+
+
+// ./serviceUtils.js
+declare export function createService(Service: ServiceClassType, protoAttrs?: ?Array<*>): *;
+declare export function startService(
+  binder: BinderInterface,
+  initialState: *,
+  serviceStartConfig: ServiceStartConfigType,
+): Promise<*>;
+
+declare export function startServices(
+  binder: BinderInterface,
+  initialState: *,
+  serviceStartConfigList: Array<ServiceStartConfigType>,
+): Promise<*>;
+declare export function stopService(binder: BinderInterface, serviceStartConfig: ServiceStartConfigType): void;
+declare export function stopServices(binder: BinderInterface, serviceStartConfigList: Array<ServiceStartConfigType>): void;
+declare export function getStartedServices(
+  binder: BinderInterface,
+  serviceStartConfigList: Array<ServiceStartConfigType>): ?Array<*>;
+
+
+declare export function createBinderProvider(BinderContext: React$Context<GlobalContextType>):
+(Component: React$ComponentType<*>, initialState?: *)=>React$ComponentType<*>;
+
+declare export function createProvider(
+  BinderContext: React$Context<GlobalContextType>,
+  ServiceContext: React$Context<?ServicesHashType>): ProviderType
+
+declare export function ServiceConnector(service: *, options: ServiceConnectorOptionsTypes): *;
+
+
+declare export class Binder{
+  bind(service: *, options: BinderConfigType): void
+}
+
+declare export class BaseComponent {}
+declare export class BaseStore {}
+declare export class ServiceStarter {}
+declare export function Connector(Component: React$ComponentType<*>, opt: *): React$ComponentType<*>;
