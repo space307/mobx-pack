@@ -5,6 +5,7 @@ import type {ProviderType, ServicesHashType} from 'src/lib/Provider.js';
 import type { BinderInterface } from 'src/lib/typing/binderInterface.js';
 import type { ServiceType } from './serviceDecorators.js';
 import type { ServiceConnectorOptionsTypes } from 'src/lib/typing/serviceConnectorTypes.js';
+import type {InternalCallbackSetType, ServiceConfigBindAsType} from "src/lib/typing/common";
 
 
 export type { BinderInterface } from 'src/lib/typing/binderInterface.js';
@@ -54,7 +55,15 @@ declare export function createProvider(
 declare export function ServiceConnector(service: *, options: ServiceConnectorOptionsTypes): *;
 
 
-declare export class Binder{}
+declare export class Binder{
+  bind(service: *, options: InternalCallbackSetType): void;
+  isBind(bindAs: ServiceConfigBindAsType): boolean;
+  unbind(bindAs: ServiceConfigBindAsType): void;
+  clear(): void;
+  getService(bindAs: ServiceConfigBindAsType): *;
+  getPendingStartResolver(bindAs:ServiceConfigBindAsType): ?Promise<*>;
+  setPendingStartResolver(bindAs:ServiceConfigBindAsType, resolver: ?Promise<*>): void;
+}
 
 declare export class BaseComponent {}
 declare export class BaseStore {}

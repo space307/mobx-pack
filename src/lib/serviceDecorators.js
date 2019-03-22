@@ -111,12 +111,12 @@ export function unbindServices(
 }
 
 
-export function onStart(service: ServiceType, callbackName: string) {
+export function onStart(service: ServiceType, callbackName: string): ServiceType {
   putMethodNameToConfig(service, callbackName, 'onStart');
   return service;
 }
 
-export function onStop(service: ServiceType, callbackName: string) {
+export function onStop(service: ServiceType, callbackName: string): ServiceType {
   putMethodNameToConfig(service, callbackName, 'onStop');
   return service;
 }
