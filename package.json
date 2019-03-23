@@ -10,7 +10,8 @@
     "build": "babel src/lib --out-dir dist --ignore 'src/**/__test__','src/**/typing'",
     "prepublish": "npm run build",
     "test": "jest --verbose true",
-    "test:watch": "jest --verbose true --watch"
+    "test:watch": "jest --verbose true --watch",
+    "test:flow": "flow check"
   },
   "repository": {
     "type": "git",

@@ -18,8 +18,8 @@ export type InternalCallbackSetType = ServiceConfigCallbackSetType & {
 
 export type BinderConfigType = {
   bindAs: ServiceConfigBindAsType,
-  onBind?: Array<InternalCallbackSetType>,
-  onUnbind?: Array<InternalCallbackSetType>,
+  onBind?: Array<ServiceConfigCallbackSetType>,
+  onUnbind?: Array<ServiceConfigCallbackSetType>,
   importData?: *,
   debug?: boolean
 };
@@ -32,8 +32,6 @@ export type ServiceConfigType = {
 
 export type ServiceClassType = Class<*> & {
   binderConfig: ServiceConfigType,
-  name: string,
-  constructor: ()=>void,
 }
 
 export type ServiceStartConfigType = {

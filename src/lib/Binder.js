@@ -350,6 +350,7 @@ class Binder implements BinderInterface {
           if (callbackSetList) {
             callbackSetList.forEach((callbackSet) => {
               if (includes(callbackSet, bindAs)) {
+                // $FlowIgnore
                 cb(depBindAs, callbackSet, service);
               }
             });
@@ -738,7 +739,8 @@ class Binder implements BinderInterface {
       return raw ? val : toJS(val); // eslint-disable-line
     }
 
-    console.warn(`Warnning! importVar form "${protoName(this)}" to "${initiator}". "${serviceName}" service not found.`);
+    console.warn(`Warnning! importVar form "${protoName(this)}" to 
+    "${initiator}". "${serviceName}" service not found.`);
 
     return undefined; // eslint-disable-line
   }
@@ -762,7 +764,8 @@ class Binder implements BinderInterface {
       if (serviceInst.api && serviceInst.api[actionName]) {
         return serviceInst.api[actionName].apply(serviceInst, arg); // eslint-disable-line
       }
-      console.warn(`CallApi warn. "${initiator}" calls unknown method "${actionName}" found in service "${serviceName}".`);
+      console.warn(`CallApi warn. "${initiator}" calls unknown method 
+      "${actionName}" found in service "${serviceName}".`);
     } else {
       console.warn(`CallApi warn. "${initiator}" calls method "${actionName}" from not bind service "${serviceName}".`);
     }
