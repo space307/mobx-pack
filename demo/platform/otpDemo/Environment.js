@@ -6,9 +6,9 @@ import type { CarStoreInterface, GarageStoreInterface,
   TimeServiceInterface, InitialStateInterface } from './typing/types.js';
 
 const SERVICE_NAMES = {
-  GARAGE_STORE: 'GARAGE_STORE',
-  TIME_SERVICE: 'TIME_SERVICE',
-  CAR_STORE: 'CAR_STORE',
+  GARAGE_STORE: 'garageStore',
+  TIME_SERVICE: 'timeService',
+  CAR_STORE: 'carStore',
 };
 
 

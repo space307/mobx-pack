@@ -33,7 +33,7 @@ const Car = ({ time, color, test }) => (
 
 const Garage = props => (
   <div>
-    <ServiceContext.Cunsumer>{([timeService, garageStore]) => (
+    <ServiceContext.Cunsumer>{({ timeService, garageStore }) => (
       <Observer>{() => (
         <Car
           {...props}
@@ -51,7 +51,7 @@ const Garage = props => (
 const GarageContainer = Provider(
   Garage,
   {
-    helper(timeService, garageStore, { color }) {
+    helper({ timeService, garageStore }, { color }) {
       return {
         color,
         counter: garageStore.counter,

@@ -37,6 +37,13 @@ export default function createBinderProvider(BinderContext: React$Context<Global
           this.state.error = 'BinderProvider wait for "React.Component" in attributes';
         }
       }
+
+      componentWillUnmount(): void {
+        if (this.newContext.binder) {
+          this.newContext.binder.clear();
+        }
+      }
+
       render() {
         if (this.state.error) {
           throw new Error(this.state.error);

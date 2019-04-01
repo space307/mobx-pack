@@ -594,17 +594,24 @@ class Binder implements BinderInterface {
   }
 
   /**
-   * clear all binder data
+   * clear all binder data besides services
    */
   clear(): void {
-    this.services = {};
     this.depsList = {
       [CALLBACK_NAME.BIND]: {},
       [CALLBACK_NAME.UNBIND]: {},
     };
+
+    this.pendingStartResolvers = {};
     this.emitter.clear();
   }
-
+  /**
+   * clear all binder data
+   */
+  clearAll(): void {
+    this.clear();
+    this.services = {};
+  }
 
   /**
    * show message to console
