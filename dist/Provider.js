@@ -61,12 +61,11 @@ function convertToServiceStartConfig(ServiceProtoList) {
 
 function convertToServiceHash(list) {
   return list && list.length ? list.reduce(function (acc, item) {
-    var name = item.constructor.name;
-
-    if (!name) {
-      throw new Error("Wrong class name \"".concat(name, "\""));
+    if (!item.constructor.binderConfig || !item.constructor.binderConfig.config.bindAs) {
+      throw new Error('Cannot convert service hash because binderConfig or bindAs props not exits');
     }
 
+    var name = item.constructor.binderConfig.config.bindAs;
     acc[name.charAt(0).toLowerCase() + name.slice(1)] = item;
     return acc;
   }, {}) : null;

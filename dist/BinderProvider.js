@@ -54,6 +54,13 @@ function createBinderProvider(BinderContext) {
       }
 
       (0, _createClass2.default)(ComponentWrapper, [{
+        key: "componentWillUnmount",
+        value: function componentWillUnmount() {
+          if (this.newContext.binder) {
+            this.newContext.binder.clear();
+          }
+        }
+      }, {
         key: "render",
         value: function render() {
           if (this.state.error) {

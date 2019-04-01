@@ -379,6 +379,7 @@ function () {
             if (callbackSetList) {
               callbackSetList.forEach(function (callbackSet) {
                 if ((0, _lodash.includes)(callbackSet, bindAs)) {
+                  // $FlowIgnore
                   cb(depBindAs, callbackSet, _service);
                 }
               });
@@ -657,7 +658,7 @@ function () {
       return settings && settings.service;
     }
     /**
-     * clear all binder data
+     * clear all binder data besides services
      */
 
   }, {
@@ -665,9 +666,19 @@ function () {
     value: function clear() {
       var _this$depsList2;
 
-      this.services = {};
       this.depsList = (_this$depsList2 = {}, (0, _defineProperty2.default)(_this$depsList2, CALLBACK_NAME.BIND, {}), (0, _defineProperty2.default)(_this$depsList2, CALLBACK_NAME.UNBIND, {}), _this$depsList2);
+      this.pendingStartResolvers = {};
       this.emitter.clear();
+    }
+    /**
+     * clear all binder data
+     */
+
+  }, {
+    key: "clearAll",
+    value: function clearAll() {
+      this.clear();
+      this.services = {};
     }
     /**
      * show message to console
@@ -818,7 +829,7 @@ function () {
         return raw ? val : (0, _mobx.toJS)(val); // eslint-disable-line
       }
 
-      console.warn("Warnning! importVar form \"".concat((0, _util.protoName)(this), "\" to \"").concat(initiator, "\". \"").concat(serviceName, "\" service not found."));
+      console.warn("Warnning! importVar form \"".concat((0, _util.protoName)(this), "\" to \n    \"").concat(initiator, "\". \"").concat(serviceName, "\" service not found."));
       return undefined; // eslint-disable-line
     }
   }, {
@@ -846,7 +857,7 @@ function () {
           return serviceInst.api[actionName].apply(serviceInst, arg); // eslint-disable-line
         }
 
-        console.warn("CallApi warn. \"".concat(initiator, "\" calls unknown method \"").concat(actionName, "\" found in service \"").concat(serviceName, "\"."));
+        console.warn("CallApi warn. \"".concat(initiator, "\" calls unknown method \n      \"").concat(actionName, "\" found in service \"").concat(serviceName, "\"."));
       } else {
         console.warn("CallApi warn. \"".concat(initiator, "\" calls method \"").concat(actionName, "\" from not bind service \"").concat(serviceName, "\"."));
       }
