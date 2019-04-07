@@ -16,7 +16,7 @@ configure({ adapter: new Adapter() });
 
 describe('Provider test', () => {
   it('calls helper && start service normally && pass props to child', (done) => {
-    const serviceName = 'test';
+    const serviceName = 'serviceProto';
     const countValue = 1;
     @bindAs(serviceName)
     class ServiceProto {
@@ -123,7 +123,7 @@ describe('Provider test', () => {
   it('put services to context', (done) => {
     const consumerMock = jest.fn();
 
-    const serviceName = 'test';
+    const serviceName = 'serviceProto';
 
     @bindAs(serviceName)
     class ServiceProto {
