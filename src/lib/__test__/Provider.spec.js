@@ -15,14 +15,20 @@ const Provider = createProvider(BinderContext, ServiceContext);
 configure({ adapter: new Adapter() });
 
 describe('Provider test', () => {
-  it('calls helper && start service normally && pass props to child', (done) => {
+  it('calls helper && start service normally && pass props to child && useState', (done) => {
     const serviceName = 'serviceProto';
     const countValue = 1;
+
+    const onStartMock = jest.fn();
+
+    const initialState = {};
+
     @bindAs(serviceName)
     class ServiceProto {
          count = countValue;
         @onStart
-         onStart() {
+         onStart(initialStateParam) {
+           onStartMock(initialState === initialStateParam);
            return new Promise(
              (resolve) => {
                setTimeout(() => { resolve(); });
@@ -34,7 +40,6 @@ describe('Provider test', () => {
     const helperMock = jest.fn();
     const childPropsMock = jest.fn();
 
-    const initialState = {};
 
     const binder = new Binder();
 
@@ -52,6 +57,7 @@ describe('Provider test', () => {
         };
       },
       services: [ServiceProto],
+      useState: true,
     });
 
     const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
@@ -64,6 +70,7 @@ describe('Provider test', () => {
       wrapper.update();
 
       setTimeout(() => {
+        expect(onStartMock).toHaveBeenCalledWith(true);
         expect(helperMock).toHaveBeenCalledWith(true);
         expect(childPropsMock).toHaveBeenCalledWith(true, true);
         expect(binder.isBind(serviceName)).toBe(true);
