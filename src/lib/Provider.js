@@ -123,8 +123,8 @@ export default function createProvider(
 
           if (options) {
             const services = typeof options.services === 'function' ? options.services(props) : options.services;
-            const { stop, helper, stub } = options;
-            this.options = { ...defaultOptions, ...{ stop, helper, stub }, ...{ services } };
+            const { stop, helper, stub, useState } = options;
+            this.options = { ...defaultOptions, ...{ stop, helper, stub, useState }, ...{ services } };
           } else {
             this.options = { ...defaultOptions };
           }

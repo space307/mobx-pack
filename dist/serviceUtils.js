@@ -58,7 +58,7 @@ function startService(binder, initialState, serviceStartConfig, useState) {
         return;
       }
 
-      var onStartResult = service[onStartFunctionName](useState && initialState);
+      var onStartResult = service[onStartFunctionName](useState ? initialState : undefined);
 
       if (onStartResult instanceof Promise) {
         onStartResult.then(function () {

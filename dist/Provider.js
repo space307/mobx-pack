@@ -118,11 +118,13 @@ function createProvider(BinderContext, ServiceContext) {
 
           var stop = options.stop,
               helper = options.helper,
-              stub = options.stub;
+              stub = options.stub,
+              useState = options.useState;
           _this.options = (0, _objectSpread2.default)({}, defaultOptions, {
             stop: stop,
             helper: helper,
-            stub: stub
+            stub: stub,
+            useState: useState
           }, {
             services: _services
           });

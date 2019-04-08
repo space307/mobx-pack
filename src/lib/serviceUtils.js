@@ -45,7 +45,7 @@ export function startService(
           return;
         }
 
-        const onStartResult = service[onStartFunctionName](useState && initialState);
+        const onStartResult = service[onStartFunctionName](useState ? initialState : undefined);
 
         if (onStartResult instanceof Promise) {
           onStartResult
