@@ -24,7 +24,7 @@ function createService(Service, protoAttrs) {
   return protoAttrs ? (0, _construct2.default)(Service, (0, _toConsumableArray2.default)(protoAttrs)) : new Service();
 }
 
-function startService(binder, initialState, serviceStartConfig) {
+function startService(binder, initialState, serviceStartConfig, useState) {
   var binderConfig = serviceStartConfig.binderConfig,
       proto = serviceStartConfig.proto;
   var config = binderConfig.config,
@@ -58,7 +58,7 @@ function startService(binder, initialState, serviceStartConfig) {
         return;
       }
 
-      var onStartResult = service[onStartFunctionName](initialState);
+      var onStartResult = service[onStartFunctionName](useState && initialState);
 
       if (onStartResult instanceof Promise) {
         onStartResult.then(function () {
@@ -83,8 +83,9 @@ function startService(binder, initialState, serviceStartConfig) {
 }
 
 function startServices(binder, initialState, serviceStartConfigList) {
+  var useState = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
   return Promise.all(serviceStartConfigList.map(function (serviceStartConfig) {
-    return startService(binder, initialState, serviceStartConfig);
+    return startService(binder, initialState, serviceStartConfig, useState);
   }));
 }
 

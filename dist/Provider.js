@@ -85,6 +85,7 @@ function createProvider(BinderContext, ServiceContext) {
 
     var defaultOptions = {
       stop: false,
+      useState: false,
       services: []
     };
     return (0, _mobxReact.observer)((_temp = _class =
@@ -182,7 +183,9 @@ function createProvider(BinderContext, ServiceContext) {
         value: function startServices() {
           var _this2 = this;
 
-          var ServiceProtoList = this.options.services;
+          var _this$options = this.options,
+              ServiceProtoList = _this$options.services,
+              useState = _this$options.useState;
           var _this$context = this.context,
               binder = _this$context.binder,
               initialState = _this$context.initialState;
@@ -199,7 +202,7 @@ function createProvider(BinderContext, ServiceContext) {
             }
 
             if (serviceStartConfigList) {
-              (0, _serviceUtils.startServices)(binder, initialState, serviceStartConfigList).then(function (services) {
+              (0, _serviceUtils.startServices)(binder, initialState, serviceStartConfigList, useState).then(function (services) {
                 var result = {
                   toStop: [],
                   services: []
