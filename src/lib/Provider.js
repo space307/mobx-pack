@@ -18,6 +18,7 @@ type ProviderOptionsAttributeType = {
   services?: Array<ServiceItemType> | (props: *)=> Array<ServiceItemType>,
   helper?: (services: ?ServicesHashType, props: *) => *,
   stub?: React$ComponentType<*>,
+  useState?: boolean,
 };
 
 type ProviderOptionsPropType = {
@@ -91,6 +92,7 @@ export default function createProvider(
   ): React$ComponentType<*> {
     const defaultOptions = {
       stop: false,
+      useState: false,
       services: [],
     };
 
@@ -168,7 +170,7 @@ export default function createProvider(
          * Start service procedure
          */
         startServices() {
-          const { services: ServiceProtoList } = this.options;
+          const { services: ServiceProtoList, useState } = this.options;
           const { binder, initialState } = this.context;
 
           if (ServiceProtoList && ServiceProtoList.length) {
@@ -180,7 +182,7 @@ export default function createProvider(
             }
 
             if (serviceStartConfigList) {
-              startServices(binder, initialState, serviceStartConfigList).then((services: *) => {
+              startServices(binder, initialState, serviceStartConfigList, useState).then((services: *) => {
                 type ResultType = {
                   toStop: Array<ServiceStartConfigType>,
                   services: Array<*>,

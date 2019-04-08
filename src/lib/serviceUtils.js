@@ -15,6 +15,7 @@ export function startService(
   binder: BinderInterface,
   initialState: *,
   serviceStartConfig: ServiceStartConfigType,
+  useState: boolean,
 ): Promise<*> {
   const { binderConfig, proto } = serviceStartConfig;
   const {
@@ -44,7 +45,7 @@ export function startService(
           return;
         }
 
-        const onStartResult = service[onStartFunctionName](initialState);
+        const onStartResult = service[onStartFunctionName](useState && initialState);
 
         if (onStartResult instanceof Promise) {
           onStartResult
@@ -80,11 +81,12 @@ export function startServices(
   binder: BinderInterface,
   initialState: *,
   serviceStartConfigList: Array<ServiceStartConfigType>,
+  useState: boolean = false,
 ): Promise<*> {
   return Promise.all(
     serviceStartConfigList.map(
       (serviceStartConfig: ServiceStartConfigType): Promise<*> =>
-        startService(binder, initialState, serviceStartConfig),
+        startService(binder, initialState, serviceStartConfig, useState),
     ),
   );
 }

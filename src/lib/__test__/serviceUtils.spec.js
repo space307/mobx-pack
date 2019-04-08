@@ -150,7 +150,7 @@ describe('serviceUtils test', () => {
     const initialState = {};
 
     const binder = new Binder();
-    startService(binder, initialState, getConfig(ServiceProto)).then(({ service }) => {
+    startService(binder, initialState, getConfig(ServiceProto), true).then(({ service }) => {
       expect(service.test).toBeCalledWith(initialState);
       done();
     });
@@ -218,15 +218,16 @@ describe('serviceUtils test', () => {
     const initialState = {};
     const binder = new Binder();
 
-    startServices(binder, initialState, [getConfig(ServiceProto1), getConfig(ServiceProto2)]).then(([data1, data2]) => {
-      expect(data1.started).toBe(true);
-      expect(binder.isBind('test1')).toBe(true);
-      expect(data1.service.test).toBeCalledWith(initialState);
-      expect(data2.started).toBe(true);
-      expect(binder.isBind('test2')).toBe(true);
-      expect(data2.service.test).toBeCalledWith(initialState);
-      done();
-    });
+    startServices(binder, initialState, [getConfig(ServiceProto1), getConfig(ServiceProto2)], true)
+      .then(([data1, data2]) => {
+        expect(data1.started).toBe(true);
+        expect(binder.isBind('test1')).toBe(true);
+        expect(data1.service.test).toBeCalledWith(initialState);
+        expect(data2.started).toBe(true);
+        expect(binder.isBind('test2')).toBe(true);
+        expect(data2.service.test).toBeCalledWith(initialState);
+        done();
+      });
   });
 
   it('startServices negative', (done) => {

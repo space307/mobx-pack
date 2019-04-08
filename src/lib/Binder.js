@@ -54,10 +54,11 @@ type ServiceSettingsType = {
 class Binder implements BinderInterface {
   services: { [key: ServiceConfigBindAsType]: ?ServiceSettingsType } = {};
 
-  depsList: { [key: string]: { [key: ServiceConfigBindAsType]: Array<ServiceConfigBindAsType> } } = {
-    [CALLBACK_NAME.BIND]: {},
-    [CALLBACK_NAME.UNBIND]: {},
-  };
+  depsList: { [key: $Values<typeof CALLBACK_NAME>]:
+      { [key: ServiceConfigBindAsType]: Array<ServiceConfigBindAsType> } } = {
+        [CALLBACK_NAME.BIND]: {},
+        [CALLBACK_NAME.UNBIND]: {},
+      };
 
   pendingStartResolvers:{ [key: ServiceConfigBindAsType]: Promise<*> } = {};
 
