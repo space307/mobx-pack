@@ -10,7 +10,7 @@ export class BaseService extends BaseStore {
     exportData: { serverTimeDelta: 1 },
   };
   // difference between server and local time in milliseconds, would get with initial request
-  serverTimeDelta: string = 55;
+  serverTimeDelta: number = 1;
 }
 
 export default new BaseService(context);

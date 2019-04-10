@@ -1,13 +1,18 @@
 {
   "name": "mobx-pack",
-  "version": "1.1.10",
+  "version": "1.1.10-otp.35",
   "description": "Library for creating application based on Mobx",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "jsnext:main": "src/lib/index.js",
   "author": "Space307",
   "license": "MIT",
   "scripts": {
-    "build": "babel src/lib/ --out-dir lib --copy-files",
-    "prepublish": "npm run build"
+    "build": "babel src/lib --out-dir dist --ignore 'src/**/__test__','src/**/typing'",
+    "prepublish": "npm run build",
+    "test": "jest",
+    "test:verbose": "jest --verbose true",
+    "test:watch": "jest --verbose true --watch",
+    "test:flow": "flow check"
   },
   "repository": {
     "type": "git",
@@ -15,7 +20,9 @@
   },
   "homepage": "https://github.com/space307/mobx-pack/",
   "dependencies": {
+    "@babel/polyfill": "^7.2.5",
     "@babel/runtime": "^7.2.0",
+    "events": "^3.0.0",
     "lodash": "4.x",
     "mobx": "4.x",
     "mobx-react": "5.x",
@@ -49,14 +56,23 @@
     "@babel/preset-flow": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
     "babel-eslint": "^9.0.0",
+    "babel-jest": "^24.5.0",
+    "enzyme": "^3.9.0",
+    "enzyme-adapter-react-16": "^1.11.2",
     "eslint": "^4.6.1",
     "eslint-config-airbnb": "^15.1.0",
+    "eslint-config-prettier": "^3.1.0",
     "eslint-plugin-flowtype": "^2.46.1",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-prettier": "^3.0.0",
     "eslint-plugin-react": "^7.2.1",
-    "flow-bin": "0.72.0",
-    "flow-typed": "^2.4.0"
+    "flow-bin": "0.90.0",
+    "flow-typed": "^2.4.0",
+    "jasmine": "^3.3.1",
+    "jest": "^24.5.0",
+    "jest-simple-dot-reporter": "^1.0.3",
+    "react-test-renderer": "^16.8.4"
   },
   "babel": {
     "presets": [
@@ -97,5 +113,20 @@
       "@babel/plugin-proposal-do-expressions",
       "@babel/plugin-transform-runtime"
     ]
+  },
+  "jest": {
+    "modulePaths": [
+      "src"
+    ],
+    "modulePathIgnorePatterns": [
+      "src/demo"
+    ],
+    "roots": [
+      "src"
+    ],
+    "reporters": [
+      "jest-simple-dot-reporter"
+    ],
+    "testRegex": "(\\.(test|spec)).(js|jsx|json|node)$"
   }
 }

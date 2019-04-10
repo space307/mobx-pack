@@ -6,7 +6,10 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = ServiceConnector;
 
 function startOk(service, options) {
-  options.binder.bind(service, options.config);
+  if (!options.binder.isBind(options.config.bindAs)) {
+    options.binder.bind(service, options.config);
+  }
+
   service.__serviceOptions.started = true;
 }
 

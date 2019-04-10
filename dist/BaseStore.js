@@ -21,7 +21,7 @@ var _lodash = _interopRequireDefault(require("lodash"));
 
 var _mobx = require("mobx");
 
-var _util = require("./util.js");
+var _util = require("./helper/util.js");
 
 var _class, _descriptor, _descriptor2, _descriptor3, _class2, _temp;
 
@@ -253,7 +253,7 @@ function () {
   }, {
     key: "addObserve",
     value: function addObserve(obsr, key, services) {
-      var result; //TODO придумать как выпилить this.getConfig()
+      var result; // TODO придумать как выпилить this.getConfig()
 
       if (!services || !this.binder.addDisposer(this.getConfig().bindAs, services, obsr)) {
         this.disposers.push(obsr);
@@ -309,8 +309,12 @@ function () {
   }, {
     key: "bindApp",
     value: function bindApp() {
-      if (Object.prototype.hasOwnProperty.call(this.getConfig(), 'bindAs')) {
-        this.binder.bind(this, this.getConfig());
+      var config = this.getConfig();
+
+      if (Object.prototype.hasOwnProperty.call(config, 'bindAs')) {
+        if (!this.binder.isBind(config.bindAs)) {
+          this.binder.bind(this, config);
+        }
       } else {
         console.warn("Base Store. ".concat((0, _util.protoName)(this), " has no bindAs in config"));
       }
@@ -336,7 +340,7 @@ function () {
         arg[_key - 2] = arguments[_key];
       }
 
-      return (_this$binder = this.binder).callApi.apply(_this$binder, [from, methodName, this.getConfig().bindAs].concat(arg));
+      return (_this$binder = this.binder).callApi.apply(_this$binder, [from, methodName, this.getConfig().config].concat(arg));
     }
   }, {
     key: "getConfig",

@@ -25,7 +25,7 @@ var _mobxReact = require("mobx-react");
 
 var _lodash = require("lodash");
 
-var _util = require("./util.js");
+var _util = require("./helper/util.js");
 
 function ConnectorF(Component) {
   var _class, _temp;

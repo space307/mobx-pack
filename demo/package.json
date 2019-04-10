@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@material-ui/core": "^3.6.2",
+    "mobx-pack": "^1.1.10-otp.29",
+    "react": "^16.7.0",
     "react-cropper": "^1.0.1",
     "react-custom-scrollbars": "^4.2.1",
     "react-loadable": "^5.3.1"
