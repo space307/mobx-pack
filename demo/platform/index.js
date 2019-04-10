@@ -19,7 +19,8 @@ import Platform from 'demo/platform/layouts/Platform/index.jsx';
    */
 
 // otp demo page
-import MyApplication from 'demo/platform/otpDemo/MyApplication.jsx';
+//import MyApplication from 'demo/platform/otpDemo/MyApplication.jsx';
+import Environment from 'demo/platform/otpDemo/Environment.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dealService.start('entry'),
     balanceService.start('entry'),
   ]).then(() => {
-    ReactDOM.render(React.createElement(Platform), document.querySelector('#root'));
+    //ReactDOM.render(React.createElement(Platform), document.querySelector('#root'));
   });
 });
 

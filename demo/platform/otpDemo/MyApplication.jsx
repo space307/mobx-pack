@@ -158,6 +158,6 @@ const WithNewBinder = BinderProvider(
 
 
 export default () => (
-  <BinderContext.Provider value={{ binder: new Binder(), initialState: { hello: 1 } }}>
+  <BinderContext.Provider value={new Binder()}>
     <WithNewBinder />
   </BinderContext.Provider>);

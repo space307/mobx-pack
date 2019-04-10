@@ -1,11 +1,7 @@
 // @flow
 import Binder from '../Binder.js';
 
-export type GlobalContextType = {
-  binder: Binder,
-  initialState: *,
-};
-
+export type GlobalContextType = Binder;
 
 export type ServiceConfigBindAsType = string;
 
@@ -18,26 +14,22 @@ export type InternalCallbackSetType = ServiceConfigCallbackSetType & {
 
 export type BinderConfigType = {
   bindAs: ServiceConfigBindAsType,
+  onStart?: ServiceConfigCallbackSetType,
+  onStop?: string,
   onBind?: Array<ServiceConfigCallbackSetType>,
   onUnbind?: Array<ServiceConfigCallbackSetType>,
   importData?: *,
   debug?: boolean
 };
 
-export type ServiceConfigType = {
-  onStart?: string,
-  onStop?: string,
-  config: BinderConfigType,
-};
-
 export type ServiceClassType = Class<*> & {
-  binderConfig: ServiceConfigType,
+  binderConfig: BinderConfigType,
 }
 
 export type ServiceStartConfigType = {
   proto: ServiceClassType,
   protoAttrs?: Array<*>,
-  binderConfig: ServiceConfigType
+  binderConfig: BinderConfigType
 }
 
 

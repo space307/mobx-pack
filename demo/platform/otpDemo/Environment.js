@@ -11,6 +11,7 @@ const SERVICE_NAMES = {
   CAR_STORE: 'carStore',
 };
 
+export const INITIAL_SERVICE = 'initialService';
 
 /* -- TimeService --*/
 
@@ -19,7 +20,7 @@ class TimeService implements TimeServiceInterface {
   @observable
   time: string = '';
 
-  @onStart
+  @onStart(INITIAL_SERVICE)
   onStart(initialService: *): boolean {
     console.log(['onStart', SERVICE_NAMES.TIME_SERVICE, initialService]);
 
@@ -44,7 +45,7 @@ class GarageStore implements GarageStoreInterface {
   counter: number = 0;
   privateField: number = 0;
 
-  @onStart
+  @onStart(INITIAL_SERVICE)
   onStart(initialService: *): Promise<*> {
     console.log(['onStart', SERVICE_NAMES.GARAGE_STORE, initialService]);
 
@@ -98,7 +99,7 @@ class CarStore implements CarStoreInterface {
     }
   }
 
-  @onStart
+  @onStart(INITIAL_SERVICE)
   onStart(initialService: *): boolean {
     console.log(['onStart', SERVICE_NAMES.CAR_STORE, initialService]);
     return true;
@@ -120,15 +121,14 @@ class CarStore implements CarStoreInterface {
 }
 /* --/ CarStore --*/
 
-export { CarStore, GarageStore, TimeService };
-
 
 /* -- InitialState --*/
+@bindAs(INITIAL_SERVICE)
 class InitialState implements InitialStateInterface {
   vip: boolean = false;
   abTest: boolean = true;
 }
-
-
-export const initialState: InitialStateInterface = new InitialState();
 /* --/ InitialState --*/
+
+export { CarStore, GarageStore, TimeService, InitialState };
+
