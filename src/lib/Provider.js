@@ -64,11 +64,11 @@ function convertToServiceStartConfig(ServiceProtoList: Array<ServiceItemType>): 
 function convertToServiceHash(list: ?Array<*>): ?ServicesHashType {
   return list && list.length ?
     list.reduce((acc, item) => {
-      if (!item.constructor.binderConfig || !item.constructor.binderConfig.config.bindAs) {
+      if (!item.constructor.binderConfig || !item.constructor.binderConfig.bindAs) {
         throw new Error('Cannot convert service hash because binderConfig or bindAs props not exits');
       }
 
-      const name = item.constructor.binderConfig.config.bindAs;
+      const name = item.constructor.binderConfig.bindAs;
 
       acc[name.charAt(0).toLowerCase() + name.slice(1)] = item;
       return acc;

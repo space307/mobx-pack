@@ -10,11 +10,10 @@ import type { GlobalContextType } from './typing/common';
 
 type BinderProviderStateTypes = {
   error: ?string,
-  ready: boolean,
 };
 
 
-export default function createBinderProvider(BinderContext: React$Context<GlobalContextType>, InitialState?: Class<*>):
+export default function createBinderProvider(BinderContext: React$Context<GlobalContextType>):
   (Component: React$ComponentType<*>)=>React$ComponentType<*> {
   return function BinderProvider(Component: React$ComponentType<*>): React$ComponentType<*> {
     class ComponentWrapper<PropType> extends
@@ -23,7 +22,6 @@ export default function createBinderProvider(BinderContext: React$Context<Global
 
       state: BinderProviderStateTypes = {
         error: null,
-        ready: true,
       };
 
       newContext:GlobalContextType;
@@ -35,22 +33,12 @@ export default function createBinderProvider(BinderContext: React$Context<Global
         if (!Component || typeof Component !== 'function') {
           this.state.error = 'BinderProvider wait for "React.Component" in attributes';
         }
-
-        if (InitialState) {
-          this.state.ready = false;
-        }
       }
 
       componentWillUnmount(): void {
         if (this.newContext) {
           this.newContext.clear();
         }
-      }
-      componentDidMount(){
-     /*   this.newContext.start().then(()=>{
-
-
-        })*/
       }
 
       render() {

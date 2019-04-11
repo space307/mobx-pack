@@ -112,7 +112,7 @@ class Binder implements BinderInterface {
     let result;
     const resolver = this.getPendingStartResolver(bindAs);
     const serviceInBinder = this.getService(bindAs);
-    const onStartFunctionName = onStart || 'onStart';
+
 
     if (serviceInBinder) {
       result = Promise.resolve({ service: serviceInBinder, started: false, serviceStartConfig });
@@ -123,17 +123,34 @@ class Binder implements BinderInterface {
         (resolve: (data: StartServiceReturnType) => void, reject: (error: Error) => void): void => {
           const service = this.createService(proto, serviceStartConfig.protoAttrs);
           const resolveData = { service, started: true, serviceStartConfig };
+          let onStartResult;
 
-          if (!service[onStartFunctionName]) {
-            this.bind(service, binderConfig);
-            resolve(resolveData);
-            return;
+          if (onStart && !Array.isArray(onStart)) {
+            throw Error(`Binder onStart error. onStart callback of "${bindAs}" is not valid`);
           }
 
-          // //////????
-          const onStartResult = service[onStartFunctionName]();
+          if (onStart && onStart.length) {
+            const {
+              callback,
+              serviceList,
+            } = this.destructCallback(onStart);
 
-          if (onStartResult instanceof Promise) {
+            if (!this.isListBind(serviceList)) {
+              // eslint-disable-next-line max-len
+              throw Error(`Binder onStart error. onStart callback of "${bindAs}" wait for service list (${serviceList ? serviceList.join(',') : ''}) to be bind, but some services are not bind ${this.getNotBind(serviceList).join(',')}`);
+            }
+
+            const funcToCall = this.parseCallback(callback, service);
+
+            if (funcToCall) {
+              onStartResult = funcToCall.apply(service, this.getServiceList(serviceList));
+            }
+          }
+
+          if (typeof onStartResult === 'undefined') {
+            this.bind(service, binderConfig);
+            resolve(resolveData);
+          } else if (onStartResult instanceof Promise) {
             onStartResult
               .then(
                 (): void => {
