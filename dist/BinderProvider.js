@@ -25,7 +25,7 @@ var _Binder = _interopRequireDefault(require("./Binder.js"));
  * BinderProvider creates new binder context and provide in to child components through react context
  */
 function createBinderProvider(BinderContext) {
-  return function BinderProvider(Component, initialState) {
+  return function BinderProvider(Component) {
     var ComponentWrapper =
     /*#__PURE__*/
     function (_React$Component) {
@@ -40,11 +40,7 @@ function createBinderProvider(BinderContext) {
           error: null
         };
         _this.newContext = void 0;
-        var contextInitialState = context && context.initialState;
-        _this.newContext = {
-          binder: new _Binder.default(context && context.binder),
-          initialState: initialState || contextInitialState
-        };
+        _this.newContext = new _Binder.default(context);
 
         if (!Component || typeof Component !== 'function') {
           _this.state.error = 'BinderProvider wait for "React.Component" in attributes';
@@ -56,8 +52,8 @@ function createBinderProvider(BinderContext) {
       (0, _createClass2.default)(ComponentWrapper, [{
         key: "componentWillUnmount",
         value: function componentWillUnmount() {
-          if (this.newContext.binder) {
-            this.newContext.binder.clear();
+          if (this.newContext) {
+            this.newContext.clear();
           }
         }
       }, {

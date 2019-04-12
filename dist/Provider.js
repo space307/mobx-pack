@@ -61,11 +61,11 @@ function convertToServiceStartConfig(ServiceProtoList) {
 
 function convertToServiceHash(list) {
   return list && list.length ? list.reduce(function (acc, item) {
-    if (!item.constructor.binderConfig || !item.constructor.binderConfig.config.bindAs) {
+    if (!item.constructor.binderConfig || !item.constructor.binderConfig.bindAs) {
       throw new Error('Cannot convert service hash because binderConfig or bindAs props not exits');
     }
 
-    var name = item.constructor.binderConfig.config.bindAs;
+    var name = item.constructor.binderConfig.bindAs;
     acc[name.charAt(0).toLowerCase() + name.slice(1)] = item;
     return acc;
   }, {}) : null;
@@ -85,7 +85,6 @@ function createProvider(BinderContext, ServiceContext) {
 
     var defaultOptions = {
       stop: false,
-      useState: false,
       services: []
     };
     return (0, _mobxReact.observer)((_temp = _class =
@@ -118,13 +117,11 @@ function createProvider(BinderContext, ServiceContext) {
 
           var stop = options.stop,
               helper = options.helper,
-              stub = options.stub,
-              useState = options.useState;
+              stub = options.stub;
           _this.options = (0, _objectSpread2.default)({}, defaultOptions, {
             stop: stop,
             helper: helper,
-            stub: stub,
-            useState: useState
+            stub: stub
           }, {
             services: _services
           });
@@ -141,8 +138,8 @@ function createProvider(BinderContext, ServiceContext) {
             _this.state.error = "".concat(err.message, " (component: ").concat(getComponentName(Component), ")");
           }
 
-          if (context && context.binder && config) {
-            var serviceList = (0, _serviceUtils.getStartedServices)(context.binder, config);
+          if (context && config) {
+            var serviceList = (0, _serviceUtils.getStartedServices)(context, config);
             _this.state.services = convertToServiceHash(serviceList);
           }
         }
@@ -164,7 +161,7 @@ function createProvider(BinderContext, ServiceContext) {
       }, {
         key: "componentDidMount",
         value: function componentDidMount() {
-          if ((!this.state.services || !this.state.services.length) && this.context && this.context.binder && this.context.initialState) {
+          if ((!this.state.services || !this.state.services.length) && this.context) {
             this.startServices();
           }
         }
@@ -172,8 +169,7 @@ function createProvider(BinderContext, ServiceContext) {
         key: "componentWillUnmount",
         value: function componentWillUnmount() {
           if (this.options.stop && this.serviceToStop && this.serviceToStop.length) {
-            var binder = this.context.binder;
-            (0, _serviceUtils.stopServices)(binder, this.serviceToStop);
+            (0, _serviceUtils.stopServices)(this.context, this.serviceToStop);
           }
         }
         /**
@@ -185,12 +181,8 @@ function createProvider(BinderContext, ServiceContext) {
         value: function startServices() {
           var _this2 = this;
 
-          var _this$options = this.options,
-              ServiceProtoList = _this$options.services,
-              useState = _this$options.useState;
-          var _this$context = this.context,
-              binder = _this$context.binder,
-              initialState = _this$context.initialState;
+          var ServiceProtoList = this.options.services;
+          var binder = this.context;
 
           if (ServiceProtoList && ServiceProtoList.length) {
             var serviceStartConfigList;
@@ -204,7 +196,7 @@ function createProvider(BinderContext, ServiceContext) {
             }
 
             if (serviceStartConfigList) {
-              (0, _serviceUtils.startServices)(binder, initialState, serviceStartConfigList, useState).then(function (services) {
+              (0, _serviceUtils.startServices)(binder, serviceStartConfigList).then(function (services) {
                 var result = {
                   toStop: [],
                   services: []

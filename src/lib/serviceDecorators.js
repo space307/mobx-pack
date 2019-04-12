@@ -90,11 +90,11 @@ export function bindAs(serviceName: string): (service: ServiceType) => ServiceTy
 }
 
 
-export function bindServices(
+export function onBind(
   ...serviceNames: Array<string>
 ): (service: ServiceType, callbackName: string) => ServiceType {
   if (!serviceNames.length || !validateNameList(serviceNames)) {
-    throw new Error(`Wrong attributes passed to bindServices decorator (${serviceNames.join(',')}).`);
+    throw new Error(`Wrong attributes passed to onBind decorator (${serviceNames.join(',')}).`);
   }
 
   return (service: ServiceType, callbackName: string): ServiceType => {
@@ -103,11 +103,11 @@ export function bindServices(
   };
 }
 
-export function unbindServices(
+export function onUnbind(
   ...serviceNames: Array<string>
 ): (service: ServiceType, callbackName: string) => ServiceType {
   if (!serviceNames.length || !validateNameList(serviceNames)) {
-    throw new Error(`Wrong attributes passed to unbindServices decorator (${serviceNames.join(',')}).`);
+    throw new Error(`Wrong attributes passed to onUnbind decorator (${serviceNames.join(',')}).`);
   }
   return (service: ServiceType, callbackName: string): ServiceType => {
     putServiceNamesToConfig(serviceNames, service, callbackName, 'onUnbind');

@@ -2,29 +2,30 @@
 
 exports[`serviceDecorators test serviceDecorators config 1`] = `
 Object {
-  "config": Object {
-    "bindAs": "test",
-    "onBind": Array [
-      Array [
-        "test1",
-        "test2",
-        "onBind",
-      ],
-      Array [
-        "test1",
-        "test2",
-        "onBindOnlyGarageService",
-      ],
+  "bindAs": "test",
+  "onBind": Array [
+    Array [
+      "test1",
+      "test2",
+      "onBind",
     ],
-    "onUnbind": Array [
-      Array [
-        "test1",
-        "test2",
-        "onUnbind",
-      ],
+    Array [
+      "test1",
+      "test2",
+      "onBindOnlyGarageService",
     ],
-  },
-  "onStart": "onStart",
+  ],
+  "onStart": Array [
+    "init",
+    "onStart",
+  ],
   "onStop": "onStop",
+  "onUnbind": Array [
+    Array [
+      "test1",
+      "test2",
+      "onUnbind",
+    ],
+  ],
 }
 `;

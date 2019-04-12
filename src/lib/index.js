@@ -10,4 +10,4 @@ export createProvider from './Provider.js';
 export createBinderProvider from './BinderProvider.js';
 
 export { startServices, stopServices } from './serviceUtils.js';
-export { onStop, onStart, unbindServices, bindServices, bindAs } from './serviceDecorators.js';
+export { onStop, onStart, onUnbind, onBind, bindAs } from './serviceDecorators.js';

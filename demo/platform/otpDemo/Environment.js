@@ -1,7 +1,7 @@
 // @flow
 /* eslint-disable no-console */
 import { observable } from 'mobx';
-import { onStop, onStart, unbindServices, bindServices, bindAs } from 'sources.js';
+import { onStop, onStart, onUnbind, onBind, bindAs } from 'sources.js';
 import type { CarStoreInterface, GarageStoreInterface,
   TimeServiceInterface, InitialStateInterface } from './typing/types.js';
 
@@ -64,17 +64,17 @@ class GarageStore implements GarageStoreInterface {
     console.log(['onStop', SERVICE_NAMES.GARAGE_STORE]);
   }
 
-  @bindServices(SERVICE_NAMES.TIME_SERVICE)
+  @onBind(SERVICE_NAMES.TIME_SERVICE)
   onBind(): void {
     console.log(['onBind', SERVICE_NAMES.GARAGE_STORE]);
   }
 
-  @bindServices(SERVICE_NAMES.CAR_STORE)
+  @onBind(SERVICE_NAMES.CAR_STORE)
   onBindCar(): void {
     console.log(['onBindCar!', SERVICE_NAMES.GARAGE_STORE]);
   }
 
-  @unbindServices(SERVICE_NAMES.CAR_STORE)
+  @onUnbind(SERVICE_NAMES.CAR_STORE)
   onUnbindCar(): void {
     console.log(['onUnbindCar', SERVICE_NAMES.GARAGE_STORE]);
   }
@@ -114,7 +114,7 @@ class CarStore implements CarStoreInterface {
     this.modelName = modelName;
   }
 
-  @bindServices(SERVICE_NAMES.GARAGE_STORE, SERVICE_NAMES.TIME_SERVICE)
+  @onBind(SERVICE_NAMES.GARAGE_STORE, SERVICE_NAMES.TIME_SERVICE)
   onBind(): void {
     console.log(['onBind', SERVICE_NAMES.CAR_STORE]);
   }

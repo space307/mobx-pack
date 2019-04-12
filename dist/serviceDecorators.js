@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.bindAs = bindAs;
-exports.bindServices = bindServices;
-exports.unbindServices = unbindServices;
+exports.onBind = onBind;
+exports.onUnbind = onUnbind;
 exports.onStart = onStart;
 exports.onStop = onStop;
 
@@ -29,20 +29,19 @@ function validateNameList(list) {
 
 function createConfig() {
   return {
-    onStart: '',
+    onStart: [],
     onStop: '',
-    config: {
-      bindAs: '',
-      onBind: [],
-      onUnbind: []
-    }
+    bindAs: '',
+    onBind: [],
+    onUnbind: []
   };
 }
 
 function putServiceNamesToConfig(serviceNames, service, callbackName, optionName) {
+  var pushToArray = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
   var proto = service.constructor;
 
-  if (!proto.binderConfig || !proto.binderConfig.config) {
+  if (!proto.binderConfig) {
     proto.binderConfig = createConfig();
   }
 
@@ -52,7 +51,12 @@ function putServiceNamesToConfig(serviceNames, service, callbackName, optionName
         throw new Error("Wrong service name \"".concat(serviceName, "\" \n          passed to function \"").concat(callbackName, "\" decorator (service:").concat(proto.name, ")."));
       }
     });
-    proto.binderConfig.config[optionName].push([].concat((0, _toConsumableArray2.default)(serviceNames), [callbackName]));
+
+    if (pushToArray) {
+      proto.binderConfig[optionName].push([].concat((0, _toConsumableArray2.default)(serviceNames), [callbackName]));
+    } else {
+      proto.binderConfig[optionName] = [].concat((0, _toConsumableArray2.default)(serviceNames), [callbackName]);
+    }
   }
 }
 
@@ -76,22 +80,22 @@ function bindAs(serviceName) {
       throw new Error("Wrong name \"".concat(serviceName, "\" passed to bindAs decorator (service:").concat(service.name, ")."));
     }
 
-    if (!service.binderConfig || !service.binderConfig.config) {
+    if (!service.binderConfig) {
       service.binderConfig = createConfig();
     }
 
-    service.binderConfig.config.bindAs = serviceName;
+    service.binderConfig.bindAs = serviceName;
     return service;
   };
 }
 
-function bindServices() {
+function onBind() {
   for (var _len = arguments.length, serviceNames = new Array(_len), _key = 0; _key < _len; _key++) {
     serviceNames[_key] = arguments[_key];
   }
 
   if (!serviceNames.length || !validateNameList(serviceNames)) {
-    throw new Error("Wrong attributes passed to bindServices decorator (".concat(serviceNames.join(','), ")."));
+    throw new Error("Wrong attributes passed to onBind decorator (".concat(serviceNames.join(','), ")."));
   }
 
   return function (service, callbackName) {
@@ -100,13 +104,13 @@ function bindServices() {
   };
 }
 
-function unbindServices() {
+function onUnbind() {
   for (var _len2 = arguments.length, serviceNames = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
     serviceNames[_key2] = arguments[_key2];
   }
 
   if (!serviceNames.length || !validateNameList(serviceNames)) {
-    throw new Error("Wrong attributes passed to unbindServices decorator (".concat(serviceNames.join(','), ")."));
+    throw new Error("Wrong attributes passed to onUnbind decorator (".concat(serviceNames.join(','), ")."));
   }
 
   return function (service, callbackName) {
@@ -115,9 +119,19 @@ function unbindServices() {
   };
 }
 
-function onStart(service, callbackName) {
-  putMethodNameToConfig(service, callbackName, 'onStart');
-  return service;
+function onStart() {
+  for (var _len3 = arguments.length, serviceNames = new Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+    serviceNames[_key3] = arguments[_key3];
+  }
+
+  if (!serviceNames.length || !validateNameList(serviceNames)) {
+    throw new Error("Wrong attributes passed to onStart decorator (".concat(serviceNames.join(','), ")."));
+  }
+
+  return function (service, callbackName) {
+    putServiceNamesToConfig(serviceNames, service, callbackName, 'onStart', false);
+    return service;
+  };
 }
 
 function onStop(service, callbackName) {

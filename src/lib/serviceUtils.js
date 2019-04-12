@@ -37,6 +37,7 @@ export function getStartedServices(
       const {
         bindAs,
       } = ServiceProto.binderConfig;
+
       const service = binder.getService(bindAs);
 
       if (service) {

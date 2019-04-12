@@ -28,7 +28,7 @@ export default function createBinderProvider(BinderContext: React$Context<Global
       constructor(props, context) {
         super();
 
-        this.newContext = new Binder(context && context.binder);
+        this.newContext = new Binder(context);
 
         if (!Component || typeof Component !== 'function') {
           this.state.error = 'BinderProvider wait for "React.Component" in attributes';

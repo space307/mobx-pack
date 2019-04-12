@@ -10,15 +10,15 @@ import type {InternalCallbackSetType, ServiceConfigBindAsType} from "src/lib/typ
 
 export type { BinderInterface } from 'src/lib/typing/binderInterface.js';
 export type { ServiceConnectorOptionsTypes } from 'src/lib/typing/serviceConnectorTypes.js';
-export type { BinderConfigType, ServiceConfigType,
+export type { BinderConfigType,
   ServiceClassType, ServiceStartConfigType, StartServiceReturnType } from 'src/lib/typing/common.js';
 
 // ./serviceDecorators.js
 declare export function bindAs(serviceName: string): (service: ServiceType) => ServiceType;
-declare export function bindServices(
+declare export function onBind(
   ...serviceNames: Array<string>
 ): (service: ServiceType, callbackName: string) => ServiceType;
-declare export function unbindServices(
+declare export function onUnbind(
   ...serviceNames: Array<string>
 ): (service: ServiceType, callbackName: string) => ServiceType;
 declare export function onStart(service: ServiceType, callbackName: string): ServiceType;
@@ -26,19 +26,10 @@ declare export function onStop(service: ServiceType, callbackName: string): Serv
 
 
 // ./serviceUtils.js
-declare export function createService(Service: ServiceClassType, protoAttrs?: ?Array<*>): *;
-declare export function startService(
-  binder: BinderInterface,
-  initialState: *,
-  serviceStartConfig: ServiceStartConfigType,
-): Promise<*>;
-
 declare export function startServices(
   binder: BinderInterface,
-  initialState: *,
   serviceStartConfigList: Array<ServiceStartConfigType>,
 ): Promise<*>;
-declare export function stopService(binder: BinderInterface, serviceStartConfig: ServiceStartConfigType): void;
 declare export function stopServices(binder: BinderInterface, serviceStartConfigList: Array<ServiceStartConfigType>): void;
 declare export function getStartedServices(
   binder: BinderInterface,
@@ -63,6 +54,11 @@ declare export class Binder{
   getService(bindAs: ServiceConfigBindAsType): *;
   getPendingStartResolver(bindAs:ServiceConfigBindAsType): ?Promise<*>;
   setPendingStartResolver(bindAs:ServiceConfigBindAsType, resolver: ?Promise<*>): void;
+  start(
+    serviceStartConfig: ServiceStartConfigType,
+  ): Promise<*>;
+  createService(Service: ServiceClassType, protoAttrs?: ?Array<*>): *;
+  stop(serviceStartConfig: ServiceStartConfigType): void;
 }
 
 declare export class BaseComponent {}

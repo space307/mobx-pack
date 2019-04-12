@@ -133,6 +133,7 @@ class Binder implements BinderInterface {
             const {
               callback,
               serviceList,
+              // $FlowIgnore
             } = this.destructCallback(onStart);
 
             if (!this.isListBind(serviceList)) {

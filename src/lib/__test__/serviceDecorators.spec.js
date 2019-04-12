@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { onStop, onStart, unbindServices, bindServices, bindAs } from '../serviceDecorators.js';
+import { onStop, onStart, onUnbind, onBind, bindAs } from '../serviceDecorators.js';
 
 
 describe('serviceDecorators test', () => {
@@ -23,11 +23,11 @@ describe('serviceDecorators test', () => {
     }).toThrow();
   });
 
-  it('wrong bindServices param', () => {
+  it('wrong onBind param', () => {
     expect(() => {
       @bindAs('test')
       class Service {
-        @bindServices
+        @onBind
         onBind() {}
       }
     }).toThrow();
@@ -35,15 +35,40 @@ describe('serviceDecorators test', () => {
     expect(() => {
       @bindAs('test')
       class Service {
-        @bindServices()
+        @onBind()
         onBind() {}
       }
     }).toThrow();
     expect(() => {
       @bindAs('test')
       class Service {
-        @bindServices('test1', 1)
+        @onBind('test1', 1)
         onBind() {}
+      }
+    }).toThrow();
+  });
+
+  it('wrong onStart param', () => {
+    expect(() => {
+      @bindAs('test')
+      class Service {
+        @onStart
+        onStart() {}
+      }
+    }).toThrow();
+
+    expect(() => {
+      @bindAs('test')
+      class Service {
+        @onStart()
+        onStart() {}
+      }
+    }).toThrow();
+    expect(() => {
+      @bindAs('test')
+      class Service {
+        @onStart('test1', 1)
+        onStart() {}
       }
     }).toThrow();
   });
@@ -52,16 +77,16 @@ describe('serviceDecorators test', () => {
   it('serviceDecorators config', () => {
     @bindAs('test')
     class Service {
-      @onStart
+      @onStart('init')
       onStart() {}
 
-      @bindServices('test1', 'test2')
+      @onBind('test1', 'test2')
       onBind() {}
 
-      @bindServices('test1', 'test2')
+      @onBind('test1', 'test2')
       onBindOnlyGarageService() {}
 
-      @unbindServices('test1', 'test2')
+      @onUnbind('test1', 'test2')
       onUnbind() {}
 
       @onStop

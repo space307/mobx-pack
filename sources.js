@@ -10,7 +10,7 @@ import createBinderProvider from 'src/lib/BinderProvider.js';
 
 export type { GlobalContextType } from 'src/lib/typing/common.js';
 export { startServices, stopServices } from 'src/lib/serviceUtils.js';
-export { onStop, onStart, unbindServices, bindServices, bindAs } from 'src/lib/serviceDecorators.js';
+export { onStop, onStart, onUnbind, onBind, bindAs } from 'src/lib/serviceDecorators.js';
 
 export {
   BaseComponent,
