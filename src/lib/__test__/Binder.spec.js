@@ -250,22 +250,51 @@ describe('Binder test', () => {
 
   it('onStart callback', (done) => {
     const serviceName = 'test';
+    const firstServiceName = 'firstService';
+    const secondServiceName = 'secondService';
 
     @bindAsDecor(serviceName)
     class ServiceProto {
-      @onStart(initialStateName)
-      onStart(initialState) {
-        this.test(initialState);
+      @onStart(firstServiceName, secondServiceName)
+      onStart(firstService, secondService) {
+        this.test(firstService, secondService);
         return true;
       }
       test = jest.fn();
     }
 
-    const initialState = {};
-    binder.bind(initialState, { bindAs: initialStateName });
+
+    const firstService = {};
+    const secondService = {};
+    binder.bind(firstService, { bindAs: firstServiceName });
+    binder.bind(secondService, { bindAs: secondServiceName });
 
     binder.start(getConfig(ServiceProto), true).then(({ service }) => {
-      expect(service.test).toBeCalledWith(initialState);
+      expect(service.test).toBeCalledWith(firstService, secondService);
+      done();
+    });
+  });
+
+  it('onStart fail if some service not bind', (done) => {
+    const serviceName = 'test';
+    const firstServiceName = 'firstService';
+    const secondServiceName = 'secondService';
+
+    @bindAsDecor(serviceName)
+    class ServiceProto {
+      @onStart(firstServiceName, secondServiceName)
+      onStart(firstService, secondService) {
+        this.test(firstService, secondService);
+        return true;
+      }
+      test = jest.fn();
+    }
+
+    const firstService = {};
+    binder.bind(firstService, { bindAs: firstServiceName });
+
+    binder.start(getConfig(ServiceProto), true).catch((error) => {
+      expect(!!error).toBe(true);
       done();
     });
   });

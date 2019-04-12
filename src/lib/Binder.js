@@ -532,7 +532,7 @@ class Binder implements BinderInterface {
   }
 
   /**
-   * return list of ids for not bind services
+   * return list of ids for services which are not bind
    */
   getNotBind(list: ?Array<ServiceConfigBindAsType>): Array<ServiceConfigBindAsType> {
     return list ? list.reduce((acc, bindAs) => {
@@ -648,7 +648,7 @@ class Binder implements BinderInterface {
     const serviceSettings = this.getServiceSettings(bindAs);
 
     if (!this.isBind(bindAs)) {
-      this.showMessage(`Not bind service "${bindAs}" try to unbind!`, MESSAGE_TYPES.WARN);
+      this.showMessage(`Service "${bindAs}", which are not bind try to unbind!`, MESSAGE_TYPES.WARN);
       return;
     }
 
