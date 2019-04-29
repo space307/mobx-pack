@@ -567,7 +567,7 @@ function () {
       }, true) : false;
     }
     /**
-     * return list of ids for not bind services
+     * return list of ids for services which are not bind
      */
 
   }, {
@@ -713,7 +713,7 @@ function () {
       var serviceSettings = this.getServiceSettings(bindAs);
 
       if (!this.isBind(bindAs)) {
-        this.showMessage("Not bind service \"".concat(bindAs, "\" try to unbind!"), MESSAGE_TYPES.WARN);
+        this.showMessage("Service \"".concat(bindAs, "\", which are not bind try to unbind!"), MESSAGE_TYPES.WARN);
         return;
       }
 
