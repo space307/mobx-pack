@@ -8,9 +8,9 @@ import ServiceConnector from 'src/lib/ServiceConnector.js';
 import createProvider from 'src/lib/Provider.js';
 import createBinderProvider from 'src/lib/BinderProvider.js';
 
-export type { GlobalContextType, ServiceConfigType } from 'src/lib/typing/common.js';
-export { startService, startServices, stopService, stopServices } from 'src/lib/serviceUtils.js';
-export { onStop, onStart, unbindServices, bindServices, bindAs } from 'src/lib/serviceDecorators.js';
+export type { GlobalContextType } from 'src/lib/typing/common.js';
+export { startServices, stopServices } from 'src/lib/serviceUtils.js';
+export { onStop, onStart, onUnbind, onBind, bindAs } from 'src/lib/serviceDecorators.js';
 
 export {
   BaseComponent,

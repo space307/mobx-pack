@@ -19,8 +19,12 @@ import type { ServiceConfigBindAsType,
   ServiceConfigCallbackSetType,
   InternalCallbackSetType,
   BinderConfigType,
+  StartServiceReturnType,
+  ServiceClassType,
+  ServiceStartConfigType,
 } from './typing/common.js';
 import type { BinderInterface } from './typing/binderInterface.js';
+
 
 const EMITTER_EVENT = {
   BIND: 'BIND',
@@ -86,6 +90,117 @@ class Binder implements BinderInterface {
       });
     }
   }
+
+  createService(Service: ServiceClassType, protoAttrs?: ?Array<*>): * {
+    if (protoAttrs && !Array.isArray(protoAttrs)) {
+      throw new Error(`Wrong ServiceParams! (${Service.name})`);
+    }
+    return protoAttrs ? new Service(...protoAttrs) : new Service();
+  }
+  /**
+   * start and bind service
+   */
+  start(
+    serviceStartConfig: ServiceStartConfigType,
+  ): Promise<*> {
+    const { binderConfig, proto } = serviceStartConfig;
+    const {
+      bindAs,
+      onStart,
+    } = binderConfig;
+
+    let result;
+    const resolver = this.getPendingStartResolver(bindAs);
+    const serviceInBinder = this.getService(bindAs);
+
+
+    if (serviceInBinder) {
+      result = Promise.resolve({ service: serviceInBinder, started: false, serviceStartConfig });
+    } else if (resolver) {
+      result = resolver;
+    } else {
+      result = new Promise(
+        (resolve: (data: StartServiceReturnType) => void, reject: (error: Error) => void): void => {
+          const service = this.createService(proto, serviceStartConfig.protoAttrs);
+          const resolveData = { service, started: true, serviceStartConfig };
+          let onStartResult;
+
+          if (onStart && !Array.isArray(onStart)) {
+            throw Error(`Binder onStart error. onStart callback of "${bindAs}" is not valid`);
+          }
+
+          if (onStart && onStart.length) {
+            const {
+              callback,
+              serviceList,
+              // $FlowIgnore
+            } = this.destructCallback(onStart);
+
+            if (!this.isListBind(serviceList)) {
+              // eslint-disable-next-line max-len
+              throw Error(`Binder onStart error. onStart callback of "${bindAs}" wait for service list (${serviceList ? serviceList.join(',') : ''}) to be bind, but some services are not bind ${this.getNotBind(serviceList).join(',')}`);
+            }
+
+            const funcToCall = this.parseCallback(callback, service);
+
+            if (funcToCall) {
+              onStartResult = funcToCall.apply(service, this.getServiceList(serviceList));
+            }
+          }
+
+          if (typeof onStartResult === 'undefined') {
+            this.bind(service, binderConfig);
+            resolve(resolveData);
+          } else if (onStartResult instanceof Promise) {
+            onStartResult
+              .then(
+                (): void => {
+                  this.bind(service, binderConfig);
+                  resolve(resolveData);
+                },
+              )
+              .catch(
+                (err: Error): void => {
+                  reject(err);
+                },
+              );
+          } else if (onStartResult === true) {
+            this.bind(service, binderConfig);
+            resolve(resolveData);
+          } else {
+            reject(new Error(`Service ${bindAs} onStart return "false"`));
+          }
+        },
+      ).finally(() => {
+        this.setPendingStartResolver(bindAs, null);
+      });
+
+      this.setPendingStartResolver(bindAs, result);
+    }
+
+    return result;
+  }
+
+  /**
+   * stop and unbind service
+   */
+  stop(serviceStartConfig: ServiceStartConfigType): void {
+    const {
+      bindAs,
+      onStop,
+    } = serviceStartConfig.binderConfig;
+
+    const serviceInBinder = this.getService(bindAs);
+    const onStopFunctionName = onStop || 'onStop';
+
+    if (serviceInBinder) {
+      this.unbind(bindAs);
+      if (typeof serviceInBinder[onStopFunctionName] === 'function') {
+        serviceInBinder[onStopFunctionName]();
+      }
+    }
+  }
+
 
   /**
    * bind service to the binder
@@ -417,7 +532,7 @@ class Binder implements BinderInterface {
   }
 
   /**
-   * return list of ids for not bind services
+   * return list of ids for services which are not bind
    */
   getNotBind(list: ?Array<ServiceConfigBindAsType>): Array<ServiceConfigBindAsType> {
     return list ? list.reduce((acc, bindAs) => {
@@ -533,7 +648,7 @@ class Binder implements BinderInterface {
     const serviceSettings = this.getServiceSettings(bindAs);
 
     if (!this.isBind(bindAs)) {
-      this.showMessage(`Not bind service "${bindAs}" try to unbind!`, MESSAGE_TYPES.WARN);
+      this.showMessage(`Service "${bindAs}", which are not bind try to unbind!`, MESSAGE_TYPES.WARN);
       return;
     }
 

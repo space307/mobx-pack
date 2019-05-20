@@ -1,7 +1,7 @@
 // @flow
 /* eslint-disable no-console */
 import { observable } from 'mobx';
-import { onStop, onStart, unbindServices, bindServices, bindAs } from 'sources.js';
+import { onStop, onStart, onUnbind, onBind, bindAs } from 'sources.js';
 import type { CarStoreInterface, GarageStoreInterface,
   TimeServiceInterface, InitialStateInterface } from './typing/types.js';
 
@@ -11,6 +11,7 @@ const SERVICE_NAMES = {
   CAR_STORE: 'carStore',
 };
 
+export const INITIAL_SERVICE = 'initialService';
 
 /* -- TimeService --*/
 
@@ -19,7 +20,7 @@ class TimeService implements TimeServiceInterface {
   @observable
   time: string = '';
 
-  @onStart
+  @onStart(INITIAL_SERVICE)
   onStart(initialService: *): boolean {
     console.log(['onStart', SERVICE_NAMES.TIME_SERVICE, initialService]);
 
@@ -44,7 +45,7 @@ class GarageStore implements GarageStoreInterface {
   counter: number = 0;
   privateField: number = 0;
 
-  @onStart
+  @onStart(INITIAL_SERVICE)
   onStart(initialService: *): Promise<*> {
     console.log(['onStart', SERVICE_NAMES.GARAGE_STORE, initialService]);
 
@@ -63,17 +64,17 @@ class GarageStore implements GarageStoreInterface {
     console.log(['onStop', SERVICE_NAMES.GARAGE_STORE]);
   }
 
-  @bindServices(SERVICE_NAMES.TIME_SERVICE)
+  @onBind(SERVICE_NAMES.TIME_SERVICE)
   onBind(): void {
     console.log(['onBind', SERVICE_NAMES.GARAGE_STORE]);
   }
 
-  @bindServices(SERVICE_NAMES.CAR_STORE)
+  @onBind(SERVICE_NAMES.CAR_STORE)
   onBindCar(): void {
     console.log(['onBindCar!', SERVICE_NAMES.GARAGE_STORE]);
   }
 
-  @unbindServices(SERVICE_NAMES.CAR_STORE)
+  @onUnbind(SERVICE_NAMES.CAR_STORE)
   onUnbindCar(): void {
     console.log(['onUnbindCar', SERVICE_NAMES.GARAGE_STORE]);
   }
@@ -98,7 +99,7 @@ class CarStore implements CarStoreInterface {
     }
   }
 
-  @onStart
+  @onStart(INITIAL_SERVICE)
   onStart(initialService: *): boolean {
     console.log(['onStart', SERVICE_NAMES.CAR_STORE, initialService]);
     return true;
@@ -113,22 +114,21 @@ class CarStore implements CarStoreInterface {
     this.modelName = modelName;
   }
 
-  @bindServices(SERVICE_NAMES.GARAGE_STORE, SERVICE_NAMES.TIME_SERVICE)
+  @onBind(SERVICE_NAMES.GARAGE_STORE, SERVICE_NAMES.TIME_SERVICE)
   onBind(): void {
     console.log(['onBind', SERVICE_NAMES.CAR_STORE]);
   }
 }
 /* --/ CarStore --*/
 
-export { CarStore, GarageStore, TimeService };
-
 
 /* -- InitialState --*/
+@bindAs(INITIAL_SERVICE)
 class InitialState implements InitialStateInterface {
   vip: boolean = false;
   abTest: boolean = true;
 }
-
-
-export const initialState: InitialStateInterface = new InitialState();
 /* --/ InitialState --*/
+
+export { CarStore, GarageStore, TimeService, InitialState };
+

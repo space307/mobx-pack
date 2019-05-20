@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { onStop, onStart, unbindServices, bindServices, bindAs } from 'sources.js';
+import { onStop, onStart, onUnbind, onBind, bindAs } from 'sources.js';
 
 const SERVICE_NAMES = {
   GARAGE_STORE: 'GarageStore',
@@ -21,13 +21,13 @@ class CarStore {
   @onStart
   onStart(initialState) {}
 
-  @bindServices(SERVICE_NAMES.TIME_SERVICE, SERVICE_NAMES.GARAGE_STORE)
+  @onBind(SERVICE_NAMES.TIME_SERVICE, SERVICE_NAMES.GARAGE_STORE)
   onBind(timeService, garageStore) {}
 
-  @bindServices(SERVICE_NAMES.GARAGE_STORE)
+  @onBind(SERVICE_NAMES.GARAGE_STORE)
   onBindOnlyGarageStore(garageStore) {}
 
-  @unbindServices(SERVICE_NAMES.TIME_SERVICE, SERVICE_NAMES.GARAGE_STORE)
+  @onUnbind(SERVICE_NAMES.TIME_SERVICE, SERVICE_NAMES.GARAGE_STORE)
   onUnbind() {}
 
   @onStop
@@ -40,11 +40,11 @@ class GarageStore {
   @onStart
   onStart(initialState) {}
 
-  @bindServices(SERVICE_NAMES.TIME_SERVICE)
+  @onBind(SERVICE_NAMES.TIME_SERVICE)
   onBind(timeService) {
 
   }
-  @unbindServices(SERVICE_NAMES.TIME_SERVICE)
+  @onUnbind(SERVICE_NAMES.TIME_SERVICE)
   onUnbind() {}
 
   @onStop

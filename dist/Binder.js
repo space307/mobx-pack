@@ -9,6 +9,10 @@ exports.default = void 0;
 
 var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
+var _construct2 = _interopRequireDefault(require("@babel/runtime/helpers/construct"));
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
 var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
@@ -87,15 +91,129 @@ function () {
       });
     }
   }
-  /**
-   * bind service to the binder
-   */
-
 
   (0, _createClass2.default)(Binder, [{
+    key: "createService",
+    value: function createService(Service, protoAttrs) {
+      if (protoAttrs && !Array.isArray(protoAttrs)) {
+        throw new Error("Wrong ServiceParams! (".concat(Service.name, ")"));
+      }
+
+      return protoAttrs ? (0, _construct2.default)(Service, (0, _toConsumableArray2.default)(protoAttrs)) : new Service();
+    }
+    /**
+     * start and bind service
+     */
+
+  }, {
+    key: "start",
+    value: function start(serviceStartConfig) {
+      var _this2 = this;
+
+      var binderConfig = serviceStartConfig.binderConfig,
+          proto = serviceStartConfig.proto;
+      var bindAs = binderConfig.bindAs,
+          onStart = binderConfig.onStart;
+      var result;
+      var resolver = this.getPendingStartResolver(bindAs);
+      var serviceInBinder = this.getService(bindAs);
+
+      if (serviceInBinder) {
+        result = Promise.resolve({
+          service: serviceInBinder,
+          started: false,
+          serviceStartConfig: serviceStartConfig
+        });
+      } else if (resolver) {
+        result = resolver;
+      } else {
+        result = new Promise(function (resolve, reject) {
+          var service = _this2.createService(proto, serviceStartConfig.protoAttrs);
+
+          var resolveData = {
+            service: service,
+            started: true,
+            serviceStartConfig: serviceStartConfig
+          };
+          var onStartResult;
+
+          if (onStart && !Array.isArray(onStart)) {
+            throw Error("Binder onStart error. onStart callback of \"".concat(bindAs, "\" is not valid"));
+          }
+
+          if (onStart && onStart.length) {
+            var _this2$destructCallba = _this2.destructCallback(onStart),
+                callback = _this2$destructCallba.callback,
+                serviceList = _this2$destructCallba.serviceList;
+
+            if (!_this2.isListBind(serviceList)) {
+              // eslint-disable-next-line max-len
+              throw Error("Binder onStart error. onStart callback of \"".concat(bindAs, "\" wait for service list (").concat(serviceList ? serviceList.join(',') : '', ") to be bind, but some services are not bind ").concat(_this2.getNotBind(serviceList).join(',')));
+            }
+
+            var funcToCall = _this2.parseCallback(callback, service);
+
+            if (funcToCall) {
+              onStartResult = funcToCall.apply(service, _this2.getServiceList(serviceList));
+            }
+          }
+
+          if (typeof onStartResult === 'undefined') {
+            _this2.bind(service, binderConfig);
+
+            resolve(resolveData);
+          } else if (onStartResult instanceof Promise) {
+            onStartResult.then(function () {
+              _this2.bind(service, binderConfig);
+
+              resolve(resolveData);
+            }).catch(function (err) {
+              reject(err);
+            });
+          } else if (onStartResult === true) {
+            _this2.bind(service, binderConfig);
+
+            resolve(resolveData);
+          } else {
+            reject(new Error("Service ".concat(bindAs, " onStart return \"false\"")));
+          }
+        }).finally(function () {
+          _this2.setPendingStartResolver(bindAs, null);
+        });
+        this.setPendingStartResolver(bindAs, result);
+      }
+
+      return result;
+    }
+    /**
+     * stop and unbind service
+     */
+
+  }, {
+    key: "stop",
+    value: function stop(serviceStartConfig) {
+      var _serviceStartConfig$b = serviceStartConfig.binderConfig,
+          bindAs = _serviceStartConfig$b.bindAs,
+          onStop = _serviceStartConfig$b.onStop;
+      var serviceInBinder = this.getService(bindAs);
+      var onStopFunctionName = onStop || 'onStop';
+
+      if (serviceInBinder) {
+        this.unbind(bindAs);
+
+        if (typeof serviceInBinder[onStopFunctionName] === 'function') {
+          serviceInBinder[onStopFunctionName]();
+        }
+      }
+    }
+    /**
+     * bind service to the binder
+     */
+
+  }, {
     key: "bind",
     value: function bind(service, options) {
-      var _this2 = this;
+      var _this3 = this;
 
       if (!options) {
         throw new Error('Binder options is not valid');
@@ -127,9 +245,9 @@ function () {
 
       (0, _lodash.each)(this.services, function (item) {
         if (item) {
-          _this2.processService(item, _this2.getServiceSettings(bindAs));
+          _this3.processService(item, _this3.getServiceSettings(bindAs));
 
-          _this2.processService(_this2.getServiceSettings(bindAs), item);
+          _this3.processService(_this3.getServiceSettings(bindAs), item);
         }
       });
       /* --/ Legacy -- */
@@ -180,7 +298,7 @@ function () {
   }, {
     key: "handleOnBind",
     value: function handleOnBind(bindAs) {
-      var _this3 = this;
+      var _this4 = this;
 
       var settings = this.getServiceSettings(bindAs);
 
@@ -193,11 +311,11 @@ function () {
         this.handleOnUnbindItem(bindAs); // check and execute OnBind dependencies from the list of dependencies of the current service
 
         this.lookOverCallback(onBindCallbackSetList, function (serviceName) {
-          _this3.handleOnBindItem(serviceName);
+          _this4.handleOnBindItem(serviceName);
         }); // check and execute OnUnbind dependencies from the list of dependencies of the current service
 
         this.lookOverCallback(onUnbindCallbackSetList, function (serviceName) {
-          _this3.handleOnUnbindItem(serviceName);
+          _this4.handleOnUnbindItem(serviceName);
         });
       }
     }
@@ -208,17 +326,17 @@ function () {
   }, {
     key: "handleOnBindItem",
     value: function handleOnBindItem(bindAs) {
-      var _this4 = this;
+      var _this5 = this;
 
       this.lookOverDeps(bindAs, CALLBACK_NAME.BIND, function (depBindAs, callbackSet, service) {
-        var _this4$destructCallba = _this4.destructCallback(callbackSet),
-            callback = _this4$destructCallba.callback,
-            serviceList = _this4$destructCallba.serviceList;
+        var _this5$destructCallba = _this5.destructCallback(callbackSet),
+            callback = _this5$destructCallba.callback,
+            serviceList = _this5$destructCallba.serviceList;
 
-        if (!callbackSet.__locked && _this4.isListBind(serviceList)) {
-          _this4.applyCallback(depBindAs, callbackSet, serviceList, callback, service, CALLBACK_NAME.BIND);
+        if (!callbackSet.__locked && _this5.isListBind(serviceList)) {
+          _this5.applyCallback(depBindAs, callbackSet, serviceList, callback, service, CALLBACK_NAME.BIND);
         } else {
-          _this4.checkCallBackResolved(depBindAs, callbackSet, serviceList);
+          _this5.checkCallBackResolved(depBindAs, callbackSet, serviceList);
         }
       });
     }
@@ -229,24 +347,24 @@ function () {
   }, {
     key: "handleOnUnbind",
     value: function handleOnUnbind(bindAs) {
-      var _this5 = this;
+      var _this6 = this;
 
       this.lookOverDeps(bindAs, CALLBACK_NAME.BIND, function (depBindAs, callbackSet) {
-        var _this5$destructCallba = _this5.destructCallback(callbackSet),
-            serviceList = _this5$destructCallba.serviceList;
+        var _this6$destructCallba = _this6.destructCallback(callbackSet),
+            serviceList = _this6$destructCallba.serviceList;
 
-        if (callbackSet.__locked && _this5.isListUnBind(serviceList)) {
+        if (callbackSet.__locked && _this6.isListUnBind(serviceList)) {
           // eslint-disable-next-line no-param-reassign
           delete callbackSet.__locked;
         }
       });
       this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND, function (depBindAs, callbackSet, service) {
-        var _this5$destructCallba2 = _this5.destructCallback(callbackSet),
-            callback = _this5$destructCallba2.callback,
-            serviceList = _this5$destructCallba2.serviceList;
+        var _this6$destructCallba2 = _this6.destructCallback(callbackSet),
+            callback = _this6$destructCallba2.callback,
+            serviceList = _this6$destructCallba2.serviceList;
 
-        if (!callbackSet.__locked && _this5.isListUnBind(serviceList)) {
-          _this5.applyCallback(depBindAs, callbackSet, serviceList, callback, service, CALLBACK_NAME.UNBIND);
+        if (!callbackSet.__locked && _this6.isListUnBind(serviceList)) {
+          _this6.applyCallback(depBindAs, callbackSet, serviceList, callback, service, CALLBACK_NAME.UNBIND);
         }
       });
     }
@@ -257,13 +375,13 @@ function () {
   }, {
     key: "handleOnUnbindItem",
     value: function handleOnUnbindItem(bindAs) {
-      var _this6 = this;
+      var _this7 = this;
 
       this.lookOverDeps(bindAs, CALLBACK_NAME.UNBIND, function (depBindAs, callbackSet) {
-        var _this6$destructCallba = _this6.destructCallback(callbackSet),
-            serviceList = _this6$destructCallba.serviceList;
+        var _this7$destructCallba = _this7.destructCallback(callbackSet),
+            serviceList = _this7$destructCallba.serviceList;
 
-        if (_this6.isListBind(serviceList) && callbackSet.__locked) {
+        if (_this7.isListBind(serviceList) && callbackSet.__locked) {
           // eslint-disable-next-line no-param-reassign
           delete callbackSet.__locked;
         }
@@ -276,7 +394,7 @@ function () {
   }, {
     key: "checkCallBackResolved",
     value: function checkCallBackResolved(bindAs, callbackSet, serviceList) {
-      var _this7 = this;
+      var _this8 = this;
 
       if (callbackSet.__resolveTM) {
         clearTimeout(callbackSet.__resolveTM);
@@ -284,12 +402,12 @@ function () {
 
 
       callbackSet.__resolveTM = setTimeout(function () {
-        var notBind = _this7.getNotBind(serviceList);
+        var notBind = _this8.getNotBind(serviceList);
 
         var cbName = callbackSet[callbackSet.length - 1];
 
         if (serviceList && notBind.length && notBind.length < serviceList.length) {
-          _this7.showMessage("\"".concat(bindAs, ".").concat(typeof cbName === 'string' ? cbName : CALLBACK_NAME.BIND, "\" \n        not called, because \"").concat(notBind.join(','), "\" still not resolved."), MESSAGE_TYPES.WARN);
+          _this8.showMessage("\"".concat(bindAs, ".").concat(typeof cbName === 'string' ? cbName : CALLBACK_NAME.BIND, "\" \n        not called, because \"").concat(notBind.join(','), "\" still not resolved."), MESSAGE_TYPES.WARN);
         } // eslint-disable-next-line no-param-reassign
 
 
@@ -326,10 +444,10 @@ function () {
   }, {
     key: "getServiceList",
     value: function getServiceList(serviceList) {
-      var _this8 = this;
+      var _this9 = this;
 
       return serviceList ? serviceList.reduce(function (acc, bindAs) {
-        var service = _this8.getService(bindAs);
+        var service = _this9.getService(bindAs);
 
         if (service) {
           acc.push(service);
@@ -363,18 +481,18 @@ function () {
   }, {
     key: "lookOverDeps",
     value: function lookOverDeps(bindAs, callbackType, cb) {
-      var _this9 = this;
+      var _this10 = this;
 
       var list = this.depsList[callbackType][bindAs];
 
       if (list && list.length) {
         list.forEach(function (depBindAs) {
-          var settings = _this9.getServiceSettings(depBindAs);
+          var settings = _this10.getServiceSettings(depBindAs);
 
           if (settings) {
             var callbackSetList = settings.options && settings.options[callbackType];
 
-            var _service = _this9.getService(depBindAs);
+            var _service = _this10.getService(depBindAs);
 
             if (callbackSetList) {
               callbackSetList.forEach(function (callbackSet) {
@@ -437,10 +555,10 @@ function () {
   }, {
     key: "isListBind",
     value: function isListBind(list) {
-      var _this10 = this;
+      var _this11 = this;
 
       return list ? list.reduce(function (acc, bindAs) {
-        if (!_this10.isBind(bindAs)) {
+        if (!_this11.isBind(bindAs)) {
           // eslint-disable-next-line no-param-reassign
           acc = false;
         }
@@ -449,16 +567,16 @@ function () {
       }, true) : false;
     }
     /**
-     * return list of ids for not bind services
+     * return list of ids for services which are not bind
      */
 
   }, {
     key: "getNotBind",
     value: function getNotBind(list) {
-      var _this11 = this;
+      var _this12 = this;
 
       return list ? list.reduce(function (acc, bindAs) {
-        if (!_this11.isBind(bindAs)) {
+        if (!_this12.isBind(bindAs)) {
           acc.push(bindAs);
         }
 
@@ -472,10 +590,10 @@ function () {
   }, {
     key: "isListUnBind",
     value: function isListUnBind(list) {
-      var _this12 = this;
+      var _this13 = this;
 
       return list ? list.reduce(function (acc, bindAs) {
-        if (_this12.isBind(bindAs)) {
+        if (_this13.isBind(bindAs)) {
           // eslint-disable-next-line no-param-reassign
           acc = false;
         }
@@ -532,7 +650,7 @@ function () {
   }, {
     key: "saveDeps",
     value: function saveDeps(bindAs, callbackType) {
-      var _this13 = this;
+      var _this14 = this;
 
       if (this.isBindOnParent(bindAs)) {
         return;
@@ -548,12 +666,12 @@ function () {
             var len = list && list.length;
             list.forEach(function (item, i) {
               if (i < len - 1) {
-                if (!_this13.depsList[callbackType][item]) {
-                  _this13.depsList[callbackType][item] = [];
+                if (!_this14.depsList[callbackType][item]) {
+                  _this14.depsList[callbackType][item] = [];
                 }
 
-                if (!(0, _lodash.includes)(_this13.depsList[callbackType][item], bindAs)) {
-                  _this13.depsList[callbackType][item].push(bindAs);
+                if (!(0, _lodash.includes)(_this14.depsList[callbackType][item], bindAs)) {
+                  _this14.depsList[callbackType][item].push(bindAs);
                 }
               }
             });
@@ -590,12 +708,12 @@ function () {
   }, {
     key: "unbind",
     value: function unbind(bindAs) {
-      var _this14 = this;
+      var _this15 = this;
 
       var serviceSettings = this.getServiceSettings(bindAs);
 
       if (!this.isBind(bindAs)) {
-        this.showMessage("Not bind service \"".concat(bindAs, "\" try to unbind!"), MESSAGE_TYPES.WARN);
+        this.showMessage("Service \"".concat(bindAs, "\", which are not bind try to unbind!"), MESSAGE_TYPES.WARN);
         return;
       }
 
@@ -611,14 +729,14 @@ function () {
           var importData = item.options.importData && item.options.importData[bindAs];
 
           if (importData) {
-            _this14.unbindData(item.bindAs, importData);
+            _this15.unbindData(item.bindAs, importData);
           }
         }
       }); // unbind data importing from other services
 
       if (serviceSettings && serviceSettings.options.importData) {
         (0, _lodash.each)(serviceSettings.options.importData, function (importData) {
-          _this14.unbindData(bindAs, importData);
+          _this15.unbindData(bindAs, importData);
         });
       } // unbind disposers in this service
 
@@ -712,7 +830,7 @@ function () {
   }, {
     key: "processService",
     value: function processService(from, to) {
-      var _this15 = this;
+      var _this16 = this;
 
       if (from.bindAs !== to.bindAs) {
         var importData = to.options.importData;
@@ -720,21 +838,21 @@ function () {
         if (importData && importData[from.bindAs]) {
           (0, _lodash.each)(importData[from.bindAs], function (toVarName, fromVarName) {
             if (!(fromVarName in from.service)) {
-              _this15.showMessage("Variable \"".concat(fromVarName, "\" required for \"").concat(to.bindAs, "\" \n            not found in \"").concat(from.bindAs, "\""), MESSAGE_TYPES.WARN);
+              _this16.showMessage("Variable \"".concat(fromVarName, "\" required for \"").concat(to.bindAs, "\" \n            not found in \"").concat(from.bindAs, "\""), MESSAGE_TYPES.WARN);
 
               return;
             }
 
             if (toVarName in to.service) {
-              _this15.showMessage("Trying create link from \"".concat(from.bindAs, ".").concat(fromVarName, "\" \n            to \"").concat(to.bindAs, ".").concat(toVarName, "\", but variable \"").concat(toVarName, "\" is already exist in \"").concat(to.bindAs, "\""), MESSAGE_TYPES.WARN);
+              _this16.showMessage("Trying create link from \"".concat(from.bindAs, ".").concat(fromVarName, "\" \n            to \"").concat(to.bindAs, ".").concat(toVarName, "\", but variable \"").concat(toVarName, "\" is already exist in \"").concat(to.bindAs, "\""), MESSAGE_TYPES.WARN);
 
               return;
             }
 
             Object.defineProperty(to.service, toVarName, {
               get: function get() {
-                if (_this15.isDebug(to.bindAs)) {
-                  _this15.showMessage("Variable \"".concat(fromVarName, "\" from \"").concat(from.bindAs, "\" \n              was taken by \"").concat(to.bindAs, "\" with name \"").concat(toVarName, "\""));
+                if (_this16.isDebug(to.bindAs)) {
+                  _this16.showMessage("Variable \"".concat(fromVarName, "\" from \"").concat(from.bindAs, "\" \n              was taken by \"").concat(to.bindAs, "\" with name \"").concat(toVarName, "\""));
                 }
 
                 return from.service[fromVarName];
@@ -748,13 +866,13 @@ function () {
   }, {
     key: "addDisposer",
     value: function addDisposer(bindAs, services, obsr) {
-      var _this16 = this;
+      var _this17 = this;
 
       var serviceSettings = this.getServiceSettings(bindAs);
       var pass = true;
       services.forEach(function (serviceName) {
-        if (!_this16.isBind(serviceName)) {
-          _this16.showMessage("Impossible add disposer for not bind service \"".concat(bindAs, "\"."), MESSAGE_TYPES.WARN);
+        if (!_this17.isBind(serviceName)) {
+          _this17.showMessage("Impossible add disposer for not bind service \"".concat(bindAs, "\"."), MESSAGE_TYPES.WARN);
 
           pass = false;
         }

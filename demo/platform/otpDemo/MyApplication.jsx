@@ -4,7 +4,7 @@ import React from 'react';
 import { Observer } from 'mobx-react';
 import { Binder } from 'sources.js';
 
-import { GarageStore, TimeService, CarStore } from './Environment.js';
+import { InitialState, GarageStore, TimeService, CarStore } from './Environment.js';
 import { BinderContext, ServiceContext } from './ComponentContext.js';
 import { Provider, BinderProvider } from './Provider.jsx';
 import type { ServiceInterfaces } from './typing/types.js';
@@ -152,12 +152,16 @@ class MyApplication extends React.Component<{}, MyApplicationStateType> {
   }
 }
 
+
+const MyApplication2 = Provider(MyApplication, { services: [TimeService] });
+
+
 const WithNewBinder = BinderProvider(
-  Provider(MyApplication, { services: [TimeService] }),
+  Provider(MyApplication2, { services: [InitialState] }),
 );
 
 
 export default () => (
-  <BinderContext.Provider value={{ binder: new Binder(), initialState: { hello: 1 } }}>
+  <BinderContext.Provider value={new Binder()}>
     <WithNewBinder />
   </BinderContext.Provider>);

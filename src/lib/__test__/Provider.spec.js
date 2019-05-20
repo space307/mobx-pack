@@ -5,7 +5,6 @@ import Adapter from 'enzyme-adapter-react-16';
 import createProvider from '../Provider.js';
 import Binder from '../Binder.js';
 import { bindAs, onStart } from '../serviceDecorators.js';
-import { startService } from '../serviceUtils.js';
 
 const BinderContext = React.createContext();
 const ServiceContext = React.createContext();
@@ -16,6 +15,7 @@ configure({ adapter: new Adapter() });
 
 describe('Provider test', () => {
   it('calls helper && start service normally && pass props to child && useState', (done) => {
+    const initialStateName = 'initialState';
     const serviceName = 'serviceProto';
     const countValue = 1;
 
@@ -26,7 +26,7 @@ describe('Provider test', () => {
     @bindAs(serviceName)
     class ServiceProto {
          count = countValue;
-        @onStart
+        @onStart(initialStateName)
          onStart(initialStateParam) {
            onStartMock(initialState === initialStateParam);
            return new Promise(
@@ -42,6 +42,7 @@ describe('Provider test', () => {
 
 
     const binder = new Binder();
+    binder.bind(initialState, { bindAs: initialStateName });
 
     const Component = ({ count, pass }) => {
       childPropsMock(count === countValue, pass);
@@ -60,7 +61,7 @@ describe('Provider test', () => {
       useState: true,
     });
 
-    const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
+    const ComponentWithBinderContext = () => (<BinderContext.Provider value={binder}>
       <ComponentWithProvider pass />
     </BinderContext.Provider>);
 
@@ -80,6 +81,7 @@ describe('Provider test', () => {
   });
 
   it('start service with attributes in constructor', (done) => {
+    const initialStateName = 'initialState';
     const constructorMock = jest.fn();
 
     const attributeToConstructor = 3;
@@ -92,7 +94,7 @@ describe('Provider test', () => {
         this.count = count;
         constructorMock(count);
       }
-      @onStart
+      @onStart(initialStateName)
       onStart() {
         return new Promise(
           (resolve) => {
@@ -105,14 +107,14 @@ describe('Provider test', () => {
     const initialState = {};
 
     const binder = new Binder();
-
+    binder.bind(initialState, { bindAs: initialStateName });
     const Component = ({ count }) => (<div id="count">{count}</div>);
 
     const ComponentWithProvider = Provider(Component, {
       services: ({ count }) => [[ServiceProto, [count]]],
     });
 
-    const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
+    const ComponentWithBinderContext = () => (<BinderContext.Provider value={binder}>
       <ComponentWithProvider count={attributeToConstructor} />
     </BinderContext.Provider>);
 
@@ -128,13 +130,14 @@ describe('Provider test', () => {
   });
 
   it('put services to context', (done) => {
+    const initialStateName = 'initialState';
     const consumerMock = jest.fn();
 
     const serviceName = 'serviceProto';
 
     @bindAs(serviceName)
     class ServiceProto {
-      @onStart
+      @onStart(initialStateName)
       onStart() {
         return new Promise(
           (resolve) => {
@@ -147,6 +150,7 @@ describe('Provider test', () => {
     const initialState = {};
 
     const binder = new Binder();
+    binder.bind(initialState, { bindAs: initialStateName });
 
     const Component = () => (<div id="count"><ServiceContext.Consumer>{({ serviceProto }) => {
       consumerMock(serviceProto === binder.getService(serviceName));
@@ -157,7 +161,7 @@ describe('Provider test', () => {
       services: ({ count }) => [[ServiceProto, [count]]],
     });
 
-    const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
+    const ComponentWithBinderContext = () => (<BinderContext.Provider value={binder}>
       <ComponentWithProvider />
     </BinderContext.Provider>);
 
@@ -174,10 +178,11 @@ describe('Provider test', () => {
 
 
   it('stop only started service', (done) => {
+    const initialStateName = 'initialState';
     const serviceName = 'test';
     @bindAs(serviceName)
     class ServiceProto {
-      @onStart
+      @onStart(initialStateName)
       onStart() {
         return new Promise(
           (resolve) => {
@@ -190,7 +195,7 @@ describe('Provider test', () => {
     const serviceName2 = 'test2';
     @bindAs(serviceName2)
     class ServiceProto2 {
-      @onStart
+      @onStart(initialStateName)
       onStart() {
         return new Promise(
           (resolve) => {
@@ -202,16 +207,17 @@ describe('Provider test', () => {
 
     const initialState = {};
     const binder = new Binder();
+    binder.bind(initialState, { bindAs: initialStateName });
 
     const Component = () => (<div id="count" />);
 
-    startService(binder, initialState, { proto: ServiceProto, binderConfig: ServiceProto.binderConfig }).then(() => {
+    binder.start({ proto: ServiceProto, binderConfig: ServiceProto.binderConfig }).then(() => {
       const ComponentWithProvider = Provider(Component, {
         services: [ServiceProto, ServiceProto2],
         stop: true,
       });
 
-      const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
+      const ComponentWithBinderContext = () => (<BinderContext.Provider value={binder}>
         <ComponentWithProvider color={1} />
       </BinderContext.Provider>);
 
@@ -237,10 +243,11 @@ describe('Provider test', () => {
   });
 
   it('not stop if stop option is not defined', (done) => {
+    const initialStateName = 'initialState';
     const serviceName = 'test';
     @bindAs(serviceName)
     class ServiceProto {
-      @onStart
+      @onStart(initialStateName)
       onStart() {
         return new Promise(
           (resolve) => {
@@ -252,13 +259,14 @@ describe('Provider test', () => {
 
     const initialState = {};
     const binder = new Binder();
+    binder.bind(initialState, { bindAs: initialStateName });
     const Component = () => (<div id="count" />);
 
     const ComponentWithProvider = Provider(Component, {
       services: [ServiceProto],
     });
 
-    const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
+    const ComponentWithBinderContext = () => (<BinderContext.Provider value={binder}>
       <ComponentWithProvider color={1} />
     </BinderContext.Provider>);
 
@@ -276,10 +284,11 @@ describe('Provider test', () => {
   });
 
   it('stub test', (done) => {
+    const initialStateName = 'initialState';
     const serviceName = 'test';
     @bindAs(serviceName)
     class ServiceProto {
-      @onStart
+      @onStart(initialStateName)
       onStart() {
         return new Promise(
           (resolve) => {
@@ -291,6 +300,7 @@ describe('Provider test', () => {
 
     const initialState = {};
     const binder = new Binder();
+    binder.bind(initialState, { bindAs: initialStateName });
     const Component = () => (<div id="count" />);
 
     const MyStub = () => (<div id="stub">Loading...</div>);
@@ -300,7 +310,7 @@ describe('Provider test', () => {
       stub: MyStub,
     });
 
-    const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
+    const ComponentWithBinderContext = () => (<BinderContext.Provider value={binder}>
       <ComponentWithProvider color={1} />
     </BinderContext.Provider>);
 
@@ -320,10 +330,11 @@ describe('Provider test', () => {
 
 
   it('in helper do not return an object shows stub', (done) => {
+    const initialStateName = 'initialState';
     const serviceName = 'test';
     @bindAs(serviceName)
     class ServiceProto {
-      @onStart
+      @onStart(initialStateName)
       onStart() {
         return true;
       }
@@ -331,6 +342,7 @@ describe('Provider test', () => {
 
     const initialState = {};
     const binder = new Binder();
+    binder.bind(initialState, { bindAs: initialStateName });
     const Component = () => (<div id="count" />);
 
     const MyStub = () => (<div id="stub">Loading...</div>);
@@ -343,7 +355,7 @@ describe('Provider test', () => {
       stub: MyStub,
     });
 
-    const ComponentWithBinderContext = () => (<BinderContext.Provider value={{ binder, initialState }}>
+    const ComponentWithBinderContext = () => (<BinderContext.Provider value={binder}>
       <ComponentWithProvider color={1} />
     </BinderContext.Provider>);
 
@@ -371,12 +383,7 @@ describe('Provider test', () => {
   it('wrong attributes: wrong services', (done) => {
     const serviceName = 'test';
     @bindAs(serviceName)
-    class ServiceProto {
-      @onStart
-      onStart() {
-        return true;
-      }
-    }
+    class ServiceProto {}
 
     const ComponentWithProvider = Provider(() => (<div />), {
       services: [2],

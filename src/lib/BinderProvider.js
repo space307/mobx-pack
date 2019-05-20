@@ -14,8 +14,8 @@ type BinderProviderStateTypes = {
 
 
 export default function createBinderProvider(BinderContext: React$Context<GlobalContextType>):
-  (Component: React$ComponentType<*>, initialState?: *)=>React$ComponentType<*> {
-  return function BinderProvider(Component: React$ComponentType<*>, initialState?: *): React$ComponentType<*> {
+  (Component: React$ComponentType<*>)=>React$ComponentType<*> {
+  return function BinderProvider(Component: React$ComponentType<*>): React$ComponentType<*> {
     class ComponentWrapper<PropType> extends
       React.Component<{context:GlobalContextType, props:PropType}, BinderProviderStateTypes > {
       static contextType = BinderContext;
@@ -27,11 +27,8 @@ export default function createBinderProvider(BinderContext: React$Context<Global
       newContext:GlobalContextType;
       constructor(props, context) {
         super();
-        const contextInitialState = context && context.initialState;
-        this.newContext = {
-          binder: new Binder(context && context.binder),
-          initialState: initialState || contextInitialState,
-        };
+
+        this.newContext = new Binder(context);
 
         if (!Component || typeof Component !== 'function') {
           this.state.error = 'BinderProvider wait for "React.Component" in attributes';
@@ -39,8 +36,8 @@ export default function createBinderProvider(BinderContext: React$Context<Global
       }
 
       componentWillUnmount(): void {
-        if (this.newContext.binder) {
-          this.newContext.binder.clear();
+        if (this.newContext) {
+          this.newContext.clear();
         }
       }
 

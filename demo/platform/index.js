@@ -9,17 +9,18 @@ import balanceService from 'demo/platform/services/BalanceService/index.js';
 import Platform from 'demo/platform/layouts/Platform/index.jsx';
 
 /*
-  import { onStop, onStart, unbindServices, bindServices, bindAs,
+  import { onStop, onStart, onUnbind, onBind, bindAs,
     startService, startServices, stopService, stopServices,
     BaseComponent, BaseStore, Binder, Connector, ServiceStarter, ServiceConnector, createProvider, createBinderProvider,
   } from 'mobx-pack';
 
-  console.log([onStop, onStart, unbindServices, bindServices, bindAs, startService, startServices, stopService, stopServices,
+  console.log([onStop, onStart, onUnbind, onBind, bindAs, startService, startServices, stopService, stopServices,
     BaseComponent, BaseStore, Binder, Connector, ServiceStarter, ServiceConnector, createProvider, createBinderProvider]);
    */
 
 // otp demo page
 import MyApplication from 'demo/platform/otpDemo/MyApplication.jsx';
+//import Environment from 'demo/platform/otpDemo/Environment.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -30,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dealService.start('entry'),
     balanceService.start('entry'),
   ]).then(() => {
-    ReactDOM.render(React.createElement(Platform), document.querySelector('#root'));
+    ReactDOM.render(React.createElement(MyApplication), document.querySelector('#root'));
   });
 });
 

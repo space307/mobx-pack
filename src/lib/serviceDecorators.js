@@ -1,6 +1,6 @@
 // @flow
 
-import type { ServiceConfigType } from './typing/common.js';
+import type { BinderConfigType } from './typing/common.js';
 
 type ServiceType = Class<*>;
 
@@ -18,15 +18,13 @@ function validateNameList(list: Array<string>): boolean {
 }
 
 
-function createConfig(): ServiceConfigType {
+function createConfig(): BinderConfigType {
   return {
-    onStart: '',
+    onStart: [],
     onStop: '',
-    config: {
-      bindAs: '',
-      onBind: [],
-      onUnbind: [],
-    },
+    bindAs: '',
+    onBind: [],
+    onUnbind: [],
   };
 }
 
@@ -34,9 +32,11 @@ function putServiceNamesToConfig(
   serviceNames: Array<string>,
   service: ServiceType,
   callbackName: string,
-  optionName: string): void {
+  optionName: string,
+  pushToArray: boolean = true,
+): void {
   const proto = service.constructor;
-  if (!proto.binderConfig || !proto.binderConfig.config) {
+  if (!proto.binderConfig) {
     proto.binderConfig = createConfig();
   }
 
@@ -50,10 +50,15 @@ function putServiceNamesToConfig(
       },
     );
 
-    proto.binderConfig.config[optionName].push(
-      [...serviceNames,
-        callbackName],
-    );
+    if (pushToArray) {
+      proto.binderConfig[optionName].push(
+        [...serviceNames,
+          callbackName],
+      );
+    } else {
+      proto.binderConfig[optionName] = [...serviceNames,
+        callbackName];
+    }
   }
 }
 
@@ -76,20 +81,20 @@ export function bindAs(serviceName: string): (service: ServiceType) => ServiceTy
       throw new Error(`Wrong name "${serviceName}" passed to bindAs decorator (service:${service.name}).`);
     }
 
-    if (!service.binderConfig || !service.binderConfig.config) {
+    if (!service.binderConfig) {
       service.binderConfig = createConfig();
     }
-    service.binderConfig.config.bindAs = serviceName;
+    service.binderConfig.bindAs = serviceName;
     return service;
   };
 }
 
 
-export function bindServices(
+export function onBind(
   ...serviceNames: Array<string>
 ): (service: ServiceType, callbackName: string) => ServiceType {
   if (!serviceNames.length || !validateNameList(serviceNames)) {
-    throw new Error(`Wrong attributes passed to bindServices decorator (${serviceNames.join(',')}).`);
+    throw new Error(`Wrong attributes passed to onBind decorator (${serviceNames.join(',')}).`);
   }
 
   return (service: ServiceType, callbackName: string): ServiceType => {
@@ -98,11 +103,11 @@ export function bindServices(
   };
 }
 
-export function unbindServices(
+export function onUnbind(
   ...serviceNames: Array<string>
 ): (service: ServiceType, callbackName: string) => ServiceType {
   if (!serviceNames.length || !validateNameList(serviceNames)) {
-    throw new Error(`Wrong attributes passed to unbindServices decorator (${serviceNames.join(',')}).`);
+    throw new Error(`Wrong attributes passed to onUnbind decorator (${serviceNames.join(',')}).`);
   }
   return (service: ServiceType, callbackName: string): ServiceType => {
     putServiceNamesToConfig(serviceNames, service, callbackName, 'onUnbind');
@@ -111,10 +116,18 @@ export function unbindServices(
 }
 
 
-export function onStart(service: ServiceType, callbackName: string): ServiceType {
-  putMethodNameToConfig(service, callbackName, 'onStart');
-  return service;
+export function onStart(
+  ...serviceNames: Array<string>
+): (service: ServiceType, callbackName: string) => ServiceType {
+  if (!serviceNames.length || !validateNameList(serviceNames)) {
+    throw new Error(`Wrong attributes passed to onStart decorator (${serviceNames.join(',')}).`);
+  }
+  return (service: ServiceType, callbackName: string): ServiceType => {
+    putServiceNamesToConfig(serviceNames, service, callbackName, 'onStart', false);
+    return service;
+  };
 }
+
 
 export function onStop(service: ServiceType, callbackName: string): ServiceType {
   putMethodNameToConfig(service, callbackName, 'onStop');

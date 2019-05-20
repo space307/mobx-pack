@@ -18,7 +18,6 @@ type ProviderOptionsAttributeType = {
   services?: Array<ServiceItemType> | (props: *)=> Array<ServiceItemType>,
   helper?: (services: ?ServicesHashType, props: *) => *,
   stub?: React$ComponentType<*>,
-  useState?: boolean,
 };
 
 type ProviderOptionsPropType = {
@@ -65,11 +64,11 @@ function convertToServiceStartConfig(ServiceProtoList: Array<ServiceItemType>): 
 function convertToServiceHash(list: ?Array<*>): ?ServicesHashType {
   return list && list.length ?
     list.reduce((acc, item) => {
-      if (!item.constructor.binderConfig || !item.constructor.binderConfig.config.bindAs) {
+      if (!item.constructor.binderConfig || !item.constructor.binderConfig.bindAs) {
         throw new Error('Cannot convert service hash because binderConfig or bindAs props not exits');
       }
 
-      const name = item.constructor.binderConfig.config.bindAs;
+      const name = item.constructor.binderConfig.bindAs;
 
       acc[name.charAt(0).toLowerCase() + name.slice(1)] = item;
       return acc;
@@ -92,7 +91,6 @@ export default function createProvider(
   ): React$ComponentType<*> {
     const defaultOptions = {
       stop: false,
-      useState: false,
       services: [],
     };
 
@@ -123,8 +121,8 @@ export default function createProvider(
 
           if (options) {
             const services = typeof options.services === 'function' ? options.services(props) : options.services;
-            const { stop, helper, stub, useState } = options;
-            this.options = { ...defaultOptions, ...{ stop, helper, stub, useState }, ...{ services } };
+            const { stop, helper, stub } = options;
+            this.options = { ...defaultOptions, ...{ stop, helper, stub }, ...{ services } };
           } else {
             this.options = { ...defaultOptions };
           }
@@ -138,8 +136,8 @@ export default function createProvider(
               this.state.error = `${err.message} (component: ${getComponentName(Component)})`;
             }
 
-            if (context && context.binder && config) {
-              const serviceList = getStartedServices(context.binder, config);
+            if (context && config) {
+              const serviceList = getStartedServices(context, config);
               this.state.services = convertToServiceHash(serviceList);
             }
           }
@@ -154,15 +152,14 @@ export default function createProvider(
 
         componentDidMount(): void {
           if ((!this.state.services || !this.state.services.length) &&
-            this.context && this.context.binder && this.context.initialState) {
+            this.context) {
             this.startServices();
           }
         }
 
         componentWillUnmount() {
           if (this.options.stop && this.serviceToStop && this.serviceToStop.length) {
-            const { binder } = this.context;
-            stopServices(binder, this.serviceToStop);
+            stopServices(this.context, this.serviceToStop);
           }
         }
 
@@ -170,8 +167,8 @@ export default function createProvider(
          * Start service procedure
          */
         startServices() {
-          const { services: ServiceProtoList, useState } = this.options;
-          const { binder, initialState } = this.context;
+          const { services: ServiceProtoList } = this.options;
+          const binder = this.context;
 
           if (ServiceProtoList && ServiceProtoList.length) {
             let serviceStartConfigList;
@@ -182,7 +179,7 @@ export default function createProvider(
             }
 
             if (serviceStartConfigList) {
-              startServices(binder, initialState, serviceStartConfigList, useState).then((services: *) => {
+              startServices(binder, serviceStartConfigList).then((services: *) => {
                 type ResultType = {
                   toStop: Array<ServiceStartConfigType>,
                   services: Array<*>,

@@ -1,13 +1,24 @@
+import '@babel/polyfill';
 import { each } from 'lodash';
 import Binder from '../Binder.js';
+import { onStart, bindAs as bindAsDecor, onStop } from '../serviceDecorators.js';
 
+function getConfig(ServiceProto) {
+  const serviceStartConfigData = {
+    proto: ServiceProto,
+    protoAttrs: [1, 2],
+    binderConfig: ServiceProto.binderConfig,
+  };
+
+  return serviceStartConfigData;
+}
 
 const s1 = 's1';
 const s2 = 's2';
 const s3 = 's3';
 const s4 = 's4';
 const s5 = 's5';
-
+const initialStateName = 'initialState';
 
 function createConfig(bindAs, onBind, onUnbind) {
   const config = {
@@ -139,6 +150,213 @@ describe('Binder test', () => {
     binder.setPendingStartResolver(s1, promise);
     expect(binder.getPendingStartResolver(s1)).toBe(promise);
   });
+
+
+  it('createService', () => {
+    class Test {
+      constructor(a, b) {
+        this.a = a;
+        this.b = b;
+      }
+    }
+    const service = binder.createService(Test, [1, 2]);
+    expect(service.a).toBe(1);
+    expect(service.b).toBe(2);
+  });
+
+  it('createService error', () => {
+    class Test {
+      constructor(a, b) {
+        this.a = a;
+        this.b = b;
+      }
+    }
+    expect(() => { binder.createService(Test, 1); }).toThrow();
+  });
+
+  it('start async', (done) => {
+    const serviceName = 'test';
+
+    @bindAsDecor(serviceName)
+    class ServiceProto {
+      @onStart(initialStateName)
+      onStart() {
+        return new Promise(
+          (resolve) => {
+            setTimeout(() => { resolve(); });
+          },
+        );
+      }
+    }
+
+    const initialState = {};
+    binder.bind(initialState, { bindAs: initialStateName });
+
+    binder.start(getConfig(ServiceProto)).then(({ service, started, serviceStartConfig }) => {
+      expect(binder.isBind(serviceName)).toBe(true);
+      expect(serviceStartConfig.proto).toBe(ServiceProto);
+      expect(started).toBe(true);
+      expect(service).toBe(binder.getService(serviceName));
+      done();
+    });
+  });
+
+
+  it('start negative start async', (done) => {
+    const serviceName = 'test';
+
+    @bindAsDecor(serviceName)
+    class ServiceProto {
+      @onStart(initialStateName)
+      onStart() {
+        return new Promise(
+          (resolve, reject) => {
+            setTimeout(() => { reject(new Error('error')); });
+          },
+        );
+      }
+    }
+
+    const initialState = {};
+    binder.bind(initialState, { bindAs: initialStateName });
+
+    binder.start(getConfig(ServiceProto)).catch((error) => {
+      expect(!!error).toBe(true);
+      done();
+    });
+  });
+
+
+  it('start negative start sync', (done) => {
+    const serviceName = 'test';
+
+    @bindAsDecor(serviceName)
+    class ServiceProto {
+      @onStart(initialStateName)
+      onStart() {
+        return false;
+      }
+    }
+
+    const initialState = {};
+    binder.bind(initialState, { bindAs: initialStateName });
+
+    binder.start(getConfig(ServiceProto)).catch((error) => {
+      expect(!!error).toBe(true);
+      done();
+    });
+  });
+
+
+  it('onStart callback', (done) => {
+    const serviceName = 'test';
+    const firstServiceName = 'firstService';
+    const secondServiceName = 'secondService';
+
+    @bindAsDecor(serviceName)
+    class ServiceProto {
+      @onStart(firstServiceName, secondServiceName)
+      onStart(firstService, secondService) {
+        this.test(firstService, secondService);
+        return true;
+      }
+      test = jest.fn();
+    }
+
+
+    const firstService = {};
+    const secondService = {};
+    binder.bind(firstService, { bindAs: firstServiceName });
+    binder.bind(secondService, { bindAs: secondServiceName });
+
+    binder.start(getConfig(ServiceProto), true).then(({ service }) => {
+      expect(service.test).toBeCalledWith(firstService, secondService);
+      done();
+    });
+  });
+
+  it('onStart fail if some service not bind', (done) => {
+    const serviceName = 'test';
+    const firstServiceName = 'firstService';
+    const secondServiceName = 'secondService';
+
+    @bindAsDecor(serviceName)
+    class ServiceProto {
+      @onStart(firstServiceName, secondServiceName)
+      onStart(firstService, secondService) {
+        this.test(firstService, secondService);
+        return true;
+      }
+      test = jest.fn();
+    }
+
+    const firstService = {};
+    binder.bind(firstService, { bindAs: firstServiceName });
+
+    binder.start(getConfig(ServiceProto), true).catch((error) => {
+      expect(!!error).toBe(true);
+      done();
+    });
+  });
+
+  it('double service start && Promise', (done) => {
+    const serviceName = 'test';
+
+    @bindAsDecor(serviceName)
+    class ServiceProto {
+      @onStart(initialStateName)
+      onStart(initialState) {
+        this.test(initialState);
+        return new Promise(
+          (resolve) => {
+            setTimeout(() => {
+              resolve();
+            });
+          },
+        );
+      }
+      test = jest.fn();
+    }
+
+    let readyService;
+
+    const initialState = {};
+    binder.bind(initialState, { bindAs: initialStateName });
+
+    binder.start(getConfig(ServiceProto)).then(({ service }) => {
+      readyService = service;
+    });
+
+    binder.start(getConfig(ServiceProto)).then(({ service }) => {
+      expect(service).toBe(readyService);
+      expect(service.test).toBeCalledTimes(1);
+      done();
+    });
+  });
+
+  it('stopService', () => {
+    const serviceName = 'test';
+    @bindAsDecor(serviceName)
+    class ServiceProto {
+      @onStop
+      onStop(initialState) {
+        this.test(initialState);
+        return false;
+      }
+      test = jest.fn();
+    }
+
+    const service = new ServiceProto();
+    const config = getConfig(ServiceProto);
+
+    binder.bind(service, config.binderConfig);
+    expect(binder.isBind(serviceName)).toBe(true);
+    binder.stop(getConfig(ServiceProto));
+
+    expect(binder.isBind(serviceName)).toBe(false);
+    expect(service.test).toBeCalled();
+  });
+
 
   describe('onBindTest', () => {
     function expectSimpleOnBindTest(service1, service2, service3) {
