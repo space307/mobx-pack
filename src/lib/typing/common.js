@@ -1,7 +1,7 @@
 // @flow
-import Binder from '../Binder.js';
+import type { BinderInterface } from './binderInterface.js';
 
-export type GlobalContextType = Binder;
+export type GlobalContextType = BinderInterface;
 
 export type ServiceConfigBindAsType = string;
 
