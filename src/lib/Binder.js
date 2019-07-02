@@ -693,7 +693,7 @@ class Binder implements BinderInterface {
     /* --/ Legacy -- */
 
     // clear service settings in binder
-    this.services[bindAs] = undefined;
+    delete this.services[bindAs];
 
     // check and execute dependencies on the OnUnbind event
     this.handleOnUnbind(bindAs);
