@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = createBinderProvider;
+exports.default = createBinderProvider;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
@@ -29,18 +29,18 @@ function createBinderProvider(BinderContext) {
     var ComponentWrapper =
     /*#__PURE__*/
     function (_React$Component) {
-      (0, _inherits2["default"])(ComponentWrapper, _React$Component);
+      (0, _inherits2.default)(ComponentWrapper, _React$Component);
 
       function ComponentWrapper(props, context) {
         var _this;
 
-        (0, _classCallCheck2["default"])(this, ComponentWrapper);
-        _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(ComponentWrapper).call(this));
+        (0, _classCallCheck2.default)(this, ComponentWrapper);
+        _this = (0, _possibleConstructorReturn2.default)(this, (0, _getPrototypeOf2.default)(ComponentWrapper).call(this));
         _this.state = {
           error: null
         };
         _this.newContext = void 0;
-        _this.newContext = new _Binder["default"](context);
+        _this.newContext = new _Binder.default(context);
 
         if (!Component || typeof Component !== 'function') {
           _this.state.error = 'BinderProvider wait for "React.Component" in attributes';
@@ -49,7 +49,7 @@ function createBinderProvider(BinderContext) {
         return _this;
       }
 
-      (0, _createClass2["default"])(ComponentWrapper, [{
+      (0, _createClass2.default)(ComponentWrapper, [{
         key: "componentWillUnmount",
         value: function componentWillUnmount() {
           if (this.newContext) {
@@ -63,13 +63,13 @@ function createBinderProvider(BinderContext) {
             throw new Error(this.state.error);
           }
 
-          return _react["default"].createElement(BinderContext.Provider, {
+          return _react.default.createElement(BinderContext.Provider, {
             value: this.newContext
-          }, _react["default"].createElement(Component, this.props));
+          }, _react.default.createElement(Component, this.props));
         }
       }]);
       return ComponentWrapper;
-    }(_react["default"].Component);
+    }(_react.default.Component);
 
     ComponentWrapper.contextType = BinderContext;
     return ComponentWrapper;

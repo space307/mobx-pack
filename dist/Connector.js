@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = void 0;
+exports.default = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
@@ -40,20 +40,20 @@ function ConnectorF(Component) {
   return (0, _mobxReact.observer)((_temp = _class =
   /*#__PURE__*/
   function (_React$Component) {
-    (0, _inherits2["default"])(Connector, _React$Component);
+    (0, _inherits2.default)(Connector, _React$Component);
 
     function Connector() {
       var _getPrototypeOf2;
 
       var _this;
 
-      (0, _classCallCheck2["default"])(this, Connector);
+      (0, _classCallCheck2.default)(this, Connector);
 
       for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
         args[_key] = arguments[_key];
       }
 
-      _this = (0, _possibleConstructorReturn2["default"])(this, (_getPrototypeOf2 = (0, _getPrototypeOf3["default"])(Connector)).call.apply(_getPrototypeOf2, [this].concat(args)));
+      _this = (0, _possibleConstructorReturn2.default)(this, (_getPrototypeOf2 = (0, _getPrototypeOf3.default)(Connector)).call.apply(_getPrototypeOf2, [this].concat(args)));
       _this.servicesLoaded = false;
       _this.options = {};
       _this.componentId = '';
@@ -63,7 +63,7 @@ function ConnectorF(Component) {
       return _this;
     }
 
-    (0, _createClass2["default"])(Connector, [{
+    (0, _createClass2.default)(Connector, [{
       key: "getChildContext",
       value: function getChildContext() {
         return {
@@ -203,7 +203,7 @@ function ConnectorF(Component) {
       key: "render",
       value: function render() {
         if (this.options.wairForServices && !this.servicesLoaded) {
-          return typeof this.options.preLoader === 'function' ? _react["default"].createElement(this.options.preLoader, null) : this.options.preLoader;
+          return typeof this.options.preLoader === 'function' ? _react.default.createElement(this.options.preLoader, null) : this.options.preLoader;
         }
 
         var props = this.composeProps();
@@ -214,21 +214,21 @@ function ConnectorF(Component) {
             props.api = this.apiResolved;
           }
 
-          comp = _react["default"].createElement(Component, props);
+          comp = _react.default.createElement(Component, props);
         } else {
-          return typeof this.options.preLoader === 'function' ? _react["default"].createElement(this.options.preLoader, null) : this.options.preLoader;
+          return typeof this.options.preLoader === 'function' ? _react.default.createElement(this.options.preLoader, null) : this.options.preLoader;
         }
 
         return comp;
       }
     }]);
     return Connector;
-  }(_react["default"].Component), _class.displayName = Component.displayName && "".concat(Component.displayName, "Connector") || "".concat(Component.name, "Connector"), _class.childContextTypes = {
-    store: _propTypes["default"].object
+  }(_react.default.Component), _class.displayName = Component.displayName && "".concat(Component.displayName, "Connector") || "".concat(Component.name, "Connector"), _class.childContextTypes = {
+    store: _propTypes.default.object
   }, _class.contextTypes = {
-    store: _propTypes["default"].object
+    store: _propTypes.default.object
   }, _temp));
 }
 
 var _default = ConnectorF;
-exports["default"] = _default;
+exports.default = _default;
