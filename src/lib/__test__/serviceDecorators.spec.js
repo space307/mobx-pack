@@ -96,40 +96,69 @@ describe('serviceDecorators test', () => {
   });
 
   describe('extends class with decorators', () => {
-    describe('bindAs', () => {
+    let ParentService;
+    let ExtendedService;
+
+    beforeEach(() => {
       @bindAs('ParentService')
-      class ParentService {}
+      class ParentServiceClass {
+        @onStart('onStartParentService')
+        onStart() {}
+
+        @onBind('onBindParentService1', 'onBindParentService2')
+        onBind() {}
+
+        @onBind('onBindParentService3', 'onBindParentService4')
+        onBindAdditionServices() {}
+
+        @onUnbind('onUnbindParentService1', 'onUnbindParentService2')
+        onUnbind() {}
+
+        @onUnbind('onUnbindParentService3', 'onUnbindParentService4')
+        onUnbindAdditionServices() {}
+
+        @onStop
+        onStop() {}
+      }
+
+      ParentService = ParentServiceClass;
+    });
+
+    describe('bindAs', () => {
+      beforeEach(() => {
+        @bindAs('ExtendedService')
+        class ExtendedServiceClass extends ParentService {}
+
+        ExtendedService = ExtendedServiceClass;
+      });
 
       it('should extends new class with other bindAs', () => {
-        @bindAs('ExtendedService')
-        class ExtendedService extends ParentService {}
-
         expect(ExtendedService.binderConfig.bindAs).toEqual('ExtendedService');
       });
 
       it('should stay ParentService without changes in bindAs after extend', () => {
-        @bindAs('ExtendedService')
-        class ExtendedService extends ParentService {}
-
         expect(ParentService.binderConfig.bindAs).toEqual('ParentService');
+      });
+
+      it('should extends new class with parent bindAs if not redefined', () => {
+        class ExtendedServiceClass extends ParentService {}
+
+        expect(ExtendedServiceClass.binderConfig.bindAs).toEqual('ParentService');
       });
     });
 
 
     describe('onStart', () => {
-      @bindAs('ParentService')
-      class ParentService {
-        @onStart('onStartParentService')
-        onStart() {}
-      }
-
-      it('should extends new class with other onStart', () => {
-        @bindAs('ExtendedService')
-        class ExtendedService extends ParentService {
+      beforeEach(() => {
+        class ExtendedServiceClass extends ParentService {
           @onStart('onStartExtendedService')
           onStart() {}
         }
 
+        ExtendedService = ExtendedServiceClass;
+      });
+
+      it('should extends new class with other onStart', () => {
         expect(ExtendedService.binderConfig.onStart).toEqual([
           'onStartExtendedService',
           'onStart',
@@ -137,13 +166,16 @@ describe('serviceDecorators test', () => {
       });
 
       it('should stay ParentService without changes in onStart after extend', () => {
-        @bindAs('ExtendedService')
-        class ExtendedService extends ParentService {
-          @onStart('onStartExtendedService')
-          onStart() {}
-        }
-
         expect(ParentService.binderConfig.onStart).toEqual([
+          'onStartParentService',
+          'onStart',
+        ]);
+      });
+
+      it('should extends new class with parent onStart if not redefined', () => {
+        class ExtendedServiceClass extends ParentService {}
+
+        expect(ExtendedServiceClass.binderConfig.onStart).toEqual([
           'onStartParentService',
           'onStart',
         ]);
@@ -151,18 +183,8 @@ describe('serviceDecorators test', () => {
     });
 
     describe('onBind', () => {
-      @bindAs('ParentService')
-      class ParentService {
-        @onBind('onBindParentService1', 'onBindParentService2')
-        onBind() {}
-
-        @onBind('onBindParentService3', 'onBindParentService4')
-        onBindAdditionServices() {}
-      }
-
-      it('should extends new class with other onBind', () => {
-        @bindAs('ExtendedService')
-        class ExtendedService extends ParentService {
+      beforeEach(() => {
+        class ExtendedServiceClass extends ParentService {
           @onBind('onBindExtendedService1')
           onBind() {}
 
@@ -170,6 +192,10 @@ describe('serviceDecorators test', () => {
           onBindAdditionExtendedServices() {}
         }
 
+        ExtendedService = ExtendedServiceClass;
+      });
+
+      it('should extends new class with other onBind', () => {
         expect(ExtendedService.binderConfig.onBind).toEqual([
           [
             'onBindExtendedService1',
@@ -189,15 +215,6 @@ describe('serviceDecorators test', () => {
 
 
       it('should stay ParentService without changes in onBind after extend', () => {
-        @bindAs('ExtendedService')
-        class ExtendedService extends ParentService {
-          @onBind('onBindExtendedService1')
-          onBind() {}
-
-          @onBind('onBindExtendedService3')
-          onBindAdditionExtendedServices() {}
-        }
-
         expect(ParentService.binderConfig.onBind).toEqual([
           [
             'onBindParentService1',
@@ -215,18 +232,8 @@ describe('serviceDecorators test', () => {
 
 
     describe('onUnbind', () => {
-      @bindAs('ParentService')
-      class ParentService {
-        @onUnbind('onUnbindParentService1', 'onUnbindParentService2')
-        onUnbind() {}
-
-        @onUnbind('onUnbindParentService3', 'onUnbindParentService4')
-        onUnbindAdditionServices() {}
-      }
-
-      it('should extends new class with other onUnbind', () => {
-        @bindAs('ExtendedService')
-        class ExtendedService extends ParentService {
+      beforeEach(() => {
+        class ExtendedServiceClass extends ParentService {
           @onUnbind('onUnbindExtendedService1')
           onUnbind() {}
 
@@ -234,6 +241,10 @@ describe('serviceDecorators test', () => {
           onUnbindAdditionExtendedServices() {}
         }
 
+        ExtendedService = ExtendedServiceClass;
+      });
+
+      it('should extends new class with other onUnbind', () => {
         expect(ExtendedService.binderConfig.onUnbind).toEqual([
           [
             'onUnbindExtendedService1',
@@ -253,15 +264,6 @@ describe('serviceDecorators test', () => {
 
 
       it('should stay ParentService without changes in onUnbind after extend', () => {
-        @bindAs('ExtendedService')
-        class ExtendedService extends ParentService {
-          @onUnbind('onUnbindExtendedService1')
-          onUnbind() {}
-
-          @onUnbind('onUnbindExtendedService3')
-          onUnbindAdditionExtendedServices() {}
-        }
-
         expect(ParentService.binderConfig.onUnbind).toEqual([
           [
             'onUnbindParentService1',
@@ -279,30 +281,27 @@ describe('serviceDecorators test', () => {
 
 
     describe('onStop', () => {
-      @bindAs('ParentService')
-      class ParentService {
-        @onStop
-        onStop() {}
-      }
-
-      it('should extends new class with other onStop', () => {
-        @bindAs('ExtendedService')
-        class ExtendedService extends ParentService {
+      beforeEach(() => {
+        class ExtendedServiceClass extends ParentService {
           @onStop
           onStopExtended() {}
         }
 
+        ExtendedService = ExtendedServiceClass;
+      });
+
+      it('should extends new class with other onStop', () => {
         expect(ExtendedService.binderConfig.onStop).toEqual('onStopExtended');
       });
 
       it('should stay ParentService without changes in onStop after extend', () => {
-        @bindAs('ExtendedService')
-        class ExtendedService extends ParentService {
-          @onStop
-          onStopExtended() {}
-        }
-
         expect(ParentService.binderConfig.onStop).toEqual('onStop');
+      });
+
+      it('should extends new class with parent onStop if not redefined', () => {
+        class ExtendedServiceClass extends ParentService {}
+
+        expect(ExtendedServiceClass.binderConfig.onStop).toEqual('onStop');
       });
     });
   });
