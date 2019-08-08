@@ -31,7 +31,8 @@
     "promise": "^8.0.1",
     "prop-types": "15.x",
     "react": "16.x",
-    "react-dom": "16.x"
+    "react-dom": "16.x",
+    "react-is": "^16.8.6"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.0",
