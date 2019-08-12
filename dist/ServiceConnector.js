@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = ServiceConnector;
+exports.default = ServiceConnector;
 
 function startOk(service, options) {
   if (!options.binder.isBind(options.config.bindAs)) {
@@ -41,7 +41,7 @@ function ServiceConnector(service, options) {
             onStartResult.then(function () {
               startOk(service, options);
               resolve();
-            })["catch"](function (err) {
+            }).catch(function (err) {
               reject(err);
             });
           } else if (onStartResult !== false) {
