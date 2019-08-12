@@ -23,6 +23,8 @@ var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits
 
 var _react = _interopRequireDefault(require("react"));
 
+var _reactIs = require("react-is");
+
 var _mobxReact = require("mobx-react");
 
 var _serviceUtils = require("./serviceUtils.js");
@@ -104,8 +106,8 @@ function createProvider(BinderContext, ServiceContext) {
         _this.options = void 0;
         _this.serviceToStop = [];
 
-        if (!Component || typeof Component !== 'function') {
-          _this.state.error = 'Provider wait for "React.Component" in attributes';
+        if (!(0, _reactIs.isValidElementType)(Component)) {
+          _this.state.error = 'Provider wait for React Element in attributes';
         }
 
         if (options && options.helper && typeof options.helper !== 'function') {

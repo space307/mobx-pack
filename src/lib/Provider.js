@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { isValidElementType } from 'react-is';
 import { observer } from 'mobx-react';
 
 import { startServices, stopServices, getStartedServices } from './serviceUtils.js';
@@ -110,8 +111,8 @@ export default function createProvider(
         constructor(props: PropType, context) {
           super();
 
-          if (!Component || typeof Component !== 'function') {
-            this.state.error = 'Provider wait for "React.Component" in attributes';
+          if (!isValidElementType(Component)) {
+            this.state.error = 'Provider wait for React Element in attributes';
           }
 
           if (options && options.helper && typeof options.helper !== 'function') {
