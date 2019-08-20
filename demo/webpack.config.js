@@ -97,6 +97,7 @@ const makeAppConfig = () => ({
     open: true,
     port: 9000,
   },
+  devtool: 'source-map',
 });
 
 module.exports = makeAppConfig();

@@ -110,11 +110,12 @@ export default function createProvider(
         constructor(props: PropType, context) {
           super();
 
-          if (!Component || typeof Component !== 'function') {
+          if (!context) {
+            this.state.error = `Binder context not found in Provider 
+            (component: ${getComponentName(Component)})`;
+          } else if (!Component || typeof Component !== 'function') {
             this.state.error = 'Provider wait for "React.Component" in attributes';
-          }
-
-          if (options && options.helper && typeof options.helper !== 'function') {
+          } else if (options && options.helper && typeof options.helper !== 'function') {
             this.state.error = `Helper put to Provider 
             (component: ${getComponentName(Component)}) should be a function`;
           }

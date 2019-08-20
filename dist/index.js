@@ -8,49 +8,49 @@ Object.defineProperty(exports, "__esModule", {
 Object.defineProperty(exports, "BaseComponent", {
   enumerable: true,
   get: function get() {
-    return _BaseComponent2["default"];
+    return _BaseComponent2.default;
   }
 });
 Object.defineProperty(exports, "BaseStore", {
   enumerable: true,
   get: function get() {
-    return _BaseStore2["default"];
+    return _BaseStore2.default;
   }
 });
 Object.defineProperty(exports, "Binder", {
   enumerable: true,
   get: function get() {
-    return _Binder2["default"];
+    return _Binder2.default;
   }
 });
 Object.defineProperty(exports, "Connector", {
   enumerable: true,
   get: function get() {
-    return _Connector2["default"];
+    return _Connector2.default;
   }
 });
 Object.defineProperty(exports, "ServiceStarter", {
   enumerable: true,
   get: function get() {
-    return _ServiceStarter2["default"];
+    return _ServiceStarter2.default;
   }
 });
 Object.defineProperty(exports, "ServiceConnector", {
   enumerable: true,
   get: function get() {
-    return _ServiceConnector2["default"];
+    return _ServiceConnector2.default;
   }
 });
 Object.defineProperty(exports, "createProvider", {
   enumerable: true,
   get: function get() {
-    return _Provider["default"];
+    return _Provider.default;
   }
 });
 Object.defineProperty(exports, "createBinderProvider", {
   enumerable: true,
   get: function get() {
-    return _BinderProvider["default"];
+    return _BinderProvider.default;
   }
 });
 Object.defineProperty(exports, "startServices", {
@@ -115,3 +115,4 @@ var _BinderProvider = _interopRequireDefault(require("./BinderProvider.js"));
 var _serviceUtils = require("./serviceUtils.js");
 
 var _serviceDecorators = require("./serviceDecorators.js");
+//# sourceMappingURL=index.js.map

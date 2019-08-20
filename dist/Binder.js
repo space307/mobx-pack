@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = void 0;
+exports.default = void 0;
 
 var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
@@ -60,12 +60,12 @@ function () {
     var _this$depsList,
         _this = this;
 
-    (0, _classCallCheck2["default"])(this, Binder);
+    (0, _classCallCheck2.default)(this, Binder);
     this.services = {};
-    this.depsList = (_this$depsList = {}, (0, _defineProperty2["default"])(_this$depsList, CALLBACK_NAME.BIND, {}), (0, _defineProperty2["default"])(_this$depsList, CALLBACK_NAME.UNBIND, {}), _this$depsList);
+    this.depsList = (_this$depsList = {}, (0, _defineProperty2.default)(_this$depsList, CALLBACK_NAME.BIND, {}), (0, _defineProperty2.default)(_this$depsList, CALLBACK_NAME.UNBIND, {}), _this$depsList);
     this.pendingStartResolvers = {};
     this.parentBinder = void 0;
-    this.emitter = new _EventEmitter["default"]();
+    this.emitter = new _EventEmitter.default();
     this.allowParentOperation = false;
 
     if (parentBinder instanceof Binder) {
@@ -92,14 +92,14 @@ function () {
     }
   }
 
-  (0, _createClass2["default"])(Binder, [{
+  (0, _createClass2.default)(Binder, [{
     key: "createService",
     value: function createService(Service, protoAttrs) {
       if (protoAttrs && !Array.isArray(protoAttrs)) {
         throw new Error("Wrong ServiceParams! (".concat(Service.name, ")"));
       }
 
-      return protoAttrs ? (0, _construct2["default"])(Service, (0, _toConsumableArray2["default"])(protoAttrs)) : new Service();
+      return protoAttrs ? (0, _construct2.default)(Service, (0, _toConsumableArray2.default)(protoAttrs)) : new Service();
     }
     /**
      * start and bind service
@@ -167,7 +167,7 @@ function () {
               _this2.bind(service, binderConfig);
 
               resolve(resolveData);
-            })["catch"](function (err) {
+            }).catch(function (err) {
               reject(err);
             });
           } else if (onStartResult === true) {
@@ -177,7 +177,7 @@ function () {
           } else {
             reject(new Error("Service ".concat(bindAs, " onStart return \"false\"")));
           }
-        })["finally"](function () {
+        }).finally(function () {
           _this2.setPendingStartResolver(bindAs, null);
         });
         this.setPendingStartResolver(bindAs, result);
@@ -232,7 +232,7 @@ function () {
         throw new Error("Service \"".concat(bindAs, "\" was already bind."));
       }
 
-      if ((0, _typeof2["default"])(service) !== 'object') {
+      if ((0, _typeof2.default)(service) !== 'object') {
         throw new Error("Service bind param is not an object (\"".concat(bindAs, "\")."));
       }
 
@@ -784,7 +784,7 @@ function () {
     value: function clear() {
       var _this$depsList2;
 
-      this.depsList = (_this$depsList2 = {}, (0, _defineProperty2["default"])(_this$depsList2, CALLBACK_NAME.BIND, {}), (0, _defineProperty2["default"])(_this$depsList2, CALLBACK_NAME.UNBIND, {}), _this$depsList2);
+      this.depsList = (_this$depsList2 = {}, (0, _defineProperty2.default)(_this$depsList2, CALLBACK_NAME.BIND, {}), (0, _defineProperty2.default)(_this$depsList2, CALLBACK_NAME.UNBIND, {}), _this$depsList2);
       this.pendingStartResolvers = {};
       this.emitter.clear();
     }
@@ -987,4 +987,5 @@ function () {
 }();
 
 var _default = Binder;
-exports["default"] = _default;
+exports.default = _default;
+//# sourceMappingURL=Binder.js.map

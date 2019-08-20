@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = createProvider;
+exports.default = createProvider;
 
 var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
@@ -90,13 +90,13 @@ function createProvider(BinderContext, ServiceContext) {
     return (0, _mobxReact.observer)((_temp = _class =
     /*#__PURE__*/
     function (_React$Component) {
-      (0, _inherits2["default"])(ProviderComponent, _React$Component);
+      (0, _inherits2.default)(ProviderComponent, _React$Component);
 
       function ProviderComponent(props, context) {
         var _this;
 
-        (0, _classCallCheck2["default"])(this, ProviderComponent);
-        _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(ProviderComponent).call(this));
+        (0, _classCallCheck2.default)(this, ProviderComponent);
+        _this = (0, _possibleConstructorReturn2.default)(this, (0, _getPrototypeOf2.default)(ProviderComponent).call(this));
         _this.state = {
           error: null,
           services: null
@@ -104,11 +104,11 @@ function createProvider(BinderContext, ServiceContext) {
         _this.options = void 0;
         _this.serviceToStop = [];
 
-        if (!Component || typeof Component !== 'function') {
+        if (!context) {
+          _this.state.error = "Binder context not found in Provider \n            (component: ".concat(getComponentName(Component), ")");
+        } else if (!Component || typeof Component !== 'function') {
           _this.state.error = 'Provider wait for "React.Component" in attributes';
-        }
-
-        if (options && options.helper && typeof options.helper !== 'function') {
+        } else if (options && options.helper && typeof options.helper !== 'function') {
           _this.state.error = "Helper put to Provider \n            (component: ".concat(getComponentName(Component), ") should be a function");
         }
 
@@ -118,7 +118,7 @@ function createProvider(BinderContext, ServiceContext) {
           var stop = options.stop,
               helper = options.helper,
               stub = options.stub;
-          _this.options = (0, _objectSpread2["default"])({}, defaultOptions, {
+          _this.options = (0, _objectSpread2.default)({}, defaultOptions, {
             stop: stop,
             helper: helper,
             stub: stub
@@ -126,7 +126,7 @@ function createProvider(BinderContext, ServiceContext) {
             services: _services
           });
         } else {
-          _this.options = (0, _objectSpread2["default"])({}, defaultOptions);
+          _this.options = (0, _objectSpread2.default)({}, defaultOptions);
         }
 
         if (_this.options.services) {
@@ -151,7 +151,7 @@ function createProvider(BinderContext, ServiceContext) {
        */
 
 
-      (0, _createClass2["default"])(ProviderComponent, [{
+      (0, _createClass2.default)(ProviderComponent, [{
         key: "setServices",
         value: function setServices(list) {
           this.setState({
@@ -229,7 +229,7 @@ function createProvider(BinderContext, ServiceContext) {
       }, {
         key: "composeProps",
         value: function composeProps(services, props) {
-          if (services && (0, _typeof2["default"])(this.options.helper)) {
+          if (services && (0, _typeof2.default)(this.options.helper)) {
             return this.options.helper ? this.options.helper(services, props) : props;
           }
 
@@ -249,15 +249,16 @@ function createProvider(BinderContext, ServiceContext) {
           var Stub = this.options.stub;
 
           if (serviceOk && helperOk) {
-            return hasService ? _react["default"].createElement(ServiceContext.Provider, {
+            return hasService ? _react.default.createElement(ServiceContext.Provider, {
               value: this.state.services
-            }, _react["default"].createElement(Component, props)) : _react["default"].createElement(Component, props);
+            }, _react.default.createElement(Component, props)) : _react.default.createElement(Component, props);
           }
 
-          return typeof Stub === 'function' ? _react["default"].createElement(Stub, null) : null;
+          return typeof Stub === 'function' ? _react.default.createElement(Stub, null) : null;
         }
       }]);
       return ProviderComponent;
-    }(_react["default"].Component), _class.contextType = BinderContext, _temp));
+    }(_react.default.Component), _class.contextType = BinderContext, _temp));
   };
 }
+//# sourceMappingURL=Provider.js.map

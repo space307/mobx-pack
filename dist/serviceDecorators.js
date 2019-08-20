@@ -53,9 +53,9 @@ function putServiceNamesToConfig(serviceNames, service, callbackName, optionName
     });
 
     if (pushToArray) {
-      proto.binderConfig[optionName].push([].concat((0, _toConsumableArray2["default"])(serviceNames), [callbackName]));
+      proto.binderConfig[optionName].push([].concat((0, _toConsumableArray2.default)(serviceNames), [callbackName]));
     } else {
-      proto.binderConfig[optionName] = [].concat((0, _toConsumableArray2["default"])(serviceNames), [callbackName]);
+      proto.binderConfig[optionName] = [].concat((0, _toConsumableArray2.default)(serviceNames), [callbackName]);
     }
   }
 }
@@ -138,3 +138,4 @@ function onStop(service, callbackName) {
   putMethodNameToConfig(service, callbackName, 'onStop');
   return service;
 }
+//# sourceMappingURL=serviceDecorators.js.map
