@@ -1,6 +1,6 @@
 // @flow
-
-import type { BinderConfigType } from './typing/common.js';
+import { cloneDeep, last } from 'lodash';
+import type { BinderConfigType, ServiceConfigCallbackSetType } from './typing/common.js';
 
 type ServiceType = Class<*>;
 
@@ -17,7 +17,6 @@ function validateNameList(list: Array<string>): boolean {
   }, true);
 }
 
-
 function createConfig(): BinderConfigType {
   return {
     onStart: [],
@@ -28,6 +27,14 @@ function createConfig(): BinderConfigType {
   };
 }
 
+function prepareConfig(service: ServiceType): void {
+  if (!service.binderConfig) {
+    service.binderConfig = createConfig();
+  } else {
+    service.binderConfig = cloneDeep(service.binderConfig);
+  }
+}
+
 function putServiceNamesToConfig(
   serviceNames: Array<string>,
   service: ServiceType,
@@ -35,40 +42,37 @@ function putServiceNamesToConfig(
   optionName: string,
   pushToArray: boolean = true,
 ): void {
-  const proto = service.constructor;
-  if (!proto.binderConfig) {
-    proto.binderConfig = createConfig();
-  }
-
   if (serviceNames && serviceNames.length && callbackName) {
     serviceNames.forEach(
       (serviceName: string) => {
         if (!validateName(serviceName)) {
           throw new Error(`Wrong service name "${serviceName}" 
-          passed to function "${callbackName}" decorator (service:${proto.name}).`);
+          passed to function "${callbackName}" decorator (service:${service.name}).`);
         }
       },
     );
 
     if (pushToArray) {
-      proto.binderConfig[optionName].push(
-        [...serviceNames,
-          callbackName],
+      const existCallback = service.binderConfig[optionName].find(
+        (callback: ServiceConfigCallbackSetType): boolean => last(callback) === callbackName,
       );
+
+      if (existCallback === undefined) {
+        service.binderConfig[optionName].push(
+          [...serviceNames, callbackName],
+        );
+      } else {
+        existCallback.splice(0, existCallback.length, ...serviceNames, callbackName);
+      }
     } else {
-      proto.binderConfig[optionName] = [...serviceNames,
-        callbackName];
+      service.binderConfig[optionName] = [...serviceNames, callbackName];
     }
   }
 }
 
 
 function putMethodNameToConfig(service: ServiceType, callbackName: string, optionName: string): void {
-  const proto = service.constructor;
-  if (!proto.binderConfig) {
-    proto.binderConfig = createConfig();
-  }
-  proto.binderConfig[optionName] = callbackName;
+  service.binderConfig[optionName] = callbackName;
 }
 
 
@@ -81,9 +85,8 @@ export function bindAs(serviceName: string): (service: ServiceType) => ServiceTy
       throw new Error(`Wrong name "${serviceName}" passed to bindAs decorator (service:${service.name}).`);
     }
 
-    if (!service.binderConfig) {
-      service.binderConfig = createConfig();
-    }
+    prepareConfig(service);
+
     service.binderConfig.bindAs = serviceName;
     return service;
   };
@@ -98,7 +101,10 @@ export function onBind(
   }
 
   return (service: ServiceType, callbackName: string): ServiceType => {
-    putServiceNamesToConfig(serviceNames, service, callbackName, 'onBind');
+    const proto = service.constructor;
+    prepareConfig(proto);
+
+    putServiceNamesToConfig(serviceNames, proto, callbackName, 'onBind');
     return service;
   };
 }
@@ -110,7 +116,10 @@ export function onUnbind(
     throw new Error(`Wrong attributes passed to onUnbind decorator (${serviceNames.join(',')}).`);
   }
   return (service: ServiceType, callbackName: string): ServiceType => {
-    putServiceNamesToConfig(serviceNames, service, callbackName, 'onUnbind');
+    const proto = service.constructor;
+    prepareConfig(proto);
+
+    putServiceNamesToConfig(serviceNames, proto, callbackName, 'onUnbind');
     return service;
   };
 }
@@ -123,13 +132,19 @@ export function onStart(
     throw new Error(`Wrong attributes passed to onStart decorator (${serviceNames.join(',')}).`);
   }
   return (service: ServiceType, callbackName: string): ServiceType => {
-    putServiceNamesToConfig(serviceNames, service, callbackName, 'onStart', false);
+    const proto = service.constructor;
+    prepareConfig(proto);
+
+    putServiceNamesToConfig(serviceNames, proto, callbackName, 'onStart', false);
     return service;
   };
 }
 
 
 export function onStop(service: ServiceType, callbackName: string): ServiceType {
-  putMethodNameToConfig(service, callbackName, 'onStop');
+  const proto = service.constructor;
+  prepareConfig(proto);
+
+  putMethodNameToConfig(proto, callbackName, 'onStop');
   return service;
 }
