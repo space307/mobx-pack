@@ -1,13 +1,13 @@
 {
   "name": "mobx-pack",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Library for creating application based on Mobx",
   "main": "dist/index.js",
   "jsnext:main": "src/lib/index.js",
   "author": "Space307",
   "license": "MIT",
   "scripts": {
-    "build": "babel src/lib --out-dir dist --ignore 'src/**/__test__','src/**/typing'",
+    "build": "babel src/lib --out-dir dist --ignore 'src/**/__test__','src/**/typing' --source-maps",
     "prepublish": "npm run build",
     "test": "jest",
     "test:verbose": "jest --verbose true",

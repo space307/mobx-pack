@@ -74,3 +74,4 @@ function ServiceConnector(service, options) {
 
   return service;
 }
+//# sourceMappingURL=ServiceConnector.js.map

@@ -106,11 +106,11 @@ function createProvider(BinderContext, ServiceContext) {
         _this.options = void 0;
         _this.serviceToStop = [];
 
-        if (!(0, _reactIs.isValidElementType)(Component)) {
-          _this.state.error = 'Provider wait for React Element in attributes';
-        }
-
-        if (options && options.helper && typeof options.helper !== 'function') {
+        if (!context) {
+          _this.state.error = "Binder context not found in Provider \n            (component: ".concat(getComponentName(Component), ")");
+        } else if (!(0, _reactIs.isValidElementType)(Component)) {
+          _this.state.error = 'Provider wait for "React.Component" in attributes';
+        } else if (options && options.helper && typeof options.helper !== 'function') {
           _this.state.error = "Helper put to Provider \n            (component: ".concat(getComponentName(Component), ") should be a function");
         }
 
@@ -263,3 +263,4 @@ function createProvider(BinderContext, ServiceContext) {
     }(_react.default.Component), _class.contextType = BinderContext, _temp));
   };
 }
+//# sourceMappingURL=Provider.js.map

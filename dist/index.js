@@ -115,3 +115,4 @@ var _BinderProvider = _interopRequireDefault(require("./BinderProvider.js"));
 var _serviceUtils = require("./serviceUtils.js");
 
 var _serviceDecorators = require("./serviceDecorators.js");
+//# sourceMappingURL=index.js.map

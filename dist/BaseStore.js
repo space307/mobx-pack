@@ -425,3 +425,4 @@ function () {
   }
 })), _class);
 exports.default = BaseStore;
+//# sourceMappingURL=BaseStore.js.map
