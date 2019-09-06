@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { isValidElementType } from 'react-is';
 import { observer } from 'mobx-react';
 
 import { startServices, stopServices, getStartedServices } from './serviceUtils.js';
@@ -113,7 +114,7 @@ export default function createProvider(
           if (!context) {
             this.state.error = `Binder context not found in Provider 
             (component: ${getComponentName(Component)})`;
-          } else if (!Component || typeof Component !== 'function') {
+          } else if (!isValidElementType(Component)) {
             this.state.error = 'Provider wait for "React.Component" in attributes';
           } else if (options && options.helper && typeof options.helper !== 'function') {
             this.state.error = `Helper put to Provider 

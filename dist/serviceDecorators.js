@@ -13,6 +13,8 @@ exports.onStop = onStop;
 
 var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
 
+var _lodash = require("lodash");
+
 function validateName(name) {
   return !!(name && typeof name === 'string' && /^[A-Za-z][A-Za-z0-9_]+$/.test(name));
 }
@@ -37,37 +39,42 @@ function createConfig() {
   };
 }
 
+function prepareConfig(service) {
+  if (!service.binderConfig) {
+    service.binderConfig = createConfig();
+  } else {
+    service.binderConfig = (0, _lodash.cloneDeep)(service.binderConfig);
+  }
+}
+
 function putServiceNamesToConfig(serviceNames, service, callbackName, optionName) {
   var pushToArray = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
-  var proto = service.constructor;
-
-  if (!proto.binderConfig) {
-    proto.binderConfig = createConfig();
-  }
 
   if (serviceNames && serviceNames.length && callbackName) {
     serviceNames.forEach(function (serviceName) {
       if (!validateName(serviceName)) {
-        throw new Error("Wrong service name \"".concat(serviceName, "\" \n          passed to function \"").concat(callbackName, "\" decorator (service:").concat(proto.name, ")."));
+        throw new Error("Wrong service name \"".concat(serviceName, "\" \n          passed to function \"").concat(callbackName, "\" decorator (service:").concat(service.name, ")."));
       }
     });
 
     if (pushToArray) {
-      proto.binderConfig[optionName].push([].concat((0, _toConsumableArray2.default)(serviceNames), [callbackName]));
+      var existCallback = service.binderConfig[optionName].find(function (callback) {
+        return (0, _lodash.last)(callback) === callbackName;
+      });
+
+      if (existCallback === undefined) {
+        service.binderConfig[optionName].push([].concat((0, _toConsumableArray2.default)(serviceNames), [callbackName]));
+      } else {
+        existCallback.splice.apply(existCallback, [0, existCallback.length].concat((0, _toConsumableArray2.default)(serviceNames), [callbackName]));
+      }
     } else {
-      proto.binderConfig[optionName] = [].concat((0, _toConsumableArray2.default)(serviceNames), [callbackName]);
+      service.binderConfig[optionName] = [].concat((0, _toConsumableArray2.default)(serviceNames), [callbackName]);
     }
   }
 }
 
 function putMethodNameToConfig(service, callbackName, optionName) {
-  var proto = service.constructor;
-
-  if (!proto.binderConfig) {
-    proto.binderConfig = createConfig();
-  }
-
-  proto.binderConfig[optionName] = callbackName;
+  service.binderConfig[optionName] = callbackName;
 }
 
 function bindAs(serviceName) {
@@ -80,10 +87,7 @@ function bindAs(serviceName) {
       throw new Error("Wrong name \"".concat(serviceName, "\" passed to bindAs decorator (service:").concat(service.name, ")."));
     }
 
-    if (!service.binderConfig) {
-      service.binderConfig = createConfig();
-    }
-
+    prepareConfig(service);
     service.binderConfig.bindAs = serviceName;
     return service;
   };
@@ -99,7 +103,9 @@ function onBind() {
   }
 
   return function (service, callbackName) {
-    putServiceNamesToConfig(serviceNames, service, callbackName, 'onBind');
+    var proto = service.constructor;
+    prepareConfig(proto);
+    putServiceNamesToConfig(serviceNames, proto, callbackName, 'onBind');
     return service;
   };
 }
@@ -114,7 +120,9 @@ function onUnbind() {
   }
 
   return function (service, callbackName) {
-    putServiceNamesToConfig(serviceNames, service, callbackName, 'onUnbind');
+    var proto = service.constructor;
+    prepareConfig(proto);
+    putServiceNamesToConfig(serviceNames, proto, callbackName, 'onUnbind');
     return service;
   };
 }
@@ -129,13 +137,16 @@ function onStart() {
   }
 
   return function (service, callbackName) {
-    putServiceNamesToConfig(serviceNames, service, callbackName, 'onStart', false);
+    var proto = service.constructor;
+    prepareConfig(proto);
+    putServiceNamesToConfig(serviceNames, proto, callbackName, 'onStart', false);
     return service;
   };
 }
 
 function onStop(service, callbackName) {
-  putMethodNameToConfig(service, callbackName, 'onStop');
+  var proto = service.constructor;
+  prepareConfig(proto);
+  putMethodNameToConfig(proto, callbackName, 'onStop');
   return service;
 }
-//# sourceMappingURL=serviceDecorators.js.map

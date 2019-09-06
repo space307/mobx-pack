@@ -232,4 +232,3 @@ function ConnectorF(Component) {
 
 var _default = ConnectorF;
 exports.default = _default;
-//# sourceMappingURL=Connector.js.map

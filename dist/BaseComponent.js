@@ -45,4 +45,3 @@ BaseComponent.contextTypes = {
 };
 var _default = BaseComponent;
 exports.default = _default;
-//# sourceMappingURL=BaseComponent.js.map

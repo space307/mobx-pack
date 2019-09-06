@@ -41,4 +41,3 @@ function () {
 }();
 
 exports.default = EventEmitter;
-//# sourceMappingURL=EventEmitter.js.map
