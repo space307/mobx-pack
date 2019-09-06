@@ -28,7 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // otp demo page
 import React from 'react';
 import ReactDOM from 'react-dom';
-
 import MyApplication from 'demo/platform/otpDemo/MyApplication.jsx';
 
-ReactDOM.render(React.createElement(MyApplication), document.querySelector('#root'));
+document.addEventListener('DOMContentLoaded', () => {
+  ReactDOM.render(React.createElement(MyApplication), document.querySelector('#root'));
+});
