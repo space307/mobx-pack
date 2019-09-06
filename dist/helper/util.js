@@ -13,3 +13,4 @@ function getUid() {
 function protoName(object) {
   return Object.getPrototypeOf(object).constructor.name;
 }
+//# sourceMappingURL=util.js.map

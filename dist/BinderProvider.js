@@ -75,3 +75,4 @@ function createBinderProvider(BinderContext) {
     return ComponentWrapper;
   };
 }
+//# sourceMappingURL=BinderProvider.js.map

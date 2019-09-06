@@ -150,3 +150,4 @@ function onStop(service, callbackName) {
   putMethodNameToConfig(proto, callbackName, 'onStop');
   return service;
 }
+//# sourceMappingURL=serviceDecorators.js.map
