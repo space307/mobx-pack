@@ -232,15 +232,19 @@ class Binder implements BinderInterface {
 
     /* -- Legacy -- */
 
-    if (this.isDebug(bindAs)) {
-      this.showMessage(`"${bindAs}" bind.`);
-    }
-    each(this.services, (item) => {
-      if (item) {
-        this.processService(item, this.getServiceSettings(bindAs));
-        this.processService(this.getServiceSettings(bindAs), item);
+    // if legacy service try to bind from this.parentBinder legacy method processService should not be called
+    if (!this.parentBinder) {
+      if (this.isDebug(bindAs)) {
+        this.showMessage(`"${bindAs}" bind.`);
       }
-    });
+      each(this.services, (item) => {
+        if (item) {
+          this.processService(item, this.getServiceSettings(bindAs));
+          this.processService(this.getServiceSettings(bindAs), item);
+        }
+      });
+    }
+
     /* --/ Legacy -- */
 
     // save OnBind dependencies of the current service
