@@ -238,20 +238,24 @@ function () {
 
       this.addService(service, options);
       /* -- Legacy -- */
+      // if legacy service try to bind from this.parentBinder legacy method processService should not be called
 
-      if (this.isDebug(bindAs)) {
-        this.showMessage("\"".concat(bindAs, "\" bind."));
-      }
-
-      (0, _lodash.each)(this.services, function (item) {
-        if (item) {
-          _this3.processService(item, _this3.getServiceSettings(bindAs));
-
-          _this3.processService(_this3.getServiceSettings(bindAs), item);
+      if (!this.parentBinder) {
+        if (this.isDebug(bindAs)) {
+          this.showMessage("\"".concat(bindAs, "\" bind."));
         }
-      });
+
+        (0, _lodash.each)(this.services, function (item) {
+          if (item) {
+            _this3.processService(item, _this3.getServiceSettings(bindAs));
+
+            _this3.processService(_this3.getServiceSettings(bindAs), item);
+          }
+        });
+      }
       /* --/ Legacy -- */
       // save OnBind dependencies of the current service
+
 
       this.saveDeps(bindAs, CALLBACK_NAME.BIND); // save OnUnbind dependencies of the current service
 
