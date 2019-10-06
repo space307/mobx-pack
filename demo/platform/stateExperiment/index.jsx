@@ -1,26 +1,53 @@
 // @flow
 /* eslint-disable react/no-multi-comp */
 import React from 'react';
+import { Observer } from 'mobx-react';
 import StateContext from './StateContext.js';
-import state from './state.js';
-import { AssetService, AssetMD, AccountService } from './services.js';
+import AppState from './state.js';
+import { AssetService, Middleware, AccountService } from './services.js';
+import type { IState } from './types.js';
 
-const AccountSwitcher = () => (<div>
-  AccountSwitcher
+const AccountSwitcher = ({ items, select }) => (<div>
+  {items.map(item => (<button key={item.id} onClick={() => { select(item.id); }}>account - {item.id}</button>))}
 </div>);
 
-const AssetsSwitcher = () => (<div>
-  AssetsSwitcher
+
+const AccountSwitcherContainer = () => (<StateContext.Consumer>{(state: IState) =>
+  (<Observer>{() =>
+    (<AccountSwitcher
+      items={state.account.collection}
+      select={(id) => {
+        state.account.select(id);
+      }}
+    />)
+  }
+  </Observer>)
+}</StateContext.Consumer>);
+
+const AssetsSwitcher = ({ items, select }) => (<div>
+  {items.map(item => (<button key={item.id} onClick={() => { select(item.id); }}>{item.id}</button>))}
 </div>);
+
+const AssetsSwitcherContainer = () => (<StateContext.Consumer>{(state: IState) =>
+  (<Observer>{() =>
+    (<AssetsSwitcher
+      items={state.asset.collection}
+      select={(id) => {
+        state.asset.select(id);
+      }}
+    />)
+  }
+  </Observer>)
+}</StateContext.Consumer>);
 
 
 class Layout extends React.Component<*> {
   render() {
     return (<div>
       <h3>AccountSwitcher</h3>
-      <AccountSwitcher />
+      <AccountSwitcherContainer />
       <h3>Assets</h3>
-      <AssetsSwitcher />
+      <AssetsSwitcherContainer />
     </div>);
   }
 }
@@ -69,9 +96,9 @@ class Container extends React.Component<{services: Array<Class<*>>, children: Re
 }
 
 
-export default () => (<StateContext.Provider value={state}>
+export default () => (<StateContext.Provider value={AppState}>
 
-  <Container services={[AssetService, AssetMD, AccountService]} >
+  <Container services={[AssetService, Middleware, AccountService]} >
     <Layout />
   </Container>
 

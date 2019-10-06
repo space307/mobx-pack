@@ -56,36 +56,6 @@ export class AssetService implements IAssetService {
   }
 }
 
-export class AssetMD {
-  reactions = [];
-
-  onStart(state: IState): void {
-    this.reactions.push(reaction(
-      () => !!(state.account && state.asset),
-      (ready) => {
-        if (ready) {
-          this.initReaction(state);
-        }
-      }, { fireImmediately: true },
-    ),
-    );
-  }
-
-  initReaction(state: IState): void {
-    this.reactions.push(
-      reaction(
-        () => state.account && state.account.selected && state.account.selected.id,
-        (accountId: ?number): void => {
-          if (accountId) {
-            state.asset.fetch(accountId);
-          }
-        }, { fireImmediately: true },
-      ),
-
-    );
-  }
-}
-
 export class AccountService implements IAccountService {
   static descriptor: TServiceDescriptors = SERVICE_DESCRIPTORS.ACCOUNT;
 
@@ -115,3 +85,35 @@ export class AccountService implements IAccountService {
     this.selectedId = 2;
   }
 }
+
+
+export class Middleware {
+  reactions = [];
+
+  onStart(state: IState): void {
+    this.reactions.push(reaction(
+      () => !!(state.account && state.asset),
+      (ready) => {
+        if (ready) {
+          this.initReaction(state);
+        }
+      }, { fireImmediately: true },
+    ),
+    );
+  }
+
+  initReaction(state: IState): void {
+    this.reactions.push(
+      reaction(
+        () => state.account && state.account.selected && state.account.selected.id,
+        (accountId: ?number): void => {
+          if (accountId) {
+            state.asset.fetch(accountId);
+          }
+        }, { fireImmediately: true },
+      ),
+
+    );
+  }
+}
+
