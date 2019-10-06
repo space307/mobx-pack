@@ -29,7 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
 import React from 'react';
 import ReactDOM from 'react-dom';
 import MyApplication from 'demo/platform/otpDemo/MyApplication.jsx';
+import StateExperiment from 'demo/platform/stateExperiment/index.jsx';
 
 document.addEventListener('DOMContentLoaded', () => {
-  ReactDOM.render(React.createElement(MyApplication), document.querySelector('#root'));
+  ReactDOM.render(React.createElement(StateExperiment), document.querySelector('#root'));
 });
