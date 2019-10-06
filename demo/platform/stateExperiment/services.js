@@ -45,15 +45,8 @@ export class AssetService implements IAssetService {
     this.selectedId = id;
   }
 
-  onStart(state: IState): void {
-    state.asset = this;
-  }
-
-  onStop(state: IState): void {
-    delete state.asset;
-  }
-
   fetch(accountId: number): void {
+    console.log(['fetch']);
     setTimeout(() => {
       runInAction(() => {
         this.collection = testData.filter(item => (item.accountId === accountId));
@@ -118,8 +111,7 @@ export class AccountService implements IAccountService {
     this.selectedId = id;
   }
 
-  onStart(state: IState): void {
+  onStart(): void {
     this.selectedId = 2;
-    state.account = this;
   }
 }

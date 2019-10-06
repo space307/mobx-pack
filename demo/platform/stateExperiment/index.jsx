@@ -45,6 +45,9 @@ class Container extends React.Component<{services: Array<Class<*>>, children: Re
       if (typeof service.onStart === 'function') {
         service.onStart(context);
       }
+      if (service.constructor.descriptor) {
+        context[service.constructor.descriptor] = service;
+      }
     });
   }
 
@@ -52,6 +55,9 @@ class Container extends React.Component<{services: Array<Class<*>>, children: Re
     this.services.forEach((service) => {
       if (typeof service.onStop === 'function') {
         service.onStop(this.contextState);
+      }
+      if (service.constructor.descriptor) {
+        delete this.contextState[service.constructor.descriptor];
       }
     });
   }
