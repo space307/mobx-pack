@@ -1,7 +1,7 @@
 import React, { Fragment } from 'react';
 import StateContext from './StateContext.js';
 import state from './state.js';
-import { AssetService, AssetMD } from './services.js';
+import { AssetService, AssetMD, AccountService } from './services.js';
 
 const AccountSwitcher = () => (<div>
   AccountSwitcher
@@ -67,7 +67,7 @@ class Container extends React.Component {
 
 export default () => (<StateContext.Provider value={state}>
 
-  <Container services={[AssetService, AssetMD]} >
+  <Container services={[AssetService, AssetMD, AccountService]} >
     <Layout />
   </Container>
 
