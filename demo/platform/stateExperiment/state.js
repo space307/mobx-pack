@@ -1,11 +1,13 @@
+// @flow
 import { observable } from 'mobx';
+import type { IAssetService, IAccountService, IState } from './types.js';
 
-class State {
+class State implements IState {
   @observable.ref
-  asset = null;
+  asset: IAssetService;
   @observable.ref
-  account = null;
+  account: IAccountService;
 }
-const state = new State();
+const state: IState = new State();
 export default state;
 

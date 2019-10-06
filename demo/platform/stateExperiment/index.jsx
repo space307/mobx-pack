@@ -1,4 +1,6 @@
-import React, { Fragment } from 'react';
+// @flow
+/* eslint-disable react/no-multi-comp */
+import React from 'react';
 import StateContext from './StateContext.js';
 import state from './state.js';
 import { AssetService, AssetMD, AccountService } from './services.js';
@@ -12,7 +14,7 @@ const AssetsSwitcher = () => (<div>
 </div>);
 
 
-class Layout extends React.Component {
+class Layout extends React.Component<*> {
   render() {
     return (<div>
       <h3>AccountSwitcher</h3>
@@ -24,11 +26,7 @@ class Layout extends React.Component {
 }
 
 
-class Container extends React.Component {
-  state = {
-    ready: false,
-  };
-
+class Container extends React.Component<{services: Array<Class<*>>, children: React$Node}> {
   services = [];
 
   static contextType = StateContext;

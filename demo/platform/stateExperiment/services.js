@@ -1,6 +1,10 @@
+// @flow
 import { observable, runInAction, reaction, computed } from 'mobx';
+import { SERVICE_DESCRIPTORS, type TServiceDescriptors } from './constants.js';
+import type { TAsset, TAccount, IAssetService, IAccountService, IState } from './types.js';
 
-const testData = [
+
+const testData: Array<TAsset> = [
   {
     id: 'EURUSD',
     accountId: 1,
@@ -23,35 +27,37 @@ const testData = [
   },
 ];
 
-export class AssetService {
+export class AssetService implements IAssetService {
+  static descriptor: TServiceDescriptors = SERVICE_DESCRIPTORS.ASSET;
+
   @observable
-  assets = [];
+  collection: Array<TAsset> = [];
   @observable
-  selectedId;
+  selectedId: string;
 
   @computed
-  get selected() {
-    return this.assets.find(item => item.id === this.selectedId);
+  get selected():?TAsset {
+    return this.collection.find(item => item.id === this.selectedId);
   }
 
 
-  select(id) {
+  select(id: string): void {
     this.selectedId = id;
   }
 
-  onStart(state) {
+  onStart(state: IState): void {
     state.asset = this;
   }
 
-  onStop(state) {
-    state.asset = null;
+  onStop(state: IState): void {
+    delete state.asset;
   }
 
-  fetch(accountId) {
+  fetch(accountId: number): void {
     setTimeout(() => {
       runInAction(() => {
-        this.assets = testData.filter(item => (item.accountId === accountId));
-        this.select(this.assets[0].id);
+        this.collection = testData.filter(item => (item.accountId === accountId));
+        this.select(this.collection[0].id);
       });
     }, 500);
   }
@@ -60,7 +66,7 @@ export class AssetService {
 export class AssetMD {
   reactions = [];
 
-  onStart(state) {
+  onStart(state: IState): void {
     this.reactions.push(reaction(
       () => !!(state.account && state.asset),
       (ready) => {
@@ -72,13 +78,14 @@ export class AssetMD {
     );
   }
 
-  initReaction(state) {
+  initReaction(state: IState): void {
     this.reactions.push(
       reaction(
-        () => state.account.selected.id,
-        (accountId) => {
-          console.log([state.asset]);
-          state.asset.fetch(accountId);
+        () => state.account && state.account.selected && state.account.selected.id,
+        (accountId: ?number): void => {
+          if (accountId) {
+            state.asset.fetch(accountId);
+          }
         }, { fireImmediately: true },
       ),
 
@@ -86,9 +93,11 @@ export class AssetMD {
   }
 }
 
-export class AccountService {
+export class AccountService implements IAccountService {
+  static descriptor: TServiceDescriptors = SERVICE_DESCRIPTORS.ACCOUNT;
+
   @observable
-  accounts = [{
+  collection: Array<TAccount> = [{
     id: 1,
     sum: 30,
   },
@@ -97,19 +106,19 @@ export class AccountService {
     sum: 500,
   }];
   @observable
-  selectedId;
+  selectedId: number;
 
   @computed
-  get selected() {
-    return this.accounts.find(item => item.id === this.selectedId);
+  get selected(): ?TAccount {
+    return this.collection.find(item => item.id === this.selectedId);
   }
 
 
-  select(id) {
+  select(id: number): void {
     this.selectedId = id;
   }
 
-  onStart(state) {
+  onStart(state: IState): void {
     this.selectedId = 2;
     state.account = this;
   }
