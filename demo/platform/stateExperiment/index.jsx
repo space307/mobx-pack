@@ -33,8 +33,12 @@ class Container extends React.Component {
 
   static contextType = StateContext;
 
+  contextState;
+
   constructor(props, context) {
-    super();
+    super(props, context);
+
+    this.contextState = context;
 
     props.services.forEach((Service) => {
       const service = new Service();
@@ -47,20 +51,16 @@ class Container extends React.Component {
   }
 
   componentWillUnmount(): void {
-    this.props.services.forEach((Service) => {
-      const service = new Service();
-
-      this.services.push(service);
+    this.services.forEach((service) => {
       if (typeof service.onStop === 'function') {
-        // service.onStop(context);
+        service.onStop(this.contextState);
       }
     });
   }
 
 
   render() {
-    return <Fragment>{this.props.children} </Fragment>;
-    // return <Fragment>{this.state.ready ? this.props.children : null} </Fragment>;
+    return this.props.children;
   }
 }
 

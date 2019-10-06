@@ -43,6 +43,10 @@ export class AssetService {
     state.asset = this;
   }
 
+  onStop(state) {
+    state.asset = null;
+  }
+
   fetch(accountId) {
     setTimeout(() => {
       runInAction(() => {
