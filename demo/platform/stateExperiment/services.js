@@ -22,6 +22,7 @@ const testData = [
     locked: false,
   },
 ];
+
 export class AssetService {
   @observable
   assets = [];
@@ -31,6 +32,10 @@ export class AssetService {
 
   select(id) {
     this.selected = id;
+  }
+
+  onStart(state){
+    state.assets = this;
   }
 
   fetch(accountId) {
@@ -45,15 +50,15 @@ export class AssetService {
 export class AssetMD {
   reactions = [];
 
-
   onStart(state) {
+
     this.reactions.push(reaction(
-      () => this.state.account && this.state.assets,
+      () => state.account && state.assets,
       (ready) => {
         if (ready) {
           this.initReaction(state);
         }
-      },
+      }, { fireImmediately: true },
     ),
     );
   }
