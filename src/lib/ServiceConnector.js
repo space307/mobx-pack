@@ -31,7 +31,7 @@ export default function ServiceConnector(service: *, options: ServiceConnectorOp
           onStart = service[onStart];
         }
 
-        if (typeof onStart === 'function') {
+        if (typeof onStart === 'function' && !service.__serviceOptions.started) {
           const onStartResult = onStart.call(service, options.initialState);
 
           if (onStartResult instanceof Promise) {

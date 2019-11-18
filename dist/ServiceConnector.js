@@ -34,7 +34,7 @@ function ServiceConnector(service, options) {
           onStart = service[onStart];
         }
 
-        if (typeof onStart === 'function') {
+        if (typeof onStart === 'function' && !service.__serviceOptions.started) {
           var onStartResult = onStart.call(service, options.initialState);
 
           if (onStartResult instanceof Promise) {

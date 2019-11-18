@@ -41,7 +41,7 @@ declare export function createBinderProvider(BinderContext: React$Context<Global
 
 declare export function createProvider(
   BinderContext: React$Context<GlobalContextType>,
-  ServiceContext: React$Context<?ServicesHashType>): ProviderType
+  ServiceContext: React$Context<ServicesHashType>): ProviderType
 
 declare export function ServiceConnector(service: *, options: ServiceConnectorOptionsTypes): *;
 
