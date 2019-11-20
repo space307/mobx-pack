@@ -85,10 +85,13 @@ function () {
     }
   }, {
     key: "startDo",
-    value: function startDo() {
+    value: function startDo(initiatorId) {
       var _this2 = this;
 
-      var initiatorId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'unknown';
+      if (!initiatorId) {
+        initiatorId = 'unknown';
+      }
+
       var starting = this.alreadyStarting;
       this.alreadyStarting = true;
       return starting ? new Promise(function (resolve) {
@@ -97,9 +100,7 @@ function () {
         _this2.startOk(resolve);
       }) : new Promise(function (resolve, reject) {
         // eslint-disable-line
-        if (!initiatorId) {
-          reject("Start service \"".concat((0, _util.protoName)(_this2), "\" error. No initiator id."));
-        } else if (_this2.serviceStatus !== STATUS_SERVICE_SLEEP && _this2.serviceStatus !== STATUS_SERVICE_STOPPED) {
+        if (_this2.serviceStatus !== STATUS_SERVICE_SLEEP && _this2.serviceStatus !== STATUS_SERVICE_STOPPED) {
           reject("Start service \"".concat((0, _util.protoName)(_this2), "\" error. \n                Wrong status \"").concat(_this2.serviceStatus, "\". Initiator - \"").concat(initiatorId, "\""));
         } else {
           // auto bind

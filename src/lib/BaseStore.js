@@ -64,7 +64,10 @@ export default class BaseStore {
       this.startDo(initiatorId, this.serviceStarter);
   }
 
-  startDo(initiatorId = 'unknown') {
+  startDo(initiatorId) {
+    if (!initiatorId) {
+      initiatorId = 'unknown';
+    }
     const starting = this.alreadyStarting;
 
     this.alreadyStarting = true;
@@ -76,9 +79,7 @@ export default class BaseStore {
       })
       :
       new Promise((resolve, reject) => { // eslint-disable-line
-        if (!initiatorId) {
-          reject(`Start service "${protoName(this)}" error. No initiator id.`);
-        } else if (this.serviceStatus !== STATUS_SERVICE_SLEEP &&
+        if (this.serviceStatus !== STATUS_SERVICE_SLEEP &&
           this.serviceStatus !== STATUS_SERVICE_STOPPED) {
           reject(`Start service "${protoName(this)}" error. 
                 Wrong status "${this.serviceStatus}". Initiator - "${initiatorId}"`);
