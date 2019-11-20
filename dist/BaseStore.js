@@ -85,9 +85,10 @@ function () {
     }
   }, {
     key: "startDo",
-    value: function startDo(initiatorId) {
+    value: function startDo() {
       var _this2 = this;
 
+      var initiatorId = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'unknown';
       var starting = this.alreadyStarting;
       this.alreadyStarting = true;
       return starting ? new Promise(function (resolve) {
