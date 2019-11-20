@@ -64,7 +64,7 @@ export default class BaseStore {
       this.startDo(initiatorId, this.serviceStarter);
   }
 
-  startDo(initiatorId) {
+  startDo(initiatorId = 'unknown') {
     const starting = this.alreadyStarting;
 
     this.alreadyStarting = true;
