@@ -793,8 +793,8 @@ function () {
       this.emitter.removeAllListeners();
 
       if (this.parentBinder) {
-        this.parentBinder.emitter.removeListener(CALLBACK_NAME.BIND, this.parentBinderBindListener);
-        this.parentBinder.emitter.removeListener(CALLBACK_NAME.UNBIND, this.parentBinderUnbindListener);
+        this.parentBinder.emitter.removeListener(EMITTER_EVENT.BIND, this.parentBinderBindListener);
+        this.parentBinder.emitter.removeListener(EMITTER_EVENT.UNBIND, this.parentBinderUnbindListener);
       }
     }
     /**
