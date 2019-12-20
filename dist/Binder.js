@@ -794,7 +794,7 @@ function () {
 
       if (this.parentBinder) {
         this.parentBinder.emitter.removeListener(CALLBACK_NAME.BIND, this.parentBinderBindListener);
-        this.parentBinder.emitter.removeListener(CALLBACK_NAME.BIND, this.parentBinderUnbindListener);
+        this.parentBinder.emitter.removeListener(CALLBACK_NAME.UNBIND, this.parentBinderUnbindListener);
       }
     }
     /**
