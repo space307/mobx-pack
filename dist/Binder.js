@@ -68,27 +68,31 @@ function () {
     this.emitter = new _EventEmitter.default();
     this.allowParentOperation = false;
 
+    this.parentBinderBindListener = function (_ref) {
+      var service = _ref.service,
+          options = _ref.options;
+
+      _this.bind(service, options);
+    };
+
+    this.parentBinderUnbindListener = function (bindAs) {
+      _this.allowParentOperation = true;
+
+      _this.unbind(bindAs);
+
+      _this.allowParentOperation = false;
+    };
+
     if (parentBinder instanceof Binder) {
       this.parentBinder = parentBinder;
-      (0, _lodash.each)(parentBinder.services, function (_ref) {
-        var service = _ref.service,
-            options = _ref.options;
-
-        _this.addService(service, options);
-      });
-      parentBinder.emitter.subscribe(EMITTER_EVENT.BIND, function (_ref2) {
+      (0, _lodash.each)(parentBinder.services, function (_ref2) {
         var service = _ref2.service,
             options = _ref2.options;
 
-        _this.bind(service, options);
+        _this.addService(service, options);
       });
-      parentBinder.emitter.subscribe(EMITTER_EVENT.UNBIND, function (bindAs) {
-        _this.allowParentOperation = true;
-
-        _this.unbind(bindAs);
-
-        _this.allowParentOperation = false;
-      });
+      parentBinder.emitter.subscribe(EMITTER_EVENT.BIND, this.parentBinderBindListener);
+      parentBinder.emitter.subscribe(EMITTER_EVENT.UNBIND, this.parentBinderUnbindListener);
     }
   }
 
@@ -786,7 +790,12 @@ function () {
 
       this.depsList = (_this$depsList2 = {}, (0, _defineProperty2.default)(_this$depsList2, CALLBACK_NAME.BIND, {}), (0, _defineProperty2.default)(_this$depsList2, CALLBACK_NAME.UNBIND, {}), _this$depsList2);
       this.pendingStartResolvers = {};
-      this.emitter.clear();
+      this.emitter.removeAllListeners();
+
+      if (this.parentBinder) {
+        this.parentBinder.emitter.removeListener(CALLBACK_NAME.BIND, this.parentBinderBindListener);
+        this.parentBinder.emitter.removeListener(CALLBACK_NAME.BIND, this.parentBinderUnbindListener);
+      }
     }
     /**
      * clear all binder data

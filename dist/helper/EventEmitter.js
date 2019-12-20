@@ -32,9 +32,14 @@ function () {
       this.emitter.on(eventType, cb);
     }
   }, {
-    key: "clear",
-    value: function clear() {
+    key: "removeAllListeners",
+    value: function removeAllListeners() {
       this.emitter.removeAllListeners();
+    }
+  }, {
+    key: "removeListener",
+    value: function removeListener(eventName, listener) {
+      this.emitter.removeListener(eventName, listener);
     }
   }]);
   return EventEmitter;
