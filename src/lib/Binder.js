@@ -72,6 +72,15 @@ class Binder implements BinderInterface {
 
   allowParentOperation: boolean = false;
 
+  parentBinderBindListener = ({ service, options }: { service: *, options: BinderConfigType }): void => {
+    this.bind(service, options);
+  };
+  parentBinderUnbindListener = (bindAs: ServiceConfigBindAsType): void => {
+    this.allowParentOperation = true;
+    this.unbind(bindAs);
+    this.allowParentOperation = false;
+  };
+
   constructor(parentBinder: BinderInterface): void {
     if (parentBinder instanceof Binder) {
       this.parentBinder = parentBinder;
@@ -79,15 +88,9 @@ class Binder implements BinderInterface {
         this.addService(service, options);
       });
 
-      parentBinder.emitter.subscribe(EMITTER_EVENT.BIND, ({ service, options }): void => {
-        this.bind(service, options);
-      });
+      parentBinder.emitter.subscribe(EMITTER_EVENT.BIND, this.parentBinderBindListener);
 
-      parentBinder.emitter.subscribe(EMITTER_EVENT.UNBIND, (bindAs: ServiceConfigBindAsType): void => {
-        this.allowParentOperation = true;
-        this.unbind(bindAs);
-        this.allowParentOperation = false;
-      });
+      parentBinder.emitter.subscribe(EMITTER_EVENT.UNBIND, this.parentBinderUnbindListener);
     }
   }
 
@@ -719,7 +722,11 @@ class Binder implements BinderInterface {
     };
 
     this.pendingStartResolvers = {};
-    this.emitter.clear();
+    this.emitter.removeAllListeners();
+    if (this.parentBinder) {
+      this.parentBinder.emitter.removeListener(CALLBACK_NAME.BIND, this.parentBinderBindListener);
+      this.parentBinder.emitter.removeListener(CALLBACK_NAME.BIND, this.parentBinderUnbindListener);
+    }
   }
   /**
    * clear all binder data

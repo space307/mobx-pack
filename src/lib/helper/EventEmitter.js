@@ -13,7 +13,10 @@ export default class EventEmitter {
     this.emitter.on(eventType, cb);
   }
 
-  clear() {
+  removeAllListeners() {
     this.emitter.removeAllListeners();
+  }
+  removeListener(eventName: string, listener: ()=>void) {
+    this.emitter.removeListener(eventName, listener);
   }
 }
