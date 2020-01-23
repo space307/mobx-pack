@@ -304,14 +304,10 @@ describe('Binder test', () => {
     const serviceName = 'test';
 
     @bindAsDecor(serviceName)
-    class ServiceProto {
-      test= 'hello1';
-    }
+    class ServiceProto {}
 
     @bindAsDecor(serviceName)
-    class ServiceProto2 {
-      test= 'hello2';
-    }
+    class ServiceProto2 {}
 
     const config = getConfig(ServiceProto);
     config.factory = () => new ServiceProto2();
