@@ -8,6 +8,7 @@ import { isValidElementType } from 'react-is';
 import { observer } from 'mobx-react';
 
 import { startServices, stopServices, getStartedServices } from './serviceUtils.js';
+import { isClass } from './helper/util.js';
 import type { GlobalContextType, ServiceStartConfigType, StartServiceReturnType } from './typing/common.js';
 
 export type ServicesHashType = {[key:string]:*};
@@ -45,13 +46,18 @@ function convertToServiceStartConfig(ServiceProtoList: Array<ServiceItemType>): 
     }
 
     const proto = Array.isArray(ServiceProto) && ServiceProto.length ? ServiceProto[0] : ServiceProto;
-    const protoAttrs = Array.isArray(ServiceProto) ? ServiceProto[1] : undefined;
+    const protoAttrs = Array.isArray(ServiceProto) && Array.isArray(ServiceProto[1]) ? ServiceProto[1] : undefined;
+    const factory = Array.isArray(ServiceProto) &&
+    typeof ServiceProto[1] === 'function' &&
+    !isClass(ServiceProto[1]) ? ServiceProto[1] : undefined;
+
 
     if (typeof proto !== 'function') {
       throw Error('Object passed as ServiceItem to Provider is not a constructor');
     }
 
     return {
+      factory,
       proto,
       protoAttrs,
       binderConfig: proto.binderConfig,
@@ -112,12 +118,12 @@ export default function createProvider(
           super();
 
           if (!context) {
-            this.state.error = `Binder context not found in Provider 
+            this.state.error = `Binder context not found in Provider
             (component: ${getComponentName(Component)})`;
           } else if (!isValidElementType(Component)) {
             this.state.error = 'Provider wait for "React.Component" in attributes';
           } else if (options && options.helper && typeof options.helper !== 'function') {
-            this.state.error = `Helper put to Provider 
+            this.state.error = `Helper put to Provider
             (component: ${getComponentName(Component)}) should be a function`;
           }
 

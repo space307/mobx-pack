@@ -56,7 +56,7 @@ const CarContainer = Provider(
         time: timeService.time,
       };
     },
-    services: props => [[CarStore, [props.modelName]], TimeService],
+    services: props => [[CarStore, () => new CarStore(props.modelName)], TimeService],
     stop: true,
   },
 );
@@ -115,7 +115,7 @@ const GarageContainer = Provider(
         counter: garageStore.counter,
       };
     },
-    services: [GarageStore],
+    services: [[GarageStore, () => new GarageStore()]],
   });
 
 

@@ -406,7 +406,9 @@ describe('Provider test', () => {
   it('pass props through provider without helper', () => {
     const Component = () => (<div id="count" />);
     const ComponentWithProvider = Provider(Component);
-    const wrapper = mount(<ComponentWithProvider test={1} />);
+    const wrapper = mount(<BinderContext.Provider value={{}}>
+      <ComponentWithProvider test={1} />
+    </BinderContext.Provider>);
     expect(wrapper.find(Component).props().test).toBe(1);
   });
 });

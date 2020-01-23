@@ -128,7 +128,12 @@ function () {
         result = resolver;
       } else {
         result = new Promise(function (resolve, reject) {
-          var service = _this2.createService(proto, serviceStartConfig.protoAttrs);
+          console.log(['serviceStartConfig', bindAs, serviceStartConfig]);
+          var service = serviceStartConfig.factory ? serviceStartConfig.factory() : _this2.createService(proto, serviceStartConfig.protoAttrs);
+
+          if (!service || (0, _typeof2.default)(service) !== 'object') {
+            throw Error("Binder service start error. Service \"".concat(bindAs, "\" is not a valid object"));
+          }
 
           var resolveData = {
             service: service,
@@ -407,7 +412,7 @@ function () {
         var cbName = callbackSet[callbackSet.length - 1];
 
         if (serviceList && notBind.length && notBind.length < serviceList.length) {
-          _this8.showMessage("\"".concat(bindAs, ".").concat(typeof cbName === 'string' ? cbName : CALLBACK_NAME.BIND, "\" \n        not called, because \"").concat(notBind.join(','), "\" still not resolved."), MESSAGE_TYPES.WARN);
+          _this8.showMessage("\"".concat(bindAs, ".").concat(typeof cbName === 'string' ? cbName : CALLBACK_NAME.BIND, "\"\n        not called, because \"").concat(notBind.join(','), "\" still not resolved."), MESSAGE_TYPES.WARN);
         } // eslint-disable-next-line no-param-reassign
 
 
@@ -434,7 +439,7 @@ function () {
           serviceList: serviceList
         });
       } else {
-        throw new Error("".concat(callbackType, " method \n      ").concat(typeof callback === 'string' ? callback : '', " not found in \"").concat(bindAs, "\"."));
+        throw new Error("".concat(callbackType, " method\n      ").concat(typeof callback === 'string' ? callback : '', " not found in \"").concat(bindAs, "\"."));
       }
     }
     /**
@@ -518,16 +523,16 @@ function () {
 
       if (list && list.length) {
         if (!Array.isArray(list[0])) {
-          throw new Error("Service \"".concat(bindAs, "\" ").concat(callbackName, " should contains \n        Array on callback data\""));
+          throw new Error("Service \"".concat(bindAs, "\" ").concat(callbackName, " should contains\n        Array on callback data\""));
         } else {
           this.lookOverCallback(list, function (serviceName) {
             if (bindAs === serviceName) {
-              throw new Error("Service \"".concat(bindAs, "\" ").concat(callbackName, " callback contains \n          the same name as service name \"").concat(bindAs, "\""));
+              throw new Error("Service \"".concat(bindAs, "\" ").concat(callbackName, " callback contains\n          the same name as service name \"").concat(bindAs, "\""));
             }
           });
           list.forEach(function (callback) {
             if (callback.length < 2) {
-              throw new Error("Service \"".concat(bindAs, "\" ").concat(callbackName, " should contains \n        Array this at least 2 items, but ").concat(callback.length, " given [").concat(callback.join(','), "].\""));
+              throw new Error("Service \"".concat(bindAs, "\" ").concat(callbackName, " should contains\n        Array this at least 2 items, but ").concat(callback.length, " given [").concat(callback.join(','), "].\""));
             }
           });
         }
@@ -838,13 +843,13 @@ function () {
         if (importData && importData[from.bindAs]) {
           (0, _lodash.each)(importData[from.bindAs], function (toVarName, fromVarName) {
             if (!(fromVarName in from.service)) {
-              _this16.showMessage("Variable \"".concat(fromVarName, "\" required for \"").concat(to.bindAs, "\" \n            not found in \"").concat(from.bindAs, "\""), MESSAGE_TYPES.WARN);
+              _this16.showMessage("Variable \"".concat(fromVarName, "\" required for \"").concat(to.bindAs, "\"\n            not found in \"").concat(from.bindAs, "\""), MESSAGE_TYPES.WARN);
 
               return;
             }
 
             if (toVarName in to.service) {
-              _this16.showMessage("Trying create link from \"".concat(from.bindAs, ".").concat(fromVarName, "\" \n            to \"").concat(to.bindAs, ".").concat(toVarName, "\", but variable \"").concat(toVarName, "\" is already exist in \"").concat(to.bindAs, "\""), MESSAGE_TYPES.WARN);
+              _this16.showMessage("Trying create link from \"".concat(from.bindAs, ".").concat(fromVarName, "\"\n            to \"").concat(to.bindAs, ".").concat(toVarName, "\", but variable \"").concat(toVarName, "\" is already exist in \"").concat(to.bindAs, "\""), MESSAGE_TYPES.WARN);
 
               return;
             }
@@ -852,7 +857,7 @@ function () {
             Object.defineProperty(to.service, toVarName, {
               get: function get() {
                 if (_this16.isDebug(to.bindAs)) {
-                  _this16.showMessage("Variable \"".concat(fromVarName, "\" from \"").concat(from.bindAs, "\" \n              was taken by \"").concat(to.bindAs, "\" with name \"").concat(toVarName, "\""));
+                  _this16.showMessage("Variable \"".concat(fromVarName, "\" from \"").concat(from.bindAs, "\"\n              was taken by \"").concat(to.bindAs, "\" with name \"").concat(toVarName, "\""));
                 }
 
                 return from.service[fromVarName];
@@ -934,7 +939,7 @@ function () {
         exportData = s.options.exportData;
 
         if (exportData && !exportData[varName]) {
-          console.warn("Warnning! Impossible import variable \"".concat(varName, "\" of \n        \"").concat(s.bindAs, "\" for \"").concat(initiator, "\" because variable is not included to config.exportData."));
+          console.warn("Warnning! Impossible import variable \"".concat(varName, "\" of\n        \"").concat(s.bindAs, "\" for \"").concat(initiator, "\" because variable is not included to config.exportData."));
           return;
         }
 
@@ -947,7 +952,7 @@ function () {
         return raw ? val : (0, _mobx.toJS)(val); // eslint-disable-line
       }
 
-      console.warn("Warnning! importVar form \"".concat((0, _util.protoName)(this), "\" to \n    \"").concat(initiator, "\". \"").concat(serviceName, "\" service not found."));
+      console.warn("Warnning! importVar form \"".concat((0, _util.protoName)(this), "\" to\n    \"").concat(initiator, "\". \"").concat(serviceName, "\" service not found."));
       return undefined; // eslint-disable-line
     }
   }, {
@@ -975,7 +980,7 @@ function () {
           return serviceInst.api[actionName].apply(serviceInst, arg); // eslint-disable-line
         }
 
-        console.warn("CallApi warn. \"".concat(initiator, "\" calls unknown method \n      \"").concat(actionName, "\" found in service \"").concat(serviceName, "\"."));
+        console.warn("CallApi warn. \"".concat(initiator, "\" calls unknown method\n      \"").concat(actionName, "\" found in service \"").concat(serviceName, "\"."));
       } else {
         console.warn("CallApi warn. \"".concat(initiator, "\" calls method \"").concat(actionName, "\" from not bind service \"").concat(serviceName, "\"."));
       }

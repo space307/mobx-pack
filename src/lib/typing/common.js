@@ -27,6 +27,7 @@ export type ServiceClassType = Class<*> & {
 }
 
 export type ServiceStartConfigType = {
+  factory: ?()=>*,
   proto: ServiceClassType,
   protoAttrs?: Array<*>,
   binderConfig: BinderConfigType

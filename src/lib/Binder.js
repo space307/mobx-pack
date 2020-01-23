@@ -121,7 +121,14 @@ class Binder implements BinderInterface {
     } else {
       result = new Promise(
         (resolve: (data: StartServiceReturnType) => void, reject: (error: Error) => void): void => {
-          const service = this.createService(proto, serviceStartConfig.protoAttrs);
+          console.log(['serviceStartConfig', bindAs, serviceStartConfig]);
+          const service = serviceStartConfig.factory ?
+            serviceStartConfig.factory() :
+            this.createService(proto, serviceStartConfig.protoAttrs);
+          if (!service || typeof service !== 'object') {
+            throw Error(`Binder service start error. Service "${bindAs}" is not a valid object`);
+          }
+
           const resolveData = { service, started: true, serviceStartConfig };
           let onStartResult;
 
@@ -385,7 +392,7 @@ class Binder implements BinderInterface {
       const cbName = callbackSet[callbackSet.length - 1];
 
       if (serviceList && notBind.length && notBind.length < serviceList.length) {
-        this.showMessage(`"${bindAs}.${typeof cbName === 'string' ? cbName : CALLBACK_NAME.BIND}" 
+        this.showMessage(`"${bindAs}.${typeof cbName === 'string' ? cbName : CALLBACK_NAME.BIND}"
         not called, because "${notBind.join(',')}" still not resolved.`, MESSAGE_TYPES.WARN);
       }
       // eslint-disable-next-line no-param-reassign
@@ -411,7 +418,7 @@ class Binder implements BinderInterface {
       callbackSet.__locked = true;
       this.emitter.emit(EMITTER_EVENT.CALLBACK_CALLED, { bindAs, callbackType, callback, serviceList });
     } else {
-      throw new Error(`${callbackType} method 
+      throw new Error(`${callbackType} method
       ${typeof callback === 'string' ? callback : ''} not found in "${bindAs}".`);
     }
   }
@@ -485,19 +492,19 @@ class Binder implements BinderInterface {
     const list = options[callbackName];
     if (list && list.length) {
       if (!Array.isArray(list[0])) {
-        throw new Error(`Service "${bindAs}" ${callbackName} should contains 
+        throw new Error(`Service "${bindAs}" ${callbackName} should contains
         Array on callback data"`);
       } else {
         this.lookOverCallback(list, (serviceName: ServiceConfigBindAsType): void => {
           if (bindAs === serviceName) {
-            throw new Error(`Service "${bindAs}" ${callbackName} callback contains 
+            throw new Error(`Service "${bindAs}" ${callbackName} callback contains
           the same name as service name "${bindAs}"`);
           }
         });
 
         list.forEach((callback: ServiceConfigCallbackSetType) => {
           if (callback.length < 2) {
-            throw new Error(`Service "${bindAs}" ${callbackName} should contains 
+            throw new Error(`Service "${bindAs}" ${callbackName} should contains
         Array this at least 2 items, but ${callback.length} given [${callback.join(',')}]."`);
           }
         });
@@ -760,13 +767,13 @@ class Binder implements BinderInterface {
       if (importData && importData[from.bindAs]) {
         each(importData[from.bindAs], (toVarName, fromVarName) => {
           if (!(fromVarName in from.service)) {
-            this.showMessage(`Variable "${fromVarName}" required for "${to.bindAs}" 
+            this.showMessage(`Variable "${fromVarName}" required for "${to.bindAs}"
             not found in "${from.bindAs}"`, MESSAGE_TYPES.WARN);
             return;
           }
 
           if (toVarName in to.service) {
-            this.showMessage(`Trying create link from "${from.bindAs}.${fromVarName}" 
+            this.showMessage(`Trying create link from "${from.bindAs}.${fromVarName}"
             to "${to.bindAs}.${toVarName}", but variable "${toVarName}" is already exist in "${to.bindAs}"`,
             MESSAGE_TYPES.WARN);
             return;
@@ -775,7 +782,7 @@ class Binder implements BinderInterface {
           Object.defineProperty(to.service, toVarName, {
             get: () => {
               if (this.isDebug(to.bindAs)) {
-                this.showMessage(`Variable "${fromVarName}" from "${from.bindAs}" 
+                this.showMessage(`Variable "${fromVarName}" from "${from.bindAs}"
               was taken by "${to.bindAs}" with name "${toVarName}"`);
               }
 
@@ -850,7 +857,7 @@ class Binder implements BinderInterface {
       exportData = s.options.exportData;
 
       if (exportData && !exportData[varName]) {
-        console.warn(`Warnning! Impossible import variable "${varName}" of 
+        console.warn(`Warnning! Impossible import variable "${varName}" of
         "${s.bindAs}" for "${initiator}" because variable is not included to config.exportData.`);
         return;
       }
@@ -862,7 +869,7 @@ class Binder implements BinderInterface {
       return raw ? val : toJS(val); // eslint-disable-line
     }
 
-    console.warn(`Warnning! importVar form "${protoName(this)}" to 
+    console.warn(`Warnning! importVar form "${protoName(this)}" to
     "${initiator}". "${serviceName}" service not found.`);
 
     return undefined; // eslint-disable-line
@@ -887,7 +894,7 @@ class Binder implements BinderInterface {
       if (serviceInst.api && serviceInst.api[actionName]) {
         return serviceInst.api[actionName].apply(serviceInst, arg); // eslint-disable-line
       }
-      console.warn(`CallApi warn. "${initiator}" calls unknown method 
+      console.warn(`CallApi warn. "${initiator}" calls unknown method
       "${actionName}" found in service "${serviceName}".`);
     } else {
       console.warn(`CallApi warn. "${initiator}" calls method "${actionName}" from not bind service "${serviceName}".`);

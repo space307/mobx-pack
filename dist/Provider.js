@@ -29,6 +29,8 @@ var _mobxReact = require("mobx-react");
 
 var _serviceUtils = require("./serviceUtils.js");
 
+var _util = require("./helper/util.js");
+
 /**
  * Provider start services (or get it from binder context) and pass it to ServiceContext to a child components
  */
@@ -43,13 +45,15 @@ function convertToServiceStartConfig(ServiceProtoList) {
     }
 
     var proto = Array.isArray(ServiceProto) && ServiceProto.length ? ServiceProto[0] : ServiceProto;
-    var protoAttrs = Array.isArray(ServiceProto) ? ServiceProto[1] : undefined;
+    var protoAttrs = Array.isArray(ServiceProto) && Array.isArray(ServiceProto[1]) ? ServiceProto[1] : undefined;
+    var factory = Array.isArray(ServiceProto) && typeof ServiceProto[1] === 'function' && !(0, _util.isClass)(ServiceProto[1]) ? ServiceProto[1] : undefined;
 
     if (typeof proto !== 'function') {
       throw Error('Object passed as ServiceItem to Provider is not a constructor');
     }
 
     return {
+      factory: factory,
       proto: proto,
       protoAttrs: protoAttrs,
       binderConfig: proto.binderConfig
@@ -107,11 +111,11 @@ function createProvider(BinderContext, ServiceContext) {
         _this.serviceToStop = [];
 
         if (!context) {
-          _this.state.error = "Binder context not found in Provider \n            (component: ".concat(getComponentName(Component), ")");
+          _this.state.error = "Binder context not found in Provider\n            (component: ".concat(getComponentName(Component), ")");
         } else if (!(0, _reactIs.isValidElementType)(Component)) {
           _this.state.error = 'Provider wait for "React.Component" in attributes';
         } else if (options && options.helper && typeof options.helper !== 'function') {
-          _this.state.error = "Helper put to Provider \n            (component: ".concat(getComponentName(Component), ") should be a function");
+          _this.state.error = "Helper put to Provider\n            (component: ".concat(getComponentName(Component), ") should be a function");
         }
 
         if (options) {
