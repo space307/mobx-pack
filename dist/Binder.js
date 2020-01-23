@@ -128,11 +128,12 @@ function () {
         result = resolver;
       } else {
         result = new Promise(function (resolve, reject) {
-          console.log(['serviceStartConfig', bindAs, serviceStartConfig]);
           var service = serviceStartConfig.factory ? serviceStartConfig.factory() : _this2.createService(proto, serviceStartConfig.protoAttrs);
 
           if (!service || (0, _typeof2.default)(service) !== 'object') {
             throw Error("Binder service start error. Service \"".concat(bindAs, "\" is not a valid object"));
+          } else if (!(service instanceof proto)) {
+            throw Error("Binder service start error. Service \"".concat(bindAs, "\"\n            prototype does not match service factory result"));
           }
 
           var resolveData = {

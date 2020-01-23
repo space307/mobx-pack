@@ -121,12 +121,15 @@ class Binder implements BinderInterface {
     } else {
       result = new Promise(
         (resolve: (data: StartServiceReturnType) => void, reject: (error: Error) => void): void => {
-          console.log(['serviceStartConfig', bindAs, serviceStartConfig]);
           const service = serviceStartConfig.factory ?
             serviceStartConfig.factory() :
             this.createService(proto, serviceStartConfig.protoAttrs);
+
           if (!service || typeof service !== 'object') {
             throw Error(`Binder service start error. Service "${bindAs}" is not a valid object`);
+          } else if (!(service instanceof proto)) {
+            throw Error(`Binder service start error. Service "${bindAs}"
+            prototype does not match service factory result`);
           }
 
           const resolveData = { service, started: true, serviceStartConfig };
