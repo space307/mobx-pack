@@ -1,4 +1,4 @@
-// -@flow
+// @flow
 
 export BaseComponent from './BaseComponent.js';
 export BaseStore from './BaseStore.js';

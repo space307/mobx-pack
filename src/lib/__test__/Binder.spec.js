@@ -299,6 +299,38 @@ describe('Binder test', () => {
     });
   });
 
+
+  it('start fails if service prototype does not match service factory result', (done) => {
+    const serviceName = 'test';
+
+    @bindAsDecor(serviceName)
+    class ServiceProto {}
+
+    @bindAsDecor(serviceName)
+    class ServiceProto2 {}
+
+    const config = getConfig(ServiceProto);
+    config.factory = () => new ServiceProto2();
+    binder.start(config).catch((error) => {
+      expect(!!error).toBe(true);
+      done();
+    });
+  });
+
+  it('start fails if service fabric return invalid result', (done) => {
+    const serviceName = 'test';
+
+    @bindAsDecor(serviceName)
+    class ServiceProto {}
+
+    const config = getConfig(ServiceProto);
+    config.factory = () => null;
+    binder.start(config).catch((error) => {
+      expect(!!error).toBe(true);
+      done();
+    });
+  });
+
   it('double service start && Promise', (done) => {
     const serviceName = 'test';
 
