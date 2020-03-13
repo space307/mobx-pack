@@ -71,8 +71,8 @@ function ConnectorF(Component) {
         };
       }
     }, {
-      key: "componentWillMount",
-      value: function componentWillMount() {
+      key: "UNSAFE_componentWillMount",
+      value: function UNSAFE_componentWillMount() {
         var _this2 = this;
 
         this.servicesLoaded = false;
@@ -161,7 +161,7 @@ function ConnectorF(Component) {
                 return (_store$binder = store.binder).callApi.apply(_store$binder, [store.getConfig().bindAs, key, componentId].concat(arg));
               } : apiMethod.bind(store);
             } else {
-              console.warn("Connector. For \"".concat(Component.name, "\" api \n            function \"").concat(key, "\" not found in store \"").concat((0, _util.protoName)(store), "\""));
+              console.warn("Connector. For \"".concat(Component.name, "\" api\n            function \"").concat(key, "\" not found in store \"").concat((0, _util.protoName)(store), "\""));
             }
           });
           this.apiResolved = api;

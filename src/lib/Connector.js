@@ -31,7 +31,7 @@ function ConnectorF(Component, opt = {}) {
       };
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
       this.servicesLoaded = false;
       this.options = options;
       this.componentId = `${Component.name}_${getUid()}`;
@@ -112,7 +112,7 @@ function ConnectorF(Component, opt = {}) {
               return store.binder.callApi(store.getConfig().bindAs, key, componentId, ...arg);
             } : apiMethod.bind(store);
           } else {
-            console.warn(`Connector. For "${Component.name}" api 
+            console.warn(`Connector. For "${Component.name}" api
             function "${key}" not found in store "${protoName(store)}"`);
           }
         });
