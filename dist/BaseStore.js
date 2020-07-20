@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = exports.STATUS_SERVICE_FAIL = exports.STATUS_SERVICE_STOPPED = exports.STATUS_SERVICE_STOPPING = exports.STATUS_SERVICE_STARTED = exports.STATUS_SERVICE_STARTING = exports.STATUS_SERVICE_SLEEP = void 0;
+exports["default"] = exports.STATUS_SERVICE_FAIL = exports.STATUS_SERVICE_STOPPED = exports.STATUS_SERVICE_STOPPING = exports.STATUS_SERVICE_STARTED = exports.STATUS_SERVICE_STARTING = exports.STATUS_SERVICE_SLEEP = void 0;
 
 var _initializerDefineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/initializerDefineProperty"));
 
@@ -39,18 +39,16 @@ var STATUS_SERVICE_FAIL = 'fail';
 exports.STATUS_SERVICE_FAIL = STATUS_SERVICE_FAIL;
 var ON_START = 'onStart';
 var ON_STOP = 'onStop';
-var BaseStore = (_class = (_temp = _class2 =
-/*#__PURE__*/
-function () {
+var BaseStore = (_class = (_temp = _class2 = /*#__PURE__*/function () {
   function BaseStore(context) {
-    (0, _classCallCheck2.default)(this, BaseStore);
+    (0, _classCallCheck2["default"])(this, BaseStore);
     this.disposers = [];
     this.disposerKeys = {};
     this.binder = void 0;
     this.mounted = false;
-    (0, _initializerDefineProperty2.default)(this, "serviceStatus", _descriptor, this);
-    (0, _initializerDefineProperty2.default)(this, "serviceReady", _descriptor2, this);
-    (0, _initializerDefineProperty2.default)(this, "serviceWasStarted", _descriptor3, this);
+    (0, _initializerDefineProperty2["default"])(this, "serviceStatus", _descriptor, this);
+    (0, _initializerDefineProperty2["default"])(this, "serviceReady", _descriptor2, this);
+    (0, _initializerDefineProperty2["default"])(this, "serviceWasStarted", _descriptor3, this);
     this.serviceFail = null;
     this.alreadyStarting = false;
     this.alreadyStopping = false;
@@ -62,7 +60,7 @@ function () {
     }
   }
 
-  (0, _createClass2.default)(BaseStore, [{
+  (0, _createClass2["default"])(BaseStore, [{
     key: "start",
     value: function start(initiatorId, context) {
       var _this = this;
@@ -77,7 +75,7 @@ function () {
         return waitFor.then(function () {
           _this.startDo(initiatorId, _this.serviceStarter).then(function () {
             return resolve();
-          }).catch(function (error) {
+          })["catch"](function (error) {
             return reject(error);
           });
         });
@@ -110,7 +108,7 @@ function () {
 
           return _this2.proceedService(initiatorId, ON_START, STATUS_SERVICE_STARTING, STATUS_SERVICE_STARTED).then(function () {
             resolve();
-          }).catch(function (e) {
+          })["catch"](function (e) {
             reject(e);
           });
         }
@@ -120,7 +118,7 @@ function () {
         return new Promise(function (resolve) {
           _this2.startOk(resolve);
         });
-      }).catch(function (err) {
+      })["catch"](function (err) {
         console.warn(err);
         return new Promise(function (resolve, reject) {
           reject(err);
@@ -147,10 +145,10 @@ function () {
       }) : new Promise(function (resolve, reject) {
         if (!initiatorId) {
           resolve();
-        } else if (_lodash.default.indexOf(_this3.initiators, initiatorId) === -1) {
+        } else if (_lodash["default"].indexOf(_this3.initiators, initiatorId) === -1) {
           reject("Stop service \"".concat((0, _util.protoName)(_this3), "\" error. Initiator with id \"").concat(initiatorId, "\" not found."));
         } else if (_this3.serviceStatus === STATUS_SERVICE_STARTED || _this3.serviceStatus === STATUS_SERVICE_STARTING || _this3.serviceStatus === STATUS_SERVICE_FAIL) {
-          _lodash.default.remove(_this3.initiators, function (n) {
+          _lodash["default"].remove(_this3.initiators, function (n) {
             return n === initiatorId;
           });
 
@@ -189,7 +187,7 @@ function () {
             _this4.setServiceStatus(state2);
 
             resolve();
-          }).catch(function (e) {
+          })["catch"](function (e) {
             _this4.setServiceStatus(STATUS_SERVICE_FAIL, "".concat(state1, "_fail"));
 
             var error = typeof e === 'string' ? new Error(e) : e;
@@ -404,21 +402,21 @@ function () {
     }
   }]);
   return BaseStore;
-}(), _class2.instance = null, _temp), (_descriptor = (0, _applyDecoratedDescriptor2.default)(_class.prototype, "serviceStatus", [_mobx.observable], {
+}(), _class2.instance = null, _temp), (_descriptor = (0, _applyDecoratedDescriptor2["default"])(_class.prototype, "serviceStatus", [_mobx.observable], {
   configurable: true,
   enumerable: true,
   writable: true,
   initializer: function initializer() {
     return STATUS_SERVICE_SLEEP;
   }
-}), _descriptor2 = (0, _applyDecoratedDescriptor2.default)(_class.prototype, "serviceReady", [_mobx.observable], {
+}), _descriptor2 = (0, _applyDecoratedDescriptor2["default"])(_class.prototype, "serviceReady", [_mobx.observable], {
   configurable: true,
   enumerable: true,
   writable: true,
   initializer: function initializer() {
     return false;
   }
-}), _descriptor3 = (0, _applyDecoratedDescriptor2.default)(_class.prototype, "serviceWasStarted", [_mobx.observable], {
+}), _descriptor3 = (0, _applyDecoratedDescriptor2["default"])(_class.prototype, "serviceWasStarted", [_mobx.observable], {
   configurable: true,
   enumerable: true,
   writable: true,
@@ -426,5 +424,5 @@ function () {
     return false;
   }
 })), _class);
-exports.default = BaseStore;
+exports["default"] = BaseStore;
 //# sourceMappingURL=BaseStore.js.map

@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
@@ -13,15 +13,13 @@ var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/creat
 
 var _events = _interopRequireDefault(require("events"));
 
-var EventEmitter =
-/*#__PURE__*/
-function () {
+var EventEmitter = /*#__PURE__*/function () {
   function EventEmitter() {
-    (0, _classCallCheck2.default)(this, EventEmitter);
-    this.emitter = new _events.default();
+    (0, _classCallCheck2["default"])(this, EventEmitter);
+    this.emitter = new _events["default"]();
   }
 
-  (0, _createClass2.default)(EventEmitter, [{
+  (0, _createClass2["default"])(EventEmitter, [{
     key: "emit",
     value: function emit(eventType, payload) {
       this.emitter.emit(eventType, payload);
@@ -40,5 +38,5 @@ function () {
   return EventEmitter;
 }();
 
-exports.default = EventEmitter;
+exports["default"] = EventEmitter;
 //# sourceMappingURL=EventEmitter.js.map

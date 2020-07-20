@@ -5,21 +5,21 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = createProvider;
+exports["default"] = createProvider;
 
 var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
 
-var _objectSpread2 = _interopRequireDefault(require("@babel/runtime/helpers/objectSpread"));
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
 var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
-
-var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 
 var _react = _interopRequireDefault(require("react"));
 
@@ -31,9 +31,13 @@ var _serviceUtils = require("./serviceUtils.js");
 
 var _util = require("./helper/util.js");
 
-/**
- * Provider start services (or get it from binder context) and pass it to ServiceContext to a child components
- */
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
 
 /**
  * Convert incoming param with service list to start service format
@@ -93,16 +97,16 @@ function createProvider(BinderContext, ServiceContext) {
       stop: false,
       services: []
     };
-    return (0, _mobxReact.observer)((_temp = _class =
-    /*#__PURE__*/
-    function (_React$Component) {
-      (0, _inherits2.default)(ProviderComponent, _React$Component);
+    return (0, _mobxReact.observer)((_temp = _class = /*#__PURE__*/function (_React$Component) {
+      (0, _inherits2["default"])(ProviderComponent, _React$Component);
+
+      var _super = _createSuper(ProviderComponent);
 
       function ProviderComponent(props, context) {
         var _this;
 
-        (0, _classCallCheck2.default)(this, ProviderComponent);
-        _this = (0, _possibleConstructorReturn2.default)(this, (0, _getPrototypeOf2.default)(ProviderComponent).call(this));
+        (0, _classCallCheck2["default"])(this, ProviderComponent);
+        _this = _super.call(this);
         _this.state = {
           error: null,
           services: null
@@ -124,15 +128,15 @@ function createProvider(BinderContext, ServiceContext) {
           var stop = options.stop,
               helper = options.helper,
               stub = options.stub;
-          _this.options = (0, _objectSpread2.default)({}, defaultOptions, {
+          _this.options = _objectSpread(_objectSpread(_objectSpread({}, defaultOptions), {
             stop: stop,
             helper: helper,
             stub: stub
-          }, {
+          }), {
             services: _services
           });
         } else {
-          _this.options = (0, _objectSpread2.default)({}, defaultOptions);
+          _this.options = _objectSpread({}, defaultOptions);
         }
 
         if (_this.options.services) {
@@ -157,7 +161,7 @@ function createProvider(BinderContext, ServiceContext) {
        */
 
 
-      (0, _createClass2.default)(ProviderComponent, [{
+      (0, _createClass2["default"])(ProviderComponent, [{
         key: "setServices",
         value: function setServices(list) {
           this.setState({
@@ -235,7 +239,7 @@ function createProvider(BinderContext, ServiceContext) {
       }, {
         key: "composeProps",
         value: function composeProps(services, props) {
-          if (services && (0, _typeof2.default)(this.options.helper)) {
+          if (services && (0, _typeof2["default"])(this.options.helper)) {
             return this.options.helper ? this.options.helper(services, props) : props;
           }
 
@@ -255,16 +259,16 @@ function createProvider(BinderContext, ServiceContext) {
           var Stub = this.options.stub;
 
           if (serviceOk && helperOk) {
-            return hasService ? _react.default.createElement(ServiceContext.Provider, {
+            return hasService ? /*#__PURE__*/_react["default"].createElement(ServiceContext.Provider, {
               value: this.state.services
-            }, _react.default.createElement(Component, props)) : _react.default.createElement(Component, props);
+            }, /*#__PURE__*/_react["default"].createElement(Component, props)) : /*#__PURE__*/_react["default"].createElement(Component, props);
           }
 
-          return typeof Stub === 'function' ? _react.default.createElement(Stub, null) : null;
+          return typeof Stub === 'function' ? /*#__PURE__*/_react["default"].createElement(Stub, null) : null;
         }
       }]);
       return ProviderComponent;
-    }(_react.default.Component), _class.contextType = BinderContext, _temp));
+    }(_react["default"].Component), _class.contextType = BinderContext, _temp));
   };
 }
 //# sourceMappingURL=Provider.js.map

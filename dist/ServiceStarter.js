@@ -5,7 +5,7 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
@@ -13,16 +13,14 @@ var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/creat
 
 var _lodash = _interopRequireDefault(require("lodash"));
 
-var ServiceStarter =
-/*#__PURE__*/
-function () {
+var ServiceStarter = /*#__PURE__*/function () {
   function ServiceStarter() {
-    (0, _classCallCheck2.default)(this, ServiceStarter);
+    (0, _classCallCheck2["default"])(this, ServiceStarter);
     this.stratedServices = {};
     this.waiters = {};
   }
 
-  (0, _createClass2.default)(ServiceStarter, [{
+  (0, _createClass2["default"])(ServiceStarter, [{
     key: "register",
     value: function register(service) {
       var conf = service.getConfig();
@@ -132,7 +130,7 @@ function () {
       var hash = {};
 
       if (waitFor.length) {
-        _lodash.default.each(waiters, function (data, service) {
+        _lodash["default"].each(waiters, function (data, service) {
           data.forEach(function (item) {
             var conf = item.waiterService.getConfig();
             var waiterName = conf.bindAs;
@@ -154,7 +152,7 @@ function () {
         });
       }
 
-      _lodash.default.each(hash, function (data, point) {
+      _lodash["default"].each(hash, function (data, point) {
         var error = _this2.goByChain(hash, point, point, chain);
 
         if (error) {
@@ -168,5 +166,5 @@ function () {
   return ServiceStarter;
 }();
 
-exports.default = ServiceStarter;
+exports["default"] = ServiceStarter;
 //# sourceMappingURL=ServiceStarter.js.map

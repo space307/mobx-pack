@@ -5,17 +5,17 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = void 0;
+exports["default"] = void 0;
 
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
-var _getPrototypeOf3 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
-
-var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _react = _interopRequireDefault(require("react"));
 
@@ -27,6 +27,10 @@ var _lodash = require("lodash");
 
 var _util = require("./helper/util.js");
 
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+
 function ConnectorF(Component) {
   var _class, _temp;
 
@@ -37,23 +41,21 @@ function ConnectorF(Component) {
     services: [],
     test: 0
   }, opt);
-  return (0, _mobxReact.observer)((_temp = _class =
-  /*#__PURE__*/
-  function (_React$Component) {
-    (0, _inherits2.default)(Connector, _React$Component);
+  return (0, _mobxReact.observer)((_temp = _class = /*#__PURE__*/function (_React$Component) {
+    (0, _inherits2["default"])(Connector, _React$Component);
+
+    var _super = _createSuper(Connector);
 
     function Connector() {
-      var _getPrototypeOf2;
-
       var _this;
 
-      (0, _classCallCheck2.default)(this, Connector);
+      (0, _classCallCheck2["default"])(this, Connector);
 
       for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
         args[_key] = arguments[_key];
       }
 
-      _this = (0, _possibleConstructorReturn2.default)(this, (_getPrototypeOf2 = (0, _getPrototypeOf3.default)(Connector)).call.apply(_getPrototypeOf2, [this].concat(args)));
+      _this = _super.call.apply(_super, [this].concat(args));
       _this.servicesLoaded = false;
       _this.options = {};
       _this.componentId = '';
@@ -63,7 +65,7 @@ function ConnectorF(Component) {
       return _this;
     }
 
-    (0, _createClass2.default)(Connector, [{
+    (0, _createClass2["default"])(Connector, [{
       key: "getChildContext",
       value: function getChildContext() {
         return {
@@ -203,7 +205,7 @@ function ConnectorF(Component) {
       key: "render",
       value: function render() {
         if (this.options.wairForServices && !this.servicesLoaded) {
-          return typeof this.options.preLoader === 'function' ? _react.default.createElement(this.options.preLoader, null) : this.options.preLoader;
+          return typeof this.options.preLoader === 'function' ? /*#__PURE__*/_react["default"].createElement(this.options.preLoader, null) : this.options.preLoader;
         }
 
         var props = this.composeProps();
@@ -214,22 +216,22 @@ function ConnectorF(Component) {
             props.api = this.apiResolved;
           }
 
-          comp = _react.default.createElement(Component, props);
+          comp = /*#__PURE__*/_react["default"].createElement(Component, props);
         } else {
-          return typeof this.options.preLoader === 'function' ? _react.default.createElement(this.options.preLoader, null) : this.options.preLoader;
+          return typeof this.options.preLoader === 'function' ? /*#__PURE__*/_react["default"].createElement(this.options.preLoader, null) : this.options.preLoader;
         }
 
         return comp;
       }
     }]);
     return Connector;
-  }(_react.default.Component), _class.displayName = Component.displayName && "".concat(Component.displayName, "Connector") || "".concat(Component.name, "Connector"), _class.childContextTypes = {
-    store: _propTypes.default.object
+  }(_react["default"].Component), _class.displayName = Component.displayName && "".concat(Component.displayName, "Connector") || "".concat(Component.name, "Connector"), _class.childContextTypes = {
+    store: _propTypes["default"].object
   }, _class.contextTypes = {
-    store: _propTypes.default.object
+    store: _propTypes["default"].object
   }, _temp));
 }
 
 var _default = ConnectorF;
-exports.default = _default;
+exports["default"] = _default;
 //# sourceMappingURL=Connector.js.map

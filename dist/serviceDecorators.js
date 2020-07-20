@@ -63,12 +63,12 @@ function putServiceNamesToConfig(serviceNames, service, callbackName, optionName
       });
 
       if (existCallback === undefined) {
-        service.binderConfig[optionName].push([].concat((0, _toConsumableArray2.default)(serviceNames), [callbackName]));
+        service.binderConfig[optionName].push([].concat((0, _toConsumableArray2["default"])(serviceNames), [callbackName]));
       } else {
-        existCallback.splice.apply(existCallback, [0, existCallback.length].concat((0, _toConsumableArray2.default)(serviceNames), [callbackName]));
+        existCallback.splice.apply(existCallback, [0, existCallback.length].concat((0, _toConsumableArray2["default"])(serviceNames), [callbackName]));
       }
     } else {
-      service.binderConfig[optionName] = [].concat((0, _toConsumableArray2.default)(serviceNames), [callbackName]);
+      service.binderConfig[optionName] = [].concat((0, _toConsumableArray2["default"])(serviceNames), [callbackName]);
     }
   }
 }
