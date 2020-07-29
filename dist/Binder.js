@@ -244,6 +244,7 @@ function () {
 
       this.addService(service, options);
       /* -- Legacy -- */
+      // if legacy service try to bind from this.parentBinder legacy method processService should not be called
 
       if (!this.parentBinder) {
         if (this.isDebug(bindAs)) {

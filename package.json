@@ -1,6 +1,6 @@
 {
   "name": "mobx-pack",
-  "version": "1.2.5-rc1",
+  "version": "1.2.5",
   "description": "Library for creating application based on Mobx",
   "main": "dist/index.js",
   "jsnext:main": "src/lib/index.js",
