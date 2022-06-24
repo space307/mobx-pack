@@ -69,11 +69,11 @@ import { BinderContext } from './context.js';
 
 const MyApplication = () => (
   <div>
-    <BinderContext.Cunsumer>
+    <BinderContext.Consumer>
       {({ binder }) => {
         console.log(binder);
       }}
-    </BinderContext.Cunsumer>
+    </BinderContext.Consumer>
   </div>
 );
 
@@ -149,9 +149,9 @@ import { Provider, ServiceContext } from './context.js';
 
 const Component = () => (
   <div>
-    <ServiceContext.Cunsumer>
+    <ServiceContext.Consumer>
       {({ someService, timeService }) => (<SomeComponent data={someService.data} time={timeService.time}>}
-    </ServiceContext.Cunsumer>
+    </ServiceContext.Consumer>
   </div>
 );
 const Container = Provider(Component, {
