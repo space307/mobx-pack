@@ -33,7 +33,7 @@ const Car = ({ time, color, test }) => (
 
 const Garage = props => (
   <div>
-    <ServiceContext.Cunsumer>{({ timeService, garageStore }) => (
+    <ServiceContext.Consumer>{({ timeService, garageStore }) => (
       <Observer>{() => (
         <Car
           {...props}
@@ -42,7 +42,7 @@ const Garage = props => (
         />
       )}</Observer>
     )
-    }</ServiceContext.Cunsumer>
+    }</ServiceContext.Consumer>
 
   </div>
 );

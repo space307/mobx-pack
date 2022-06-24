@@ -12,9 +12,9 @@ BinderProvider - создаёт новый BinderContext
 
 const MyApplication = () => (
   <div>
-    <BinderContext.Cunsumer>{({ binder, initialState }) => {
+    <BinderContext.Consumer>{({ binder, initialState }) => {
       console.log(binder, initialState);
-    }}</BinderContext.Cunsumer>
+    }}</BinderContext.Consumer>
 
   </div>
 );
