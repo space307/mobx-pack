@@ -2,7 +2,7 @@
 /* eslint-disable react/no-multi-comp */
 import React from 'react';
 import { Observer } from 'mobx-react';
-import { Binder } from 'sources.js';
+import { Binder } from 'mobx-pack';
 
 import { InitialState, GarageStore, TimeService, CarStore } from './Environment.js';
 import { BinderContext, ServiceContext } from './ComponentContext.js';
@@ -16,7 +16,6 @@ type DriverPropType = {
 
 class Driver extends React.PureComponent<DriverPropType> {
   render() {
-    // console.log(['Driver render']);
     return (<div>Driver!!! modelName:{this.props.modelName} time: {this.props.time}
     </div>);
   }
@@ -129,8 +128,6 @@ class MyApplication extends React.Component<{}, MyApplicationStateType> {
     color: 'dark',
   };
 
-  static contextType = BinderContext;
-
   componentDidMount() {
     setInterval(() => {
       this.setState({ timer: this.state.timer += 1 });
@@ -159,7 +156,6 @@ const MyApplication2 = Provider(MyApplication, { services: [TimeService] });
 const WithNewBinder = BinderProvider(
   Provider(MyApplication2, { services: [InitialState] }),
 );
-
 
 export default () => (
   <BinderContext.Provider value={new Binder()}>

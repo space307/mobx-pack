@@ -1,5 +1,5 @@
 // @flow
-import { BaseStore } from 'sources.js';
+import { BaseStore } from 'mobx-pack';
 import { BASE_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
 

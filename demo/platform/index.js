@@ -27,9 +27,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // otp demo page
 import React from 'react';
-import ReactDOM from 'react-dom';
-import MyApplication from 'demo/platform/otpDemo/MyApplication.jsx';
+import { createRoot } from 'react-dom/client';
+import MyApplication from './otpDemo/MyApplication.jsx';
 
 document.addEventListener('DOMContentLoaded', () => {
-  ReactDOM.render(React.createElement(MyApplication), document.querySelector('#root'));
+  const container = document.querySelector('#root');
+
+  if (container) {
+    const root = createRoot(container);
+    root.render(React.createElement(MyApplication));
+  }
 });

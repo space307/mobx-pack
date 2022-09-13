@@ -195,4 +195,4 @@ pids
 *.seed
 
 node_modules
-package-lock.json
+dist

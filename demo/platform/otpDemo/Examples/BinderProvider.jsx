@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Binder } from 'sources.js';
+import { Binder } from 'mobx-pack';
 import { BinderContext } from './../ComponentContext.js';
 import { BinderProvider } from './../Provider.jsx';
 

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { onStop, onStart, onUnbind, onBind, bindAs } from 'sources.js';
+import { onStop, onStart, onUnbind, onBind, bindAs } from 'mobx-pack';
 
 const SERVICE_NAMES = {
   GARAGE_STORE: 'GarageStore',

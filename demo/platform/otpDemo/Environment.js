@@ -1,7 +1,7 @@
 // @flow
 /* eslint-disable no-console */
 import { observable } from 'mobx';
-import { onStop, onStart, onUnbind, onBind, bindAs } from 'sources.js';
+import { onStop, onStart, onUnbind, onBind, bindAs } from 'mobx-pack';
 import type { CarStoreInterface, GarageStoreInterface,
   TimeServiceInterface, InitialStateInterface } from './typing/types.js';
 
@@ -26,8 +26,8 @@ class TimeService implements TimeServiceInterface {
 
     setInterval((): void => {
       const date = new Date();
-      this.time = `${date.getMinutes()}:${date.getSeconds()}`;
-    }, 10000);
+      this.time = `${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+    }, 1000);
 
     return true;
   }

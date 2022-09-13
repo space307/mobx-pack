@@ -1,6 +1,6 @@
 // @flow
 
-import { createProvider, createBinderProvider } from 'sources.js';
+import { createProvider, createBinderProvider } from 'mobx-pack';
 
 import { BinderContext, ServiceContext } from './ComponentContext.js';
 

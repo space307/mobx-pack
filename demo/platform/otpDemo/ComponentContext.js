@@ -1,6 +1,6 @@
 // @flow
 import React from 'react';
-import { Binder } from 'sources.js';
+import { Binder } from 'mobx-pack';
 import type { ServiceInterfaces } from './typing/types.js';
 
 type BinderContextType = ?{ binder: Binder, initialState: * };

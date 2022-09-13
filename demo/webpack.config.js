@@ -1,7 +1,8 @@
 // Чтобы отключить css source maps, добавь параметр --env.disableCssSourceMap к вызову вебпака
 
-const webpack = require('webpack');
 const path = require('path');
+const webpack = require('webpack');
+const HtmlPlugin = require('html-webpack-plugin');
 
 const makeAppConfig = () => ({
   mode: 'development',
@@ -16,7 +17,12 @@ const makeAppConfig = () => ({
   watchOptions: {
     aggregateTimeout: 100,
   },
-  plugins: [new webpack.IgnorePlugin(/\.\/locale/)],
+  plugins: [
+    new webpack.IgnorePlugin({ resourceRegExp: /\.\/locale/ }),
+    new HtmlPlugin({
+      template: './index.html',
+    }),
+  ],
   module: {
     rules: [
       {
@@ -68,10 +74,6 @@ const makeAppConfig = () => ({
         ],
       },
       {
-        test: /\.html$/,
-        use: ['ignore-loader'],
-      },
-      {
         test: /\.scss$/,
         exclude: /node_modules/,
         use: [
@@ -89,8 +91,10 @@ const makeAppConfig = () => ({
     ],
   },
   resolve: {
-    modules: [path.resolve('../'), 'node_modules'],
-    alias: {},
+    modules: [path.resolve('../node_modules'), 'node_modules'],
+    alias: {
+      'mobx-pack': path.resolve('../dist'),
+    },
     extensions: ['.js', '.jsx'],
   },
   devServer: {

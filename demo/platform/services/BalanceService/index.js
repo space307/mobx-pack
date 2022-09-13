@@ -3,7 +3,7 @@ import { observable, action } from 'mobx';
 import { BALANCE_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
 import { ASSET_NAMES } from 'demo/platform/constants/common.js';
-import { ServiceConnector } from 'sources.js';
+import { ServiceConnector } from 'mobx-pack';
 
 
 function validateBalanceChange(

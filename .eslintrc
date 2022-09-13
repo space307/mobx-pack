@@ -1,12 +1,16 @@
 {
   "extends": ["airbnb"],
-  "parser": "babel-eslint",
+  "parser": "@babel/eslint-parser",
   "plugins": ["flowtype"],
   "env": {
     "browser": true,
     "jest": true
   },
   "rules": {
+    "indent": [2, 2],
+    "react/state-in-constructor": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react/destructuring-assignment": "off",
     "react/prop-types": "off",
     "react/prefer-stateless-function": "warn",
     "react/no-array-index-key": "warn",
@@ -34,15 +38,6 @@
       "error",
       120
     ],
-    "import/extensions": [
-      "off"//,
-//      "always",
-//      {
-//        "js": "always",
-//        "jsx": "always",
-//        "scss": "always",
-//        "json": "always"
-//      }
-    ]
+    "import/extensions": "off"
   }
 }
