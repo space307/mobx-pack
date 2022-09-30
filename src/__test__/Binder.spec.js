@@ -54,22 +54,17 @@ function clearServiceMocks(...services) {
   });
 }
 
-describe('Binder test', () => {
-  let binder;
-  let localBinder;
-
-  beforeEach(() => {
-    binder = new Binder();
-    localBinder = new Binder(binder);
-  });
-
+describe('Binder', () => {
   it('isBind', () => {
+    const binder = new Binder();
     // someMethod: jest.fn,
     binder.bind({}, createConfig(s1));
     expect(binder.isBind(s1)).toBe(true);
   });
 
   it('bind start with wrong params-1', () => {
+    const binder = new Binder();
+
     expect(() => {
       binder.bind(null);
     }).toThrow();
@@ -85,24 +80,32 @@ describe('Binder test', () => {
   });
 
   it('bind start with wrong onBind param - 1', () => {
+    const binder = new Binder();
+
     expect(() => {
       binder.bind(s1, createConfig(s1, [[s1, s2]]));
     }).toThrow();
   });
 
   it('bind start with wrong onBind param - 2', () => {
+    const binder = new Binder();
+
     expect(() => {
       binder.bind(s1, createConfig(s1, [[s2]]));
     }).toThrow();
   });
 
   it('getService', () => {
+    const binder = new Binder();
     const service = {};
+
     binder.bind(service, createConfig(s1));
     expect(binder.getService(s1)).toBe(service);
   });
 
   it('isListBind', () => {
+    const binder = new Binder();
+
     binder.bind({}, createConfig(s1));
     binder.bind({}, createConfig(s2));
     expect(binder.isListBind([s1, s2])).toBe(true);
@@ -110,22 +113,30 @@ describe('Binder test', () => {
   });
 
   it('isListUnBind', () => {
+    const binder = new Binder();
+
     binder.bind({}, createConfig(s1));
     expect(binder.isListUnBind([s2, s3])).toBe(true);
     expect(binder.isListUnBind([s1, s2, s3])).toBe(false);
   });
 
   it('getNotBind', () => {
+    const binder = new Binder();
+
     binder.bind({}, createConfig(s1));
     expect(binder.getNotBind([s1, s2, s3])).toEqual([s2, s3]);
   });
 
   it('getNotBind', () => {
+    const binder = new Binder();
+
     binder.bind({}, createConfig(s1));
     expect(binder.getNotBind([s1, s2, s3])).toEqual([s2, s3]);
   });
 
   it('addService', () => {
+    const binder = new Binder();
+
     // expect(t).toThrow(TypeError);
     binder.addService({
       someMethod() {
@@ -137,6 +148,8 @@ describe('Binder test', () => {
   });
 
   it('saveDeps', () => {
+    const binder = new Binder();
+
     binder.bind({
       someMethod() {
       },
@@ -145,8 +158,10 @@ describe('Binder test', () => {
   });
 
   it('getServiceList', () => {
+    const binder = new Binder();
     const service1 = {};
     const service2 = {};
+
     binder.bind(service1, createConfig(s1));
     binder.bind(service2, createConfig(s2));
     expect(binder.getServiceList([s1, s2])[0]).toBe(service1);
@@ -154,7 +169,9 @@ describe('Binder test', () => {
   });
 
   it('setPendingStartResolver', () => {
+    const binder = new Binder();
     const promise = Promise;
+
     binder.setPendingStartResolver(s1, promise);
     expect(binder.pendingStartResolvers[s1]).toBe(promise);
     binder.setPendingStartResolver(s1, null);
@@ -162,12 +179,16 @@ describe('Binder test', () => {
   });
 
   it('getPendingStartResolver', () => {
+    const binder = new Binder();
     const promise = Promise;
+
     binder.setPendingStartResolver(s1, promise);
     expect(binder.getPendingStartResolver(s1)).toBe(promise);
   });
 
   it('createService', () => {
+    const binder = new Binder();
+
     class Test {
       constructor(a, b) {
         this.a = a;
@@ -181,6 +202,8 @@ describe('Binder test', () => {
   });
 
   it('createService error', () => {
+    const binder = new Binder();
+
     class Test {
       constructor(a, b) {
         this.a = a;
@@ -194,6 +217,7 @@ describe('Binder test', () => {
   });
 
   it('start async', (done) => {
+    const binder = new Binder();
     const serviceName = 'test';
 
     @bindAsDecor(serviceName)
@@ -223,6 +247,7 @@ describe('Binder test', () => {
   });
 
   it('start negative start async', (done) => {
+    const binder = new Binder();
     const serviceName = 'test';
 
     @bindAsDecor(serviceName)
@@ -249,6 +274,7 @@ describe('Binder test', () => {
   });
 
   it('start negative start sync', (done) => {
+    const binder = new Binder();
     const serviceName = 'test';
 
     @bindAsDecor(serviceName)
@@ -269,6 +295,7 @@ describe('Binder test', () => {
   });
 
   it('onStart callback', (done) => {
+    const binder = new Binder();
     const serviceName = 'test';
     const firstServiceName = 'firstService';
     const secondServiceName = 'secondService';
@@ -296,6 +323,7 @@ describe('Binder test', () => {
   });
 
   it('onStart fail if some service not bind', (done) => {
+    const binder = new Binder();
     const serviceName = 'test';
     const firstServiceName = 'firstService';
     const secondServiceName = 'secondService';
@@ -321,6 +349,7 @@ describe('Binder test', () => {
   });
 
   it('start fails if service prototype does not match service factory result', (done) => {
+    const binder = new Binder();
     const serviceName = 'test';
 
     @bindAsDecor(serviceName)
@@ -340,6 +369,7 @@ describe('Binder test', () => {
   });
 
   it('start fails if service fabric return invalid result', (done) => {
+    const binder = new Binder();
     const serviceName = 'test';
 
     @bindAsDecor(serviceName)
@@ -355,6 +385,7 @@ describe('Binder test', () => {
   });
 
   it('double service start && Promise', (done) => {
+    const binder = new Binder();
     const serviceName = 'test';
 
     @bindAsDecor(serviceName)
@@ -391,6 +422,7 @@ describe('Binder test', () => {
   });
 
   it('stopService', () => {
+    const binder = new Binder();
     const serviceName = 'test';
 
     @bindAsDecor(serviceName)
@@ -426,6 +458,7 @@ describe('Binder test', () => {
     }
 
     it('simple onBind test', () => {
+      const binder = new Binder();
       const service1 = createService();
       const service2 = createService();
       const service3 = createService();
@@ -438,6 +471,7 @@ describe('Binder test', () => {
     });
 
     it('simple onBind test & different order', () => {
+      const binder = new Binder();
       const service1 = createService();
       const service2 = createService();
       const service3 = createService();
@@ -450,6 +484,7 @@ describe('Binder test', () => {
     });
 
     it('simple onBind test & unbind', () => {
+      const binder = new Binder();
       const service1 = createService();
       const service2 = createService();
       const service3 = createService();
@@ -466,6 +501,7 @@ describe('Binder test', () => {
     });
 
     it('repeat onBind if service unbind', () => {
+      const binder = new Binder();
       const service1 = createService();
       const service2 = createService();
       const service3 = createService();
@@ -483,6 +519,7 @@ describe('Binder test', () => {
     });
 
     it('simple onUnbind test', () => {
+      const binder = new Binder();
       const service1 = createService();
       const service2 = createService();
       const service3 = createService();
@@ -501,6 +538,7 @@ describe('Binder test', () => {
     });
 
     it('simple onUnbind test if service bind', () => {
+      const binder = new Binder();
       const service1 = createService();
       const service2 = createService();
       const service3 = createService();
@@ -522,6 +560,8 @@ describe('Binder test', () => {
     });
 
     it('localBinder test', () => {
+      const binder = new Binder();
+      const localBinder = new Binder(binder);
       const service1 = createService();
       const service2 = createService();
 
@@ -536,6 +576,8 @@ describe('Binder test', () => {
     });
 
     it('common binder + localBinder test', () => {
+      const binder = new Binder();
+      const localBinder = new Binder(binder);
       const service1 = createService();
       const service2 = createService();
       const service3 = createService();

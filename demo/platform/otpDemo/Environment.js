@@ -51,7 +51,7 @@ class GarageStore implements GarageStoreInterface {
 
     setInterval((): void => {
       this.counter += 1;
-    }, 10000);
+    }, 1000);
 
     return new Promise(
       (resolve) => {

@@ -1,5 +1,45 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Binder addService 1`] = `
+Array [
+  "s1",
+  Object {
+    "bindAs": "s1",
+    "onBind": Array [
+      Array [
+        "s2",
+        "s3",
+        "someMethod",
+      ],
+    ],
+    "onUnbind": Array [
+      Array [
+        "s2",
+        "someMethod",
+      ],
+    ],
+  },
+]
+`;
+
+exports[`Binder saveDeps 1`] = `
+Object {
+  "onBind": Object {
+    "s2": Array [
+      "s1",
+    ],
+    "s3": Array [
+      "s1",
+    ],
+  },
+  "onUnbind": Object {
+    "s3": Array [
+      "s1",
+    ],
+  },
+}
+`;
+
 exports[`Binder test addService 1`] = `
 Array [
   "s1",
