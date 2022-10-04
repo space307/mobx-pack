@@ -2,5 +2,13 @@
   "extends": ["../../.eslintrc"],
   "rules": {
     "max-classes-per-file": 0
-  }
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "parserOptions": {
+        "project": "../../tsconfig.json"
+      }
+    }
+  ]
 }

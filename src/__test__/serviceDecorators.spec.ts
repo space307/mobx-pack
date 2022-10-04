@@ -1,53 +1,56 @@
-/* eslint-disable no-unused-vars */
-import {
-  onStop, onStart, onUnbind, onBind, bindAs,
-} from '../serviceDecorators.js';
+/* eslint-disable no-unused-vars,@typescript-eslint/no-unused-vars,@typescript-eslint/no-empty-function */
+import { onStop, onStart, onUnbind, onBind, bindAs } from '../serviceDecorators';
 
 describe('serviceDecorators test', () => {
   it('wrong bindAs param', () => {
     expect(() => {
+      // @ts-expect-error Expected
       @bindAs
-      class Service {
-      }
+      // @ts-expect-error Expected
+      class Service {}
     }).toThrow();
 
     expect(() => {
+      // @ts-expect-error Expected
       @bindAs()
-      class Service {
-      }
+      // @ts-expect-error Expected
+      class Service {}
     }).toThrow();
 
     expect(() => {
+      // @ts-expect-error Expected
       @bindAs(1)
-      class Service {
-      }
+      // @ts-expect-error Expected
+      class Service {}
     }).toThrow();
   });
 
   it('wrong onBind param', () => {
     expect(() => {
       @bindAs('test')
+      // @ts-expect-error Expected
       class Service {
+        // @ts-expect-error Expected
         @onBind
-        onBind() {
-        }
+        onBind() {}
       }
     }).toThrow();
 
     expect(() => {
       @bindAs('test')
+      // @ts-expect-error Expected
       class Service {
         @onBind()
-        onBind() {
-        }
+        onBind() {}
       }
     }).toThrow();
     expect(() => {
       @bindAs('test')
+      // @ts-expect-error Expected
       class Service {
+        // @ts-expect-error Expected
         @onBind('test1', 1)
-        onBind() {
-        }
+        onBind() {}
       }
     }).toThrow();
   });
@@ -55,27 +58,29 @@ describe('serviceDecorators test', () => {
   it('wrong onStart param', () => {
     expect(() => {
       @bindAs('test')
+      // @ts-expect-error Expected
       class Service {
+        // @ts-expect-error Expected
         @onStart
-        onStart() {
-        }
+        onStart() {}
       }
     }).toThrow();
 
     expect(() => {
       @bindAs('test')
+      // @ts-expect-error Expected
       class Service {
         @onStart()
-        onStart() {
-        }
+        onStart() {}
       }
     }).toThrow();
     expect(() => {
       @bindAs('test')
+      // @ts-expect-error Expected
       class Service {
+        // @ts-expect-error Expected
         @onStart('test1', 1)
-        onStart() {
-        }
+        onStart() {}
       }
     }).toThrow();
   });
@@ -84,59 +89,49 @@ describe('serviceDecorators test', () => {
     @bindAs('test')
     class Service {
       @onStart('init')
-      onStart() {
-      }
+      onStart() {}
 
       @onBind('test1', 'test2')
-      onBind() {
-      }
+      onBind() {}
 
       @onBind('test1', 'test2')
-      onBindOnlyGarageService() {
-      }
+      onBindOnlyGarageService() {}
 
       @onUnbind('test1', 'test2')
-      onUnbind() {
-      }
+      onUnbind() {}
 
       @onStop
-      onStop() {
-      }
+      onStop() {}
     }
 
+    // @ts-expect-error Expected
     expect(Service.binderConfig).toMatchSnapshot();
   });
 
   describe('extends class with decorators', () => {
-    let ParentService;
-    let ExtendedService;
+    let ParentService: any;
+    let ExtendedService: any;
 
     beforeEach(() => {
       @bindAs('ParentService')
       class ParentServiceClass {
         @onStart('onStartParentService')
-        onStart() {
-        }
+        onStart() {}
 
         @onBind('onBindParentService1', 'onBindParentService2')
-        onBind() {
-        }
+        onBind() {}
 
         @onBind('onBindParentService3', 'onBindParentService4')
-        onBindAdditionServices() {
-        }
+        onBindAdditionServices() {}
 
         @onUnbind('onUnbindParentService1', 'onUnbindParentService2')
-        onUnbind() {
-        }
+        onUnbind() {}
 
         @onUnbind('onUnbindParentService3', 'onUnbindParentService4')
-        onUnbindAdditionServices() {
-        }
+        onUnbindAdditionServices() {}
 
         @onStop
-        onStop() {
-        }
+        onStop() {}
       }
 
       ParentService = ParentServiceClass;
@@ -145,8 +140,7 @@ describe('serviceDecorators test', () => {
     describe('bindAs', () => {
       beforeEach(() => {
         @bindAs('ExtendedService')
-        class ExtendedServiceClass extends ParentService {
-        }
+        class ExtendedServiceClass extends ParentService {}
 
         ExtendedService = ExtendedServiceClass;
       });
@@ -160,8 +154,7 @@ describe('serviceDecorators test', () => {
       });
 
       it('should extends new class with parent bindAs if not redefined', () => {
-        class ExtendedServiceClass extends ParentService {
-        }
+        class ExtendedServiceClass extends ParentService {}
 
         expect(ExtendedServiceClass.binderConfig.bindAs).toEqual('ParentService');
       });
@@ -171,30 +164,22 @@ describe('serviceDecorators test', () => {
       beforeEach(() => {
         class ExtendedServiceClass extends ParentService {
           @onStart('onStartExtendedService')
-          onStart() {
-          }
+          onStart() {}
         }
 
         ExtendedService = ExtendedServiceClass;
       });
 
       it('should extends new class with other onStart', () => {
-        expect(ExtendedService.binderConfig.onStart).toEqual([
-          'onStartExtendedService',
-          'onStart',
-        ]);
+        expect(ExtendedService.binderConfig.onStart).toEqual(['onStartExtendedService', 'onStart']);
       });
 
       it('should stay ParentService without changes in onStart after extend', () => {
-        expect(ParentService.binderConfig.onStart).toEqual([
-          'onStartParentService',
-          'onStart',
-        ]);
+        expect(ParentService.binderConfig.onStart).toEqual(['onStartParentService', 'onStart']);
       });
 
       it('should extends new class with parent onStart if not redefined', () => {
-        class ExtendedServiceClass extends ParentService {
-        }
+        class ExtendedServiceClass extends ParentService {}
 
         expect(ExtendedServiceClass.binderConfig.onStart).toEqual([
           'onStartParentService',
@@ -207,12 +192,10 @@ describe('serviceDecorators test', () => {
       beforeEach(() => {
         class ExtendedServiceClass extends ParentService {
           @onBind('onBindExtendedService1')
-          onBind() {
-          }
+          onBind() {}
 
           @onBind('onBindExtendedService3')
-          onBindAdditionExtendedServices() {
-          }
+          onBindAdditionExtendedServices() {}
         }
 
         ExtendedService = ExtendedServiceClass;
@@ -220,34 +203,16 @@ describe('serviceDecorators test', () => {
 
       it('should extends new class with other onBind', () => {
         expect(ExtendedService.binderConfig.onBind).toEqual([
-          [
-            'onBindExtendedService1',
-            'onBind',
-          ],
-          [
-            'onBindParentService3',
-            'onBindParentService4',
-            'onBindAdditionServices',
-          ],
-          [
-            'onBindExtendedService3',
-            'onBindAdditionExtendedServices',
-          ],
+          ['onBindExtendedService1', 'onBind'],
+          ['onBindParentService3', 'onBindParentService4', 'onBindAdditionServices'],
+          ['onBindExtendedService3', 'onBindAdditionExtendedServices'],
         ]);
       });
 
       it('should stay ParentService without changes in onBind after extend', () => {
         expect(ParentService.binderConfig.onBind).toEqual([
-          [
-            'onBindParentService1',
-            'onBindParentService2',
-            'onBind',
-          ],
-          [
-            'onBindParentService3',
-            'onBindParentService4',
-            'onBindAdditionServices',
-          ],
+          ['onBindParentService1', 'onBindParentService2', 'onBind'],
+          ['onBindParentService3', 'onBindParentService4', 'onBindAdditionServices'],
         ]);
       });
     });
@@ -256,12 +221,10 @@ describe('serviceDecorators test', () => {
       beforeEach(() => {
         class ExtendedServiceClass extends ParentService {
           @onUnbind('onUnbindExtendedService1')
-          onUnbind() {
-          }
+          onUnbind() {}
 
           @onUnbind('onUnbindExtendedService3')
-          onUnbindAdditionExtendedServices() {
-          }
+          onUnbindAdditionExtendedServices() {}
         }
 
         ExtendedService = ExtendedServiceClass;
@@ -269,34 +232,16 @@ describe('serviceDecorators test', () => {
 
       it('should extends new class with other onUnbind', () => {
         expect(ExtendedService.binderConfig.onUnbind).toEqual([
-          [
-            'onUnbindExtendedService1',
-            'onUnbind',
-          ],
-          [
-            'onUnbindParentService3',
-            'onUnbindParentService4',
-            'onUnbindAdditionServices',
-          ],
-          [
-            'onUnbindExtendedService3',
-            'onUnbindAdditionExtendedServices',
-          ],
+          ['onUnbindExtendedService1', 'onUnbind'],
+          ['onUnbindParentService3', 'onUnbindParentService4', 'onUnbindAdditionServices'],
+          ['onUnbindExtendedService3', 'onUnbindAdditionExtendedServices'],
         ]);
       });
 
       it('should stay ParentService without changes in onUnbind after extend', () => {
         expect(ParentService.binderConfig.onUnbind).toEqual([
-          [
-            'onUnbindParentService1',
-            'onUnbindParentService2',
-            'onUnbind',
-          ],
-          [
-            'onUnbindParentService3',
-            'onUnbindParentService4',
-            'onUnbindAdditionServices',
-          ],
+          ['onUnbindParentService1', 'onUnbindParentService2', 'onUnbind'],
+          ['onUnbindParentService3', 'onUnbindParentService4', 'onUnbindAdditionServices'],
         ]);
       });
     });
@@ -305,8 +250,7 @@ describe('serviceDecorators test', () => {
       beforeEach(() => {
         class ExtendedServiceClass extends ParentService {
           @onStop
-          onStopExtended() {
-          }
+          onStopExtended() {}
         }
 
         ExtendedService = ExtendedServiceClass;
@@ -321,8 +265,7 @@ describe('serviceDecorators test', () => {
       });
 
       it('should extends new class with parent onStop if not redefined', () => {
-        class ExtendedServiceClass extends ParentService {
-        }
+        class ExtendedServiceClass extends ParentService {}
 
         expect(ExtendedServiceClass.binderConfig.onStop).toEqual('onStop');
       });

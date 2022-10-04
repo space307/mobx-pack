@@ -1,18 +1,18 @@
 import * as React from 'react';
-import {
-  render, screen, act, type RenderResult,
-} from '@testing-library/react';
-import createProvider from '../Provider.js';
-import Binder from '../Binder.js';
+import { render, screen, act, type RenderResult } from '@testing-library/react';
+import type { ServicesHashType } from '../Provider';
+import { createProvider } from '../Provider';
+import { Binder } from '../Binder';
 import { bindAs, onStart } from '../serviceDecorators.js';
 
-const BinderContext = React.createContext();
-const ServiceContext = React.createContext();
+const BinderContext = React.createContext<Binder>(new Binder());
+const ServiceContext = React.createContext<ServicesHashType | null>(null);
 const Provider = createProvider(BinderContext, ServiceContext);
 
-const delay = (ttl?: number) => new Promise((resolve) => {
-  setTimeout(resolve, ttl);
-});
+const delay = (ttl?: number) =>
+  new Promise<void>(resolve => {
+    setTimeout(resolve, ttl);
+  });
 
 describe('Provider test', () => {
   it('calls helper && start service normally & pass props to child & useState', async () => {
@@ -29,7 +29,7 @@ describe('Provider test', () => {
       count = countValue;
 
       @onStart(initialStateName)
-      onStart(initialStateParam) {
+      onStart(initialStateParam: any) {
         onStartMock(initialState === initialStateParam);
         return delay();
       }
@@ -41,21 +41,19 @@ describe('Provider test', () => {
     const binder = new Binder();
     binder.bind(initialState, { bindAs: initialStateName });
 
-    function Component({ count, pass }) {
+    function Component({ count, pass }: { count: number; pass: boolean }) {
       childPropsMock(count === countValue, pass);
-      return (<div id="count">{count}</div>);
+      return <div id="count">{count}</div>;
     }
 
     const ComponentWithProvider = Provider(Component, {
-      helper({ serviceProto }, { pass }) {
+      helper({ serviceProto }: { serviceProto: ServiceProto }, { pass }) {
         helperMock(binder.getService(serviceName) === serviceProto && pass);
         return {
-          pass,
           count: serviceProto.count,
         };
       },
       services: [ServiceProto],
-      useState: true,
     });
 
     function ComponentWithBinderContext() {
@@ -102,6 +100,7 @@ describe('Provider test', () => {
 
     const binder = new Binder();
     binder.bind(initialState, { bindAs: initialStateName });
+
     function Component({ count }) {
       return <div id="count">{count}</div>;
     }
@@ -247,6 +246,7 @@ describe('Provider test', () => {
     const initialState = {};
     const binder = new Binder();
     binder.bind(initialState, { bindAs: initialStateName });
+
     function Component() {
       return <div id="count" />;
     }
@@ -286,6 +286,7 @@ describe('Provider test', () => {
     const initialState = {};
     const binder = new Binder();
     binder.bind(initialState, { bindAs: initialStateName });
+
     function Component() {
       return <div id="count" />;
     }
@@ -328,6 +329,7 @@ describe('Provider test', () => {
     const initialState = {};
     const binder = new Binder();
     binder.bind(initialState, { bindAs: initialStateName });
+
     function Component() {
       return <div id="count" />;
     }
@@ -369,24 +371,23 @@ describe('Provider test', () => {
     const serviceName = 'test';
 
     @bindAs(serviceName)
-    class ServiceProto {
-    }
+    class ServiceProto {}
 
-    const ComponentWithProvider = Provider(() => (<div />), {
+    const ComponentWithProvider = Provider(() => <div />, {
       services: [2],
     });
     expect(() => {
       render(<ComponentWithProvider />);
     }).toThrowError('Object passed as ServiceItem to Provider is not a constructor (component: )');
 
-    const ComponentWithProvider2 = Provider(() => (<div />), {
+    const ComponentWithProvider2 = Provider(() => <div />, {
       services: [[ServiceProto]],
     });
     expect(() => {
       render(<ComponentWithProvider2 />);
     }).toThrowError('ServiceItem passed in Provider is not valid Array (component: )');
 
-    const ComponentWithProvider3 = Provider(() => (<div />), {
+    const ComponentWithProvider3 = Provider(() => <div />, {
       services: [ServiceProto, {}],
     });
     expect(() => {
@@ -398,6 +399,7 @@ describe('Provider test', () => {
     function Component(props) {
       return <div data-testid="inner" {...props} />;
     }
+
     const ComponentWithProvider = Provider(Component);
     const wrapper = render(
       <BinderContext.Provider value={{}}>

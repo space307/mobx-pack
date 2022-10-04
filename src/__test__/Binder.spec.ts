@@ -1,17 +1,7 @@
-import '@babel/polyfill';
-import { each } from 'lodash';
-import Binder from '../Binder.js';
-import { onStart, bindAs as bindAsDecor, onStop } from '../serviceDecorators.js';
-
-function getConfig(ServiceProto) {
-  const serviceStartConfigData = {
-    proto: ServiceProto,
-    protoAttrs: [1, 2],
-    binderConfig: ServiceProto.binderConfig,
-  };
-
-  return serviceStartConfigData;
-}
+import { Binder } from '../Binder';
+import { onStart, onStop, bindAs as bindAsDecor } from '../serviceDecorators';
+import type { BinderConfig } from '../typing/common';
+import { getConfig } from './utils';
 
 const s1 = 's1';
 const s2 = 's2';
@@ -20,8 +10,12 @@ const s4 = 's4';
 const s5 = 's5';
 const initialStateName = 'initialState';
 
-function createConfig(bindAs, onBind, onUnbind) {
-  const config = {
+function createConfig(
+  bindAs: BinderConfig['bindAs'],
+  onBind?: BinderConfig['onBind'] | null,
+  onUnbind?: BinderConfig['onUnbind'] | null,
+): BinderConfig {
+  const config: BinderConfig = {
     bindAs,
   };
 
@@ -44,13 +38,17 @@ function createService() {
   };
 }
 
-function clearServiceMocks(...services) {
-  services.forEach((service) => {
-    each(service, (prop) => {
-      if (typeof prop === 'function') {
-        prop.mockClear();
+function clearServiceMocks(...services: Record<string, jest.MockedFn<any>>[]) {
+  services.forEach(service => {
+    for (const key in service) {
+      if (Object.prototype.hasOwnProperty.call(service, key)) {
+        const prop = service[key];
+
+        if (typeof prop === 'function') {
+          prop.mockClear();
+        }
       }
-    });
+    }
   });
 }
 
@@ -66,15 +64,19 @@ describe('Binder', () => {
     const binder = new Binder();
 
     expect(() => {
+      // @ts-expect-error Expected
       binder.bind(null);
     }).toThrow();
     expect(() => {
+      // @ts-expect-error Expected
       binder.bind();
     }).toThrow();
     expect(() => {
+      // @ts-expect-error Expected
       binder.bind(0);
     }).toThrow();
     expect(() => {
+      // @ts-expect-error Expected
       binder.bind(s1);
     }).toThrow();
   });
@@ -83,6 +85,7 @@ describe('Binder', () => {
     const binder = new Binder();
 
     expect(() => {
+      // @ts-expect-error Expected
       binder.bind(s1, createConfig(s1, [[s1, s2]]));
     }).toThrow();
   });
@@ -91,6 +94,7 @@ describe('Binder', () => {
     const binder = new Binder();
 
     expect(() => {
+      // @ts-expect-error Expected
       binder.bind(s1, createConfig(s1, [[s2]]));
     }).toThrow();
   });
@@ -138,22 +142,32 @@ describe('Binder', () => {
     const binder = new Binder();
 
     // expect(t).toThrow(TypeError);
-    binder.addService({
-      someMethod() {
+    binder.addService(
+      {
+        someMethod() {
+          // empty
+        },
       },
-    }, createConfig(s1, [[s2, s3, 'someMethod']], [[s2, 'someMethod']]));
+      createConfig(s1, [[s2, s3, 'someMethod']], [[s2, 'someMethod']]),
+    );
     const settings = binder.getServiceSettings(s1);
-    expect([settings.bindAs, settings.options]).toMatchSnapshot();
-    expect(settings.options.onUnbind[0].__locked).toBe(true);
+
+    expect(settings).toBeDefined();
+    expect([settings?.bindAs, settings?.options]).toMatchSnapshot();
+    expect(settings?.options.onUnbind?.[0].__locked).toBe(true);
   });
 
   it('saveDeps', () => {
     const binder = new Binder();
 
-    binder.bind({
-      someMethod() {
+    binder.bind(
+      {
+        someMethod() {
+          // empty
+        },
       },
-    }, createConfig(s1, [[s2, s3, 'someMethod']], [[s3, 'someMethod']]));
+      createConfig(s1, [[s2, s3, 'someMethod']], [[s3, 'someMethod']]),
+    );
     expect(binder.depsList).toMatchSnapshot();
   });
 
@@ -170,8 +184,9 @@ describe('Binder', () => {
 
   it('setPendingStartResolver', () => {
     const binder = new Binder();
-    const promise = Promise;
+    const promise = Promise.resolve();
 
+    // @ts-expect-error Expected
     binder.setPendingStartResolver(s1, promise);
     expect(binder.pendingStartResolvers[s1]).toBe(promise);
     binder.setPendingStartResolver(s1, null);
@@ -180,8 +195,9 @@ describe('Binder', () => {
 
   it('getPendingStartResolver', () => {
     const binder = new Binder();
-    const promise = Promise;
+    const promise = Promise.resolve();
 
+    // @ts-expect-error Expected
     binder.setPendingStartResolver(s1, promise);
     expect(binder.getPendingStartResolver(s1)).toBe(promise);
   });
@@ -190,10 +206,7 @@ describe('Binder', () => {
     const binder = new Binder();
 
     class Test {
-      constructor(a, b) {
-        this.a = a;
-        this.b = b;
-      }
+      constructor(public a: number, public b: number) {}
     }
 
     const service = binder.createService(Test, [1, 2]);
@@ -205,18 +218,16 @@ describe('Binder', () => {
     const binder = new Binder();
 
     class Test {
-      constructor(a, b) {
-        this.a = a;
-        this.b = b;
-      }
+      constructor(public a: number, public b: number) {}
     }
 
     expect(() => {
+      // @ts-expect-error Expected
       binder.createService(Test, 1);
     }).toThrow();
   });
 
-  it('start async', (done) => {
+  it('start async', async () => {
     const binder = new Binder();
     const serviceName = 'test';
 
@@ -224,29 +235,26 @@ describe('Binder', () => {
     class ServiceProto {
       @onStart(initialStateName)
       onStart() {
-        return new Promise(
-          (resolve) => {
-            setTimeout(() => {
-              resolve();
-            });
-          },
-        );
+        return new Promise(resolve => {
+          setTimeout(resolve);
+        });
       }
     }
 
     const initialState = {};
     binder.bind(initialState, { bindAs: initialStateName });
 
-    binder.start(getConfig(ServiceProto)).then(({ service, started, serviceStartConfig }) => {
-      expect(binder.isBind(serviceName)).toBe(true);
-      expect(serviceStartConfig.proto).toBe(ServiceProto);
-      expect(started).toBe(true);
-      expect(service).toBe(binder.getService(serviceName));
-      done();
-    });
+    const { service, started, serviceStartConfig } = await binder.start(
+      getConfig(ServiceProto, []),
+    );
+
+    expect(binder.isBind(serviceName)).toBe(true);
+    expect(serviceStartConfig.proto).toBe(ServiceProto);
+    expect(started).toBe(true);
+    expect(service).toBe(binder.getService(serviceName));
   });
 
-  it('start negative start async', (done) => {
+  it('start negative start async', done => {
     const binder = new Binder();
     const serviceName = 'test';
 
@@ -254,26 +262,22 @@ describe('Binder', () => {
     class ServiceProto {
       @onStart(initialStateName)
       onStart() {
-        return new Promise(
-          (resolve, reject) => {
-            setTimeout(() => {
-              reject(new Error('error'));
-            });
-          },
-        );
+        return new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('error')));
+        });
       }
     }
 
     const initialState = {};
     binder.bind(initialState, { bindAs: initialStateName });
 
-    binder.start(getConfig(ServiceProto)).catch((error) => {
+    binder.start(getConfig(ServiceProto, [])).catch(error => {
       expect(!!error).toBe(true);
       done();
     });
   });
 
-  it('start negative start sync', (done) => {
+  it('start negative start sync', done => {
     const binder = new Binder();
     const serviceName = 'test';
 
@@ -288,13 +292,13 @@ describe('Binder', () => {
     const initialState = {};
     binder.bind(initialState, { bindAs: initialStateName });
 
-    binder.start(getConfig(ServiceProto)).catch((error) => {
+    binder.start(getConfig(ServiceProto, [])).catch(error => {
       expect(!!error).toBe(true);
       done();
     });
   });
 
-  it('onStart callback', (done) => {
+  it('onStart callback', async () => {
     const binder = new Binder();
     const serviceName = 'test';
     const firstServiceName = 'firstService';
@@ -303,7 +307,7 @@ describe('Binder', () => {
     @bindAsDecor(serviceName)
     class ServiceProto {
       @onStart(firstServiceName, secondServiceName)
-      onStart(firstService, secondService) {
+      onStart(firstService: any, secondService: any) {
         this.test(firstService, secondService);
         return true;
       }
@@ -316,13 +320,11 @@ describe('Binder', () => {
     binder.bind(firstService, { bindAs: firstServiceName });
     binder.bind(secondService, { bindAs: secondServiceName });
 
-    binder.start(getConfig(ServiceProto), true).then(({ service }) => {
-      expect(service.test).toBeCalledWith(firstService, secondService);
-      done();
-    });
+    const { service } = await binder.start(getConfig(ServiceProto, []));
+    expect(service.test).toBeCalledWith(firstService, secondService);
   });
 
-  it('onStart fail if some service not bind', (done) => {
+  it('onStart fail if some service not bind', async () => {
     const binder = new Binder();
     const serviceName = 'test';
     const firstServiceName = 'firstService';
@@ -331,7 +333,7 @@ describe('Binder', () => {
     @bindAsDecor(serviceName)
     class ServiceProto {
       @onStart(firstServiceName, secondServiceName)
-      onStart(firstService, secondService) {
+      onStart(firstService: any, secondService: any) {
         this.test(firstService, secondService);
         return true;
       }
@@ -342,79 +344,66 @@ describe('Binder', () => {
     const firstService = {};
     binder.bind(firstService, { bindAs: firstServiceName });
 
-    binder.start(getConfig(ServiceProto), true).catch((error) => {
-      expect(!!error).toBe(true);
-      done();
-    });
+    await expect(binder.start(getConfig(ServiceProto, []))).rejects.toBeDefined();
   });
 
-  it('start fails if service prototype does not match service factory result', (done) => {
+  it('start fails if service prototype does not match service factory result', async () => {
     const binder = new Binder();
     const serviceName = 'test';
 
     @bindAsDecor(serviceName)
-    class ServiceProto {
-    }
+    class ServiceProto {}
 
     @bindAsDecor(serviceName)
-    class ServiceProto2 {
-    }
+    class ServiceProto2 {}
 
-    const config = getConfig(ServiceProto);
+    const config = getConfig(ServiceProto, []);
     config.factory = () => new ServiceProto2();
-    binder.start(config).catch((error) => {
-      expect(!!error).toBe(true);
-      done();
-    });
+
+    await expect(binder.start(config)).rejects.toBeDefined();
   });
 
-  it('start fails if service fabric return invalid result', (done) => {
+  it('start fails if service fabric return invalid result', async () => {
     const binder = new Binder();
     const serviceName = 'test';
 
     @bindAsDecor(serviceName)
-    class ServiceProto {
-    }
+    class ServiceProto {}
 
-    const config = getConfig(ServiceProto);
+    const config = getConfig(ServiceProto, []);
+    // @ts-expect-error Expected
     config.factory = () => null;
-    binder.start(config).catch((error) => {
-      expect(!!error).toBe(true);
-      done();
-    });
+
+    await expect(binder.start(config)).rejects.toBeDefined();
   });
 
-  it('double service start && Promise', (done) => {
+  it('double service start && Promise', done => {
     const binder = new Binder();
     const serviceName = 'test';
 
     @bindAsDecor(serviceName)
     class ServiceProto {
       @onStart(initialStateName)
-      onStart(initialState) {
+      onStart(initialState: any) {
         this.test(initialState);
-        return new Promise(
-          (resolve) => {
-            setTimeout(() => {
-              resolve();
-            });
-          },
-        );
+        return new Promise(resolve => {
+          setTimeout(resolve);
+        });
       }
 
       test = jest.fn();
     }
 
-    let readyService;
+    let readyService: object;
 
     const initialState = {};
     binder.bind(initialState, { bindAs: initialStateName });
 
-    binder.start(getConfig(ServiceProto)).then(({ service }) => {
+    void binder.start(getConfig(ServiceProto, [])).then(({ service }) => {
       readyService = service;
     });
 
-    binder.start(getConfig(ServiceProto)).then(({ service }) => {
+    void binder.start(getConfig(ServiceProto, [])).then(({ service }) => {
       expect(service).toBe(readyService);
       expect(service.test).toBeCalledTimes(1);
       done();
@@ -428,7 +417,7 @@ describe('Binder', () => {
     @bindAsDecor(serviceName)
     class ServiceProto {
       @onStop
-      onStop(initialState) {
+      onStop(initialState: any) {
         this.test(initialState);
         return false;
       }
@@ -437,18 +426,18 @@ describe('Binder', () => {
     }
 
     const service = new ServiceProto();
-    const config = getConfig(ServiceProto);
+    const config = getConfig(ServiceProto, []);
 
     binder.bind(service, config.binderConfig);
     expect(binder.isBind(serviceName)).toBe(true);
-    binder.stop(getConfig(ServiceProto));
+    binder.stop(getConfig(ServiceProto, []));
 
     expect(binder.isBind(serviceName)).toBe(false);
     expect(service.test).toBeCalled();
   });
 
   describe('onBindTest', () => {
-    function expectSimpleOnBindTest(service1, service2, service3) {
+    function expectSimpleOnBindTest(service1: any, service2: any, service3: any) {
       expect(service1.onBind1).toBeCalledWith(service2, service3);
       expect(service1.onBind2).toBeCalledWith(service3);
       expect(service2.onBind1).toBeCalledWith(service1, service3);
@@ -463,9 +452,27 @@ describe('Binder', () => {
       const service2 = createService();
       const service3 = createService();
 
-      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
-      binder.bind(service2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
-      binder.bind(service3, createConfig(s3, [[s2, s1, 'onBind1'], [s2, 'onBind2']]));
+      binder.bind(
+        service1,
+        createConfig(s1, [
+          [s2, s3, 'onBind1'],
+          [s3, 'onBind2'],
+        ]),
+      );
+      binder.bind(
+        service2,
+        createConfig(s2, [
+          [s1, s3, 'onBind1'],
+          [s1, 'onBind2'],
+        ]),
+      );
+      binder.bind(
+        service3,
+        createConfig(s3, [
+          [s2, s1, 'onBind1'],
+          [s2, 'onBind2'],
+        ]),
+      );
 
       expectSimpleOnBindTest(service1, service2, service3);
     });
@@ -476,9 +483,27 @@ describe('Binder', () => {
       const service2 = createService();
       const service3 = createService();
 
-      binder.bind(service2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
-      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
-      binder.bind(service3, createConfig(s3, [[s2, s1, 'onBind1'], [s2, 'onBind2']]));
+      binder.bind(
+        service2,
+        createConfig(s2, [
+          [s1, s3, 'onBind1'],
+          [s1, 'onBind2'],
+        ]),
+      );
+      binder.bind(
+        service1,
+        createConfig(s1, [
+          [s2, s3, 'onBind1'],
+          [s3, 'onBind2'],
+        ]),
+      );
+      binder.bind(
+        service3,
+        createConfig(s3, [
+          [s2, s1, 'onBind1'],
+          [s2, 'onBind2'],
+        ]),
+      );
 
       expectSimpleOnBindTest(service1, service2, service3);
     });
@@ -489,13 +514,43 @@ describe('Binder', () => {
       const service2 = createService();
       const service3 = createService();
 
-      binder.bind(service2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
-      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
+      binder.bind(
+        service2,
+        createConfig(s2, [
+          [s1, s3, 'onBind1'],
+          [s1, 'onBind2'],
+        ]),
+      );
+      binder.bind(
+        service1,
+        createConfig(s1, [
+          [s2, s3, 'onBind1'],
+          [s3, 'onBind2'],
+        ]),
+      );
       binder.unbind(s1);
-      binder.bind(service3, createConfig(s3, [[s2, s1, 'onBind1'], [s2, 'onBind2']]));
+      binder.bind(
+        service3,
+        createConfig(s3, [
+          [s2, s1, 'onBind1'],
+          [s2, 'onBind2'],
+        ]),
+      );
       binder.unbind(s2);
-      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s3, 'onBind2']]));
-      binder.bind(service2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
+      binder.bind(
+        service1,
+        createConfig(s1, [
+          [s2, s3, 'onBind1'],
+          [s3, 'onBind2'],
+        ]),
+      );
+      binder.bind(
+        service2,
+        createConfig(s2, [
+          [s1, s3, 'onBind1'],
+          [s1, 'onBind2'],
+        ]),
+      );
 
       expectSimpleOnBindTest(service1, service2, service3);
     });
@@ -524,9 +579,27 @@ describe('Binder', () => {
       const service2 = createService();
       const service3 = createService();
 
-      binder.bind(service1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
-      binder.bind(service2, createConfig(s2, null, [[s1, s3, 'onUnbind1'], [s1, 'onUnbind2']]));
-      binder.bind(service3, createConfig(s3, null, [[s2, s1, 'onUnbind1'], [s2, 'onUnbind2']]));
+      binder.bind(
+        service1,
+        createConfig(s1, null, [
+          [s2, s3, 'onUnbind1'],
+          [s2, 'onUnbind2'],
+        ]),
+      );
+      binder.bind(
+        service2,
+        createConfig(s2, null, [
+          [s1, s3, 'onUnbind1'],
+          [s1, 'onUnbind2'],
+        ]),
+      );
+      binder.bind(
+        service3,
+        createConfig(s3, null, [
+          [s2, s1, 'onUnbind1'],
+          [s2, 'onUnbind2'],
+        ]),
+      );
 
       binder.unbind(s2);
       binder.unbind(s3);
@@ -543,15 +616,51 @@ describe('Binder', () => {
       const service2 = createService();
       const service3 = createService();
 
-      binder.bind(service1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
-      binder.bind(service2, createConfig(s2, null, [[s1, s3, 'onUnbind1'], [s1, 'onUnbind2']]));
-      binder.bind(service3, createConfig(s3, null, [[s2, s1, 'onUnbind1'], [s1, 'onUnbind2']]));
+      binder.bind(
+        service1,
+        createConfig(s1, null, [
+          [s2, s3, 'onUnbind1'],
+          [s2, 'onUnbind2'],
+        ]),
+      );
+      binder.bind(
+        service2,
+        createConfig(s2, null, [
+          [s1, s3, 'onUnbind1'],
+          [s1, 'onUnbind2'],
+        ]),
+      );
+      binder.bind(
+        service3,
+        createConfig(s3, null, [
+          [s2, s1, 'onUnbind1'],
+          [s1, 'onUnbind2'],
+        ]),
+      );
       binder.unbind(s1);
       binder.unbind(s2);
-      binder.bind(service1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
+      binder.bind(
+        service1,
+        createConfig(s1, null, [
+          [s2, s3, 'onUnbind1'],
+          [s2, 'onUnbind2'],
+        ]),
+      );
       binder.unbind(s1);
-      binder.bind(service1, createConfig(s1, null, [[s2, s3, 'onUnbind1'], [s2, 'onUnbind2']]));
-      binder.bind(service2, createConfig(s2, null, [[s1, s3, 'onUnbind1'], [s1, 'onUnbind2']]));
+      binder.bind(
+        service1,
+        createConfig(s1, null, [
+          [s2, s3, 'onUnbind1'],
+          [s2, 'onUnbind2'],
+        ]),
+      );
+      binder.bind(
+        service2,
+        createConfig(s2, null, [
+          [s1, s3, 'onUnbind1'],
+          [s1, 'onUnbind2'],
+        ]),
+      );
       binder.unbind(s1);
       binder.unbind(s2);
 
@@ -584,19 +693,55 @@ describe('Binder', () => {
       const service4 = createService();
       const service5 = createService();
 
-      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s2, 'onBind2']]));
-      binder.bind(service2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
-      binder.bind(service3, createConfig(
-        s3,
-        [[s2, s1, 'onBind1'], [s1, 'onBind2']],
-        [[s2, s1, 'onUnbind1'], [s1, 'onUnbind2']],
-      ));
-      localBinder.bind(service4, createConfig(s4, [[s5, s1, 'onBind1'], [s1, 'onBind2']]));
-      localBinder.bind(service5, createConfig(
-        s5,
-        [[s4, s2, 'onBind1'], [s2, 'onBind2']],
-        [[s4, s2, 'onUnbind1'], [s2, 'onUnbind2']],
-      ));
+      binder.bind(
+        service1,
+        createConfig(s1, [
+          [s2, s3, 'onBind1'],
+          [s2, 'onBind2'],
+        ]),
+      );
+      binder.bind(
+        service2,
+        createConfig(s2, [
+          [s1, s3, 'onBind1'],
+          [s1, 'onBind2'],
+        ]),
+      );
+      binder.bind(
+        service3,
+        createConfig(
+          s3,
+          [
+            [s2, s1, 'onBind1'],
+            [s1, 'onBind2'],
+          ],
+          [
+            [s2, s1, 'onUnbind1'],
+            [s1, 'onUnbind2'],
+          ],
+        ),
+      );
+      localBinder.bind(
+        service4,
+        createConfig(s4, [
+          [s5, s1, 'onBind1'],
+          [s1, 'onBind2'],
+        ]),
+      );
+      localBinder.bind(
+        service5,
+        createConfig(
+          s5,
+          [
+            [s4, s2, 'onBind1'],
+            [s2, 'onBind2'],
+          ],
+          [
+            [s4, s2, 'onUnbind1'],
+            [s2, 'onUnbind2'],
+          ],
+        ),
+      );
 
       expect(service1.onBind1).toBeCalledWith(service2, service3);
       expect(service1.onBind1).toBeCalledTimes(1);
@@ -627,12 +772,30 @@ describe('Binder', () => {
 
       binder.unbind(s1);
       binder.unbind(s2);
-      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s2, 'onBind2']]));
+      binder.bind(
+        service1,
+        createConfig(s1, [
+          [s2, s3, 'onBind1'],
+          [s2, 'onBind2'],
+        ]),
+      );
       binder.unbind(s1);
-      binder.bind(service1, createConfig(s1, [[s2, s3, 'onBind1'], [s2, 'onBind2']]));
+      binder.bind(
+        service1,
+        createConfig(s1, [
+          [s2, s3, 'onBind1'],
+          [s2, 'onBind2'],
+        ]),
+      );
       expect(service3.onUnbind1).toBeCalledTimes(1);
       expect(service3.onUnbind2).toBeCalledTimes(2);
-      binder.bind(service2, createConfig(s2, [[s1, s3, 'onBind1'], [s1, 'onBind2']]));
+      binder.bind(
+        service2,
+        createConfig(s2, [
+          [s1, s3, 'onBind1'],
+          [s1, 'onBind2'],
+        ]),
+      );
 
       expect(service3.onBind1).toBeCalledWith(service2, service1);
       expect(service3.onBind1).toBeCalledTimes(1);

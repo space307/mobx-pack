@@ -1,43 +1,74 @@
 {
-  "extends": ["airbnb"],
-  "parser": "@babel/eslint-parser",
-  "plugins": ["flowtype"],
+  "plugins": ["prettier"],
+  "extends": ["airbnb", "prettier"],
   "env": {
     "browser": true,
     "jest": true
   },
   "rules": {
-    "indent": [2, 2],
-    "react/state-in-constructor": "off",
-    "react/jsx-props-no-spreading": "off",
-    "react/destructuring-assignment": "off",
-    "react/prop-types": "off",
-    "react/prefer-stateless-function": "warn",
-    "react/no-array-index-key": "warn",
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
-    "react/require-default-props": "off",
-    "react/forbid-prop-types": "off",
-    "jsx-a11y/href-no-hash": "off",
-    "jsx-a11y/no-autofocus":"off",
-    "react/sort-comp": "off",
-    "flowtype/define-flow-type": 2,
-    "jsx-a11y/label-has-for": [ 2, {
-      "required": {
-        "some": [ "nesting", "id" ]
+    "prettier/prettier": 2,
+    "react/state-in-constructor": 0,
+    "react/jsx-props-no-spreading": 0,
+    "react/destructuring-assignment": 0,
+    "react/prop-types": 0,
+    "react/prefer-stateless-function": 1,
+    "react/no-array-index-key": 1,
+    "react/jsx-filename-extension": [
+      2, {
+        "extensions": [".tsx"]
       }
-    }],
-    "jsx-a11y/no-static-element-interactions": "warn",
-    "react/jsx-indent": "off",
-    "import/no-unresolved": "off",
-    "import/no-extraneous-dependencies": "off",
-    "no-param-reassign": "warn",
-    "no-plusplus": "warn",
-    "class-methods-use-this": "warn",
-    "no-underscore-dangle": "off",
-    "max-len": [
-      "error",
-      120
     ],
-    "import/extensions": "off"
-  }
+    "react/require-default-props": 0,
+    "react/forbid-prop-types": 0,
+    "no-restricted-syntax": 0,
+    "jsx-a11y/href-no-hash": 0,
+    "jsx-a11y/no-autofocus": 0,
+    "react/sort-comp": 0,
+    "jsx-a11y/label-has-for": [
+      2, {
+        "required": {
+          "some": ["nesting", "id"]
+        }
+      }
+    ],
+    "jsx-a11y/no-static-element-interactions": 1,
+    "react/jsx-indent": 0,
+    "import/no-unresolved": 0,
+    "import/no-extraneous-dependencies": 0,
+    "no-param-reassign": 1,
+    "no-plusplus": 1,
+    "class-methods-use-this": 1,
+    "no-underscore-dangle": 0,
+    "no-void": 0,
+    "no-use-before-define": 0,
+    "import/extensions": 0,
+    "import/prefer-default-export": 0,
+    "import/no-default-export": 2
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "project": "./tsconfig.json"
+      },
+      "plugins": ["@typescript-eslint"],
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+      ],
+      "rules": {
+        "no-shadow": 0,
+        "no-useless-constructor": 0,
+        "@typescript-eslint/no-unsafe-member-access": 0,
+        "@typescript-eslint/no-unsafe-assignment": 0,
+        "@typescript-eslint/consistent-type-imports": 2,
+        "@typescript-eslint/array-type": [
+          "error", {
+            "default": "array"
+          }
+        ]
+      }
+    }
+  ]
 }

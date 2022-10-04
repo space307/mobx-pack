@@ -16,7 +16,7 @@ describe('BinderProvider test', () => {
       return (
         <div id="count">
           <BinderContext.Consumer>
-            {(binderParam) => {
+            {binderParam => {
               consumerMock(!!(binderParam && binderParam.parentBinder === binder));
             }}
           </BinderContext.Consumer>
@@ -38,7 +38,7 @@ describe('BinderProvider test', () => {
     expect(consumerMock).toHaveBeenCalledWith(true);
   });
 
-  it('wrong attributes test', (done) => {
+  it('wrong attributes test', done => {
     const ComponentWithBinderProvider = BinderProvider();
     expect(() => {
       render(<ComponentWithBinderProvider />);

@@ -1,19 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Binder addService 1`] = `
-Array [
+[
   "s1",
-  Object {
+  {
     "bindAs": "s1",
-    "onBind": Array [
-      Array [
+    "onBind": [
+      [
         "s2",
         "s3",
         "someMethod",
       ],
     ],
-    "onUnbind": Array [
-      Array [
+    "onUnbind": [
+      [
         "s2",
         "someMethod",
       ],
@@ -23,17 +23,17 @@ Array [
 `;
 
 exports[`Binder saveDeps 1`] = `
-Object {
-  "onBind": Object {
-    "s2": Array [
+{
+  "onBind": {
+    "s2": [
       "s1",
     ],
-    "s3": Array [
+    "s3": [
       "s1",
     ],
   },
-  "onUnbind": Object {
-    "s3": Array [
+  "onUnbind": {
+    "s3": [
       "s1",
     ],
   },
@@ -41,19 +41,19 @@ Object {
 `;
 
 exports[`Binder test addService 1`] = `
-Array [
+[
   "s1",
-  Object {
+  {
     "bindAs": "s1",
-    "onBind": Array [
-      Array [
+    "onBind": [
+      [
         "s2",
         "s3",
         "someMethod",
       ],
     ],
-    "onUnbind": Array [
-      Array [
+    "onUnbind": [
+      [
         "s2",
         "someMethod",
       ],
@@ -63,17 +63,17 @@ Array [
 `;
 
 exports[`Binder test saveDeps 1`] = `
-Object {
-  "onBind": Object {
-    "s2": Array [
+{
+  "onBind": {
+    "s2": [
       "s1",
     ],
-    "s3": Array [
+    "s3": [
       "s1",
     ],
   },
-  "onUnbind": Object {
-    "s3": Array [
+  "onUnbind": {
+    "s3": [
       "s1",
     ],
   },
