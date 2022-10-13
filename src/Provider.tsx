@@ -7,7 +7,7 @@ import * as React from 'react';
 import { useContext } from 'react';
 import { isValidElementType } from 'react-is';
 import { observer } from 'mobx-react';
-import type { Binder } from './Binder';
+import type { Binder } from './Binder.js';
 
 import { startServices, stopServices, getStartedServices } from './serviceUtils.js';
 import { isClass } from './helper/util.js';
@@ -15,34 +15,61 @@ import type {
   BindableEntity,
   BindableEntityConstructor,
   BindableEntityStartConfig,
-  Constructor,
   StartBindableEntityResult,
+  Constructor,
 } from './typing/common.js';
 
-export type ServicesHashType = Record<string, unknown>;
+export type ServicesHashType = Record<string, object>;
 
 export type ServiceItemType =
   | Constructor
   | [
       service: BindableEntityStartConfig['proto'],
       factory: BindableEntityStartConfig['factory'] | unknown,
-      ...args: unknown[],
+      ...args: any[],
     ];
 
-type ProviderOptionsAttributeType<Props extends object, ModifiedProps extends object> = {
+type ValuesOf<T extends object> = T[keyof T];
+type ProviderServiceFactory<T extends ServicesHashType> = ValuesOf<{
+  [K in keyof T]: {
+    value: [Constructor<T[K]>, () => T[K]];
+  }['value'];
+}>;
+
+type CommonProviderOptionsAttribute = {
   stop?: boolean;
-  services: ServiceItemType[] | ((props: unknown) => ServiceItemType[]);
-  helper?: (services: any, props: Props) => ModifiedProps;
-  stub?: React.ComponentType;
+  stub?: React.ComponentType | null;
 };
 
-type ProviderOptionsPropType = ProviderOptionsAttributeType & {
-  services: ServiceItemType[];
-};
+type ProviderServicesProtos<T extends ServicesHashType, K extends keyof T = keyof T> = (
+  | Constructor<T[K]>
+  | [constructor: Constructor<T[K]>, ...args: unknown[]]
+)[];
 
-type ProviderStateTypes = {
+type ProviderServicesFactory<T extends ServicesHashType> = ProviderServiceFactory<T>[];
+
+type ProviderOptionsAttribute<
+  ExternalProps extends object,
+  InjectedProps extends object,
+  Services extends ServicesHashType | void,
+> = [Services] extends [void]
+  ? CommonProviderOptionsAttribute & {
+      services?: void;
+      helper?: (services: void, props: ExternalProps) => ExternalProps & InjectedProps;
+    }
+  : CommonProviderOptionsAttribute & {
+      services: // @ts-expect-error TODO fix
+      | ProviderServicesProtos<Services>
+        // @ts-expect-error TODO fix
+        | ((props: ExternalProps) => ProviderServicesProtos<Services>)
+        // @ts-expect-error TODO fix
+        | ProviderServicesFactory<Services>;
+      helper?: (services: Services, props: ExternalProps) => (ExternalProps & InjectedProps) | void;
+    };
+
+type ProviderStateTypes<Services> = {
   error: string | null;
-  services: ServicesHashType | null;
+  services: Services;
 };
 
 /**
@@ -58,7 +85,7 @@ function convertToServiceStartConfig(
 
     const proto =
       Array.isArray(ServiceProto) && ServiceProto.length
-        ? ServiceProto[0]
+        ? (ServiceProto[0] as BindableEntityConstructor)
         : (ServiceProto as BindableEntityConstructor);
     const protoAttrs =
       Array.isArray(ServiceProto) && Array.isArray(ServiceProto[1]) ? ServiceProto[1] : [];
@@ -93,7 +120,7 @@ function convertToServiceHash(list: BindableEntity[] | null): ServicesHashType |
   }
 
   return list.reduce<Record<string, BindableEntity>>((acc, item) => {
-    const ctr = item.constructor;
+    const ctr = item.constructor as BindableEntityConstructor;
     if (!ctr.binderConfig || !ctr.binderConfig.bindAs) {
       throw new Error('Cannot convert service hash because binderConfig or bindAs props not exits');
     }
@@ -108,38 +135,43 @@ function convertToServiceHash(list: BindableEntity[] | null): ServicesHashType |
 /**
  * return name of React.Component
  */
-function getComponentName(Component: React.ComponentType): string {
+function getComponentName(Component: React.ComponentType<any>): string {
   return Component && typeof Component.name === 'string' ? Component.name : 'unknown';
 }
 
 export function createProvider(
   BinderContext: React.Context<Binder>,
-  ServiceContext: React.Context<ServicesHashType | null>,
+  ServiceContext: React.Context<ServicesHashType>,
 ) {
-  return function Provider<Props extends object, CombinedProps extends object = object>(
-    Component: React.ComponentType<Props>,
-    options?: ProviderOptionsAttributeType<Props, CombinedProps>,
-  ): React.ComponentType<Omit<Props, keyof CombinedProps>> {
-    const defaultOptions = {
+  return function Provider<
+    ExternalProps extends object,
+    InjectedProps extends object,
+    Services extends ServicesHashType,
+  >(
+    Component: React.ComponentType<ExternalProps & InjectedProps>,
+    options?: ProviderOptionsAttribute<ExternalProps, InjectedProps, Services>,
+  ): React.ComponentType<ExternalProps> {
+    const defaultOptions: CommonProviderOptionsAttribute = {
       stop: false,
-      services: [],
+      stub: null,
     };
 
     const ProviderC = observer(
-      class ProviderComponent<PropType extends object> extends React.Component<
-        PropType & { binder: Binder },
-        ProviderStateTypes
+      class ProviderComponent extends React.Component<
+        ExternalProps & { binder: Binder },
+        ProviderStateTypes<Services>
       > {
-        state: ProviderStateTypes = {
+        state: ProviderStateTypes<Services> = {
           error: null,
-          services: null,
+          // @ts-expect-error TODO fix
+          services: {},
         };
 
-        options: ProviderOptionsPropType;
+        options: ProviderOptionsAttribute<ExternalProps, InjectedProps, Services>;
 
         serviceToStop: BindableEntityStartConfig[] = [];
 
-        constructor(props: PropType & { binder: Binder }) {
+        constructor(props: ExternalProps & { binder: Binder }) {
           super(props);
 
           if (!props.binder) {
@@ -156,8 +188,10 @@ export function createProvider(
             const services =
               typeof options.services === 'function' ? options.services(props) : options.services;
             const { stop, helper, stub } = options;
+            // @ts-expect-error TODO fix
             this.options = { ...defaultOptions, ...{ stop, helper, stub }, ...{ services } };
           } else {
+            // @ts-expect-error TODO fix
             this.options = { ...defaultOptions };
           }
 
@@ -165,7 +199,8 @@ export function createProvider(
             let config;
 
             try {
-              config = convertToServiceStartConfig(this.options.services);
+              // @ts-expect-error TODO fix
+              config = convertToServiceStartConfig(this.options.services ?? []);
             } catch (err) {
               if (err instanceof Error) {
                 this.state.error = `${err.message} (component: ${getComponentName(Component)})`;
@@ -178,6 +213,7 @@ export function createProvider(
 
             if (props.binder && config) {
               const serviceList = getStartedServices(props.binder, config);
+              // @ts-expect-error TODO fix
               this.state.services = convertToServiceHash(serviceList);
             }
           }
@@ -187,6 +223,7 @@ export function createProvider(
          * Ser service list to state && for service context provider
          */
         setServices(list: BindableEntity[] | null) {
+          // @ts-expect-error TODO fix
           this.setState({ services: convertToServiceHash(list) });
         }
 
@@ -206,13 +243,14 @@ export function createProvider(
          * Start service procedure
          */
         startServices() {
-          const { services: ServiceProtoList } = this.options;
+          const { services: serviceProtoList } = this.options;
           const { binder } = this.props;
 
-          if (ServiceProtoList && ServiceProtoList.length) {
+          if (serviceProtoList && serviceProtoList.length) {
             let serviceStartConfigList;
             try {
-              serviceStartConfigList = convertToServiceStartConfig(ServiceProtoList);
+              // @ts-expect-error TODO fix
+              serviceStartConfigList = convertToServiceStartConfig(serviceProtoList);
             } catch (err) {
               if (err instanceof Error) {
                 this.setState({
@@ -265,11 +303,17 @@ export function createProvider(
         /**
          * Merge props for wrapped component and call helper
          */
-        composeProps(services: ServicesHashType | null, props: PropType) {
+        composeProps(
+          services: Services,
+          props: ExternalProps,
+        ): (ExternalProps & InjectedProps) | void {
           if (services && typeof this.options.helper) {
-            return this.options.helper ? this.options.helper(services, props) : props;
+            return this.options.helper
+              ? // @ts-expect-error TODO fix types later
+                this.options.helper(services, props)
+              : (props as ExternalProps & InjectedProps);
           }
-          return props;
+          return props as ExternalProps & InjectedProps;
         }
 
         render() {
@@ -283,7 +327,7 @@ export function createProvider(
           const helperOk = !this.options.helper || !!props;
           const Stub = this.options.stub;
 
-          if (serviceOk && helperOk) {
+          if (serviceOk && helperOk && props) {
             return hasService ? (
               <ServiceContext.Provider value={this.state.services}>
                 <Component {...props} />

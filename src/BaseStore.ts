@@ -1,12 +1,15 @@
+/* eslint-disable */
+// @ts-nocheck Этот файл не спасти
+
 /**
  отличия от боевого файла:
  - ворзвращается не функция а класс принимающий объект context
  - поле appBinder переименовано в биндер
  */
 import { makeObservable, observable } from 'mobx';
-import type { Binder } from './Binder';
+import type { Binder } from './Binder.js';
 import { protoName } from './helper/util.js';
-import type { ServiceStarter } from './ServiceStarter';
+import type { ServiceStarter } from './ServiceStarter.js';
 import type { ServiceConfigBindAs, BindableEntity, BindableEntityConfig } from './typing/common.js';
 
 export enum ServiceStatus {
@@ -126,7 +129,7 @@ export class BaseStore implements BindableEntity {
 
     return stopping
       ? Promise.resolve()
-      : new Promise<void>((resolve, reject) => {
+      : new Promise<boolean | void>((resolve, reject) => {
           if (!initiatorId) {
             resolve();
           } else if (this.initiators.indexOf(initiatorId) === -1) {
@@ -148,11 +151,11 @@ export class BaseStore implements BindableEntity {
             resolve(true);
           }
         }).then(alreadyStopped => {
-          let result = false;
+          let result: boolean | Promise<boolean | void> = false;
 
           if ((alreadyStopped || this.initiators.length) && initiatorId) {
-            result = new Promise(resolve => {
-              resolve(this.initiators.length);
+            result = new Promise<boolean>(resolve => {
+              resolve(this.initiators.length !== 0);
             });
           } else {
             this.alreadyStopping = true;

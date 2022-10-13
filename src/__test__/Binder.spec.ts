@@ -1,7 +1,7 @@
 import { Binder } from '../Binder';
 import { onStart, onStop, bindAs as bindAsDecor } from '../serviceDecorators';
 import type { BinderConfig } from '../typing/common';
-import { getConfig } from './utils';
+import { getConfig } from './utils.js';
 
 const s1 = 's1';
 const s2 = 's2';

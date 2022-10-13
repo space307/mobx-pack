@@ -1,4 +1,4 @@
-import type { BindableEntity, ServiceConnectorOptions } from './typing/common';
+import type { BindableEntity, ServiceConnectorOptions } from './typing/common.js';
 
 function startOk(service: BindableEntity, options: ServiceConnectorOptions) {
   if (!options.binder.isBind(options.config.bindAs)) {
@@ -62,7 +62,9 @@ export function ServiceConnector(service: BindableEntity, options: ServiceConnec
 
     service.stop = function () {
       let onStop = options.onStop || service.onStop;
+      // @ts-expect-error unfixable
       if (typeof onStop === 'string' && typeof service[onStop] === 'function') {
+        // @ts-expect-error unfixable
         onStop = service[onStop];
       }
 

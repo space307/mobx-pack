@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
+    "baseUrl": "./src",
     "target": "es2020",
-    "module": "esnext",
+    "module": "ES6",
     "newLine": "lf",
     "jsx": "react",
     "declaration": true,
@@ -20,5 +21,7 @@
       "dom",
       "es2020"
     ]
-  }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["src/__test__/*.ts", "src/__test__/*.tsx"]
 }

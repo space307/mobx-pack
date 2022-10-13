@@ -2,7 +2,7 @@ import '@babel/polyfill';
 import { startServices, stopServices } from '../serviceUtils';
 import { Binder } from '../Binder';
 import { onStart, bindAs, onStop } from '../serviceDecorators';
-import { getConfig } from './utils';
+import { getConfig } from './utils.js';
 
 describe('serviceUtils test', () => {
   it('startServices', done => {

@@ -60,6 +60,10 @@
       "rules": {
         "no-shadow": 0,
         "no-useless-constructor": 0,
+        "max-classes-per-file": 0,
+        "@typescript-eslint/ban-types": 0,
+        "@typescript-eslint/no-unsafe-call": 0,
+        "@typescript-eslint/no-unsafe-argument": 0,
         "@typescript-eslint/no-unsafe-member-access": 0,
         "@typescript-eslint/no-unsafe-assignment": 0,
         "@typescript-eslint/consistent-type-imports": 2,

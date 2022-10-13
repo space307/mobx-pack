@@ -1,12 +1,13 @@
 import * as React from 'react';
-import { render, screen, act, type RenderResult } from '@testing-library/react';
+import { useContext } from 'react';
+import { render, act } from '@testing-library/react';
 import type { ServicesHashType } from '../Provider';
 import { createProvider } from '../Provider';
 import { Binder } from '../Binder';
-import { bindAs, onStart } from '../serviceDecorators.js';
+import { bindAs, onStart } from '../serviceDecorators';
 
 const BinderContext = React.createContext<Binder>(new Binder());
-const ServiceContext = React.createContext<ServicesHashType | null>(null);
+const ServiceContext = React.createContext<ServicesHashType>({});
 const Provider = createProvider(BinderContext, ServiceContext);
 
 const delay = (ttl?: number) =>
@@ -46,11 +47,16 @@ describe('Provider test', () => {
       return <div id="count">{count}</div>;
     }
 
-    const ComponentWithProvider = Provider(Component, {
+    const ComponentWithProvider = Provider<
+      { pass: boolean },
+      { count: number },
+      { serviceProto: ServiceProto }
+    >(Component, {
       helper({ serviceProto }: { serviceProto: ServiceProto }, { pass }) {
         helperMock(binder.getService(serviceName) === serviceProto && pass);
         return {
           count: serviceProto.count,
+          pass,
         };
       },
       services: [ServiceProto],
@@ -85,7 +91,7 @@ describe('Provider test', () => {
     class ServiceProto {
       count = 1;
 
-      constructor(count) {
+      constructor(count: number) {
         this.count = count;
         constructorMock(count);
       }
@@ -101,13 +107,16 @@ describe('Provider test', () => {
     const binder = new Binder();
     binder.bind(initialState, { bindAs: initialStateName });
 
-    function Component({ count }) {
+    function Component({ count }: { count: number }) {
       return <div id="count">{count}</div>;
     }
 
-    const ComponentWithProvider = Provider(Component, {
-      services: ({ count }) => [[ServiceProto, [count]]],
-    });
+    const ComponentWithProvider = Provider<{ count: number }, {}, { serviceProto: ServiceProto }>(
+      Component,
+      {
+        services: ({ count }) => [[ServiceProto, [count]]],
+      },
+    );
 
     function ComponentWithBinderContext() {
       return (
@@ -145,19 +154,13 @@ describe('Provider test', () => {
     binder.bind(initialState, { bindAs: initialStateName });
 
     function Component() {
-      return (
-        <div id="count">
-          <ServiceContext.Consumer>
-            {({ serviceProto }) => {
-              consumerMock(serviceProto === binder.getService(serviceName));
-            }}
-          </ServiceContext.Consumer>
-        </div>
-      );
+      const { serviceProto } = useContext(ServiceContext);
+      consumerMock(serviceProto === binder.getService(serviceName));
+      return null;
     }
 
-    const ComponentWithProvider = Provider(Component, {
-      services: ({ count }) => [[ServiceProto, [count]]],
+    const ComponentWithProvider = Provider<{}, {}, { serviceProto: ServiceProto }>(Component, {
+      services: () => [ServiceProto],
     });
 
     function ComponentWithBinderContext() {
@@ -205,8 +208,17 @@ describe('Provider test', () => {
       return <div id="count" />;
     }
 
-    await binder.start({ proto: ServiceProto, binderConfig: ServiceProto.binderConfig });
-    const ComponentWithProvider = Provider(Component, {
+    await binder.start({
+      proto: ServiceProto,
+      protoAttrs: [],
+      // @ts-expect-error decorator type issue
+      binderConfig: ServiceProto.binderConfig,
+    });
+    const ComponentWithProvider = Provider<
+      { color: number },
+      {},
+      { s1: ServiceProto; s2: ServiceProto2 }
+    >(Component, {
       services: [ServiceProto, ServiceProto2],
       stop: true,
     });
@@ -251,7 +263,7 @@ describe('Provider test', () => {
       return <div id="count" />;
     }
 
-    const ComponentWithProvider = Provider(Component, {
+    const ComponentWithProvider = Provider<{ color: number }, {}, { s1: ServiceProto }>(Component, {
       services: [ServiceProto],
     });
 
@@ -295,7 +307,7 @@ describe('Provider test', () => {
       return <div id="stub">Loading...</div>;
     }
 
-    const ComponentWithProvider = Provider(Component, {
+    const ComponentWithProvider = Provider<{ color: number }, {}, { s1: ServiceProto }>(Component, {
       services: [ServiceProto],
       stub: MyStub,
     });
@@ -338,7 +350,7 @@ describe('Provider test', () => {
       return <div id="stub">Loading...</div>;
     }
 
-    const ComponentWithProvider = Provider(Component, {
+    const ComponentWithProvider = Provider<{ color: number }, {}, { s1: ServiceProto }>(Component, {
       helper() {
         return undefined;
       },
@@ -361,6 +373,7 @@ describe('Provider test', () => {
   });
 
   it('wrong attributes: no Component passed', () => {
+    // @ts-expect-error Expected
     const ComponentWithProvider = Provider();
     expect(() => {
       render(<ComponentWithProvider />);
@@ -374,6 +387,7 @@ describe('Provider test', () => {
     class ServiceProto {}
 
     const ComponentWithProvider = Provider(() => <div />, {
+      // @ts-expect-error Expected
       services: [2],
     });
     expect(() => {
@@ -388,6 +402,7 @@ describe('Provider test', () => {
     }).toThrowError('ServiceItem passed in Provider is not valid Array (component: )');
 
     const ComponentWithProvider3 = Provider(() => <div />, {
+      // @ts-expect-error Expected
       services: [ServiceProto, {}],
     });
     expect(() => {
@@ -395,17 +410,18 @@ describe('Provider test', () => {
     }).toThrowError('Object passed as ServiceItem to Provider is not a constructor (component: )');
   });
 
-  it('pass props through provider without helper', async () => {
-    function Component(props) {
+  it('pass props through provider without helper', () => {
+    function Component(props: any) {
       return <div data-testid="inner" {...props} />;
     }
 
     const ComponentWithProvider = Provider(Component);
     const wrapper = render(
+      // @ts-expect-error Expected
       <BinderContext.Provider value={{}}>
         <ComponentWithProvider data-myvalue="1" />
       </BinderContext.Provider>,
     );
-    expect((await wrapper.queryByTestId('inner')).dataset.myvalue).toBe('1');
+    expect(wrapper.queryByTestId('inner')?.dataset.myvalue).toBe('1');
   });
 });

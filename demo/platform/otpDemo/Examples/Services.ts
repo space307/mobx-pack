@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+/* eslint-disable no-unused-vars,@typescript-eslint/no-empty-function */
 import { onStop, onStart, onUnbind, onBind, bindAs } from 'mobx-pack';
 
 const SERVICE_NAMES = {
@@ -11,21 +11,21 @@ const SERVICE_NAMES = {
 /* TimeService */
 @bindAs(SERVICE_NAMES.TIME_SERVICE)
 class TimeService {
-  @onStart
-  onStart(initialState) {}
+  @onStart()
+  onStart() {}
 }
 
 /* CarStore */
 @bindAs(SERVICE_NAMES.CAR_STORE)
 class CarStore {
-  @onStart
-  onStart(initialState) {}
+  @onStart()
+  onStart() {}
 
   @onBind(SERVICE_NAMES.TIME_SERVICE, SERVICE_NAMES.GARAGE_STORE)
-  onBind(timeService, garageStore) {}
+  onBind(_timeService: TimeService, _garageStore: GarageStore) {}
 
   @onBind(SERVICE_NAMES.GARAGE_STORE)
-  onBindOnlyGarageStore(garageStore) {}
+  onBindOnlyGarageStore(_garageStore: GarageStore) {}
 
   @onUnbind(SERVICE_NAMES.TIME_SERVICE, SERVICE_NAMES.GARAGE_STORE)
   onUnbind() {}
@@ -37,13 +37,12 @@ class CarStore {
 /* GarageStore */
 @bindAs(SERVICE_NAMES.GARAGE_STORE)
 class GarageStore {
-  @onStart
-  onStart(initialState) {}
+  @onStart()
+  onStart() {}
 
   @onBind(SERVICE_NAMES.TIME_SERVICE)
-  onBind(timeService) {
+  onBind(_timeService: TimeService) {}
 
-  }
   @onUnbind(SERVICE_NAMES.TIME_SERVICE)
   onUnbind() {}
 
@@ -57,12 +56,12 @@ class GarageStore {
 class SomeService {
   static binderConfig = {
     bindAs: SERVICE_NAMES.SOME_SERVICE,
-    onBind: [
-      [SERVICE_NAMES.TIME_SERVICE, 'onBind'],
-    ],
+    onBind: [[SERVICE_NAMES.TIME_SERVICE, 'onBind']],
   };
-  onStart(initialState) {}
-  onBind(timeService) {}
+
+  onStart() {}
+
+  onBind() {}
 }
 
 export { GarageStore, TimeService, CarStore, SomeService };

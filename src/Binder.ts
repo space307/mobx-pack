@@ -13,8 +13,8 @@
 
 import { cloneDeep } from 'lodash';
 import { toJS } from 'mobx';
-import { protoName } from './helper/util';
-import { EventEmitter } from './helper/EventEmitter';
+import { protoName } from './helper/util.js';
+import { EventEmitter } from './helper/EventEmitter.js';
 import type {
   ServiceConfigBindAs,
   ServiceConfigCallbackSet,
@@ -24,7 +24,7 @@ import type {
   BindableEntityStartConfig,
   BindableEntity,
   Constructor,
-} from './typing/common';
+} from './typing/common.js';
 
 enum EMITTER_EVENT {
   BIND,

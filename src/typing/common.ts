@@ -57,7 +57,7 @@ export interface BindableEntity {
   api?: Record<string, (...args: unknown[]) => void>;
 
   start: (initiatorId: string) => Promise<unknown>;
-  stop?: () => Promise<unknown> | void;
+  stop?: (initiatorId: string) => Promise<unknown> | void;
   onStart?: (...args: any[]) => boolean | Promise<boolean>;
   onStop?: () => void;
   __serviceOptions: {

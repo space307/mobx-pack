@@ -1,4 +1,3 @@
-
 /*
 Legacy demo page
 
@@ -24,17 +23,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 */
 
-
 // otp demo page
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import MyApplication from './otpDemo/MyApplication.jsx';
+import { MyApplicationContainer } from './otpDemo/MyApplication';
 
 document.addEventListener('DOMContentLoaded', () => {
   const container = document.querySelector('#root');
 
   if (container) {
     const root = createRoot(container);
-    root.render(React.createElement(MyApplication));
+    root.render(React.createElement(MyApplicationContainer));
   }
 });

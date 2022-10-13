@@ -1,9 +1,12 @@
-// @flow
 /* eslint-disable no-console */
 import { observable } from 'mobx';
 import { onStop, onStart, onUnbind, onBind, bindAs } from 'mobx-pack';
-import type { CarStoreInterface, GarageStoreInterface,
-  TimeServiceInterface, InitialStateInterface } from './typing/types.js';
+import type {
+  CarStoreInterface,
+  GarageStoreInterface,
+  TimeServiceInterface,
+  InitialStateInterface,
+} from './typing/types';
 
 const SERVICE_NAMES = {
   GARAGE_STORE: 'garageStore',
@@ -18,47 +21,50 @@ export const INITIAL_SERVICE = 'initialService';
 @bindAs(SERVICE_NAMES.TIME_SERVICE)
 class TimeService implements TimeServiceInterface {
   @observable
-  time: string = '';
+  time = '';
 
   @onStart(INITIAL_SERVICE)
-  onStart(initialService: *): boolean {
+  onStart(initialService: any): boolean {
     console.log(['onStart', SERVICE_NAMES.TIME_SERVICE, initialService]);
 
     setInterval((): void => {
       const date = new Date();
-      this.time = `${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+      this.time = `${date.getMinutes().toString().padStart(2, '0')}:${date
+        .getSeconds()
+        .toString()
+        .padStart(2, '0')}`;
     }, 1000);
 
     return true;
   }
+
   @onStop
   onStop() {
     console.log(['onStop', SERVICE_NAMES.TIME_SERVICE]);
   }
 }
+
 /* --/ TimeService --*/
 
 /* -- GarageStore --*/
 @bindAs(SERVICE_NAMES.GARAGE_STORE)
 class GarageStore implements GarageStoreInterface {
   @observable
-  counter: number = 0;
-  privateField: number = 0;
+  counter = 0;
+
+  privateField = 0;
 
   @onStart(INITIAL_SERVICE)
-  onStart(initialService: *): Promise<*> {
+  onStart(initialService: any): Promise<void> {
     console.log(['onStart', SERVICE_NAMES.GARAGE_STORE, initialService]);
 
     setInterval((): void => {
       this.counter += 1;
     }, 1000);
 
-    return new Promise(
-      (resolve) => {
-        setTimeout(() => resolve(), 1000);
-      },
-    );
+    return new Promise(resolve => setTimeout(resolve, 1000));
   }
+
   @onStop
   onStop() {
     console.log(['onStop', SERVICE_NAMES.GARAGE_STORE]);
@@ -86,12 +92,11 @@ class GarageStore implements GarageStoreInterface {
 
 /* --/ GarageStore --*/
 
-
 /* -- CarStore --*/
 @bindAs(SERVICE_NAMES.CAR_STORE)
 class CarStore implements CarStoreInterface {
   @observable
-  modelName: string = 'Zapor';
+  modelName = 'Zapor';
 
   constructor(modelName: string) {
     if (modelName) {
@@ -100,7 +105,7 @@ class CarStore implements CarStoreInterface {
   }
 
   @onStart(INITIAL_SERVICE)
-  onStart(initialService: *): boolean {
+  onStart(initialService: any): boolean {
     console.log(['onStart', SERVICE_NAMES.CAR_STORE, initialService]);
     return true;
   }
@@ -110,6 +115,7 @@ class CarStore implements CarStoreInterface {
     console.log(['onStop', SERVICE_NAMES.CAR_STORE]);
     return true;
   }
+
   setModelName(modelName: string): void {
     this.modelName = modelName;
   }
@@ -119,16 +125,17 @@ class CarStore implements CarStoreInterface {
     console.log(['onBind', SERVICE_NAMES.CAR_STORE]);
   }
 }
-/* --/ CarStore --*/
 
+/* --/ CarStore --*/
 
 /* -- InitialState --*/
 @bindAs(INITIAL_SERVICE)
 class InitialState implements InitialStateInterface {
-  vip: boolean = false;
-  abTest: boolean = true;
+  vip = false;
+
+  abTest = true;
 }
+
 /* --/ InitialState --*/
 
 export { CarStore, GarageStore, TimeService, InitialState };
-

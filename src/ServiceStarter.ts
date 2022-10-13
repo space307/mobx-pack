@@ -1,5 +1,5 @@
-import type { BaseStore } from './BaseStore';
-import type { ServiceConfigBindAs } from './typing/common';
+import type { BaseStore } from './BaseStore.js';
+import type { ServiceConfigBindAs } from './typing/common.js';
 
 type StartResult = boolean | boolean[];
 

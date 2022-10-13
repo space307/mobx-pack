@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "mobx-pack": ["../dist"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}

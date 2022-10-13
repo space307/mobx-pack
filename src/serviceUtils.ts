@@ -1,5 +1,9 @@
-import type { StartBindableEntityResult, BindableEntityStartConfig } from './typing/common.js';
-import type { Binder } from './Binder';
+import type {
+  StartBindableEntityResult,
+  BindableEntityStartConfig,
+  BindableEntity,
+} from './typing/common.js';
+import type { Binder } from './Binder.js';
 
 export function startServices<T extends BindableEntityStartConfig[]>(
   binder: Binder,
@@ -25,14 +29,14 @@ export function stopServices(
 export function getStartedServices(
   binder: Binder,
   serviceStartConfigList: BindableEntityStartConfig[],
-): object[] | null {
-  const services: object[] = [];
+): BindableEntity[] | null {
+  const services: BindableEntity[] = [];
   serviceStartConfigList.forEach(startConfig => {
     const { bindAs } = startConfig.binderConfig;
     const service = binder.getService(bindAs);
 
     if (service) {
-      services.push(service);
+      services.push(service as BindableEntity);
     }
   });
   return services.length === serviceStartConfigList.length ? services : null;

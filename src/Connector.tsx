@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useState, useMemo, useEffect, useReducer } from 'react';
 import { observer } from 'mobx-react';
-import type { BaseStore } from './BaseStore';
-import type { BindableEntity } from './typing/common';
+import type { BaseStore } from './BaseStore.js';
+import type { BindableEntity } from './typing/common.js';
 import { getUid, protoName } from './helper/util.js';
 
 type ConnectorOptions<Store extends BaseStore, AdditionalProps extends object = object> = {
@@ -62,6 +62,7 @@ export function Connector<
     return baseProps as Props & AdditionalProps;
   };
 
+  // eslint-disable-next-line react/function-component-definition
   const WrapperComponent: React.FunctionComponent<Props & { store?: Store }> = props => {
     const forceUpdate = useForceUpdate();
     const componentId = useMemo(() => `${Component.name}_${getUid()}`, [Component]);
@@ -87,8 +88,10 @@ export function Connector<
         if (store && store.api) {
           Object.entries(store.api).forEach(([key, apiMethod]) => {
             if (typeof apiMethod === 'function') {
+              // @ts-expect-error unfixable
               api[key] = store.callApi
-                ? (...arg) =>
+                ? (...arg: unknown[]) =>
+                    // @ts-expect-error unfixable
                     store.binder?.callApi(store.getConfig().bindAs, key, componentId, ...arg)
                 : apiMethod.bind(store);
             } else {
@@ -105,9 +108,11 @@ export function Connector<
 
       function initComponent() {
         setServicesLoaded(true);
-        setResolvedApi(null);
+        setResolvedApi({});
 
-        const store = resolveStore(options.store || props.store); // eslint-disable-line
+        // eslint-disable-next-line
+        // @ts-expect-error wtf
+        const store = resolveStore(options.store || props.store);
 
         if (store) {
           void store.start(componentId);
@@ -141,7 +146,7 @@ export function Connector<
         if (options.services) {
           options.services.forEach(service => {
             if (!service.config || !service.config.unstoppable) {
-              service.stop(componentId);
+              void service.stop?.(componentId);
             }
           });
         }
@@ -150,13 +155,14 @@ export function Connector<
 
     if (options.waitForServices && !servicesLoaded) {
       const Preloader = options.preLoader;
-      return typeof Preloader === 'function' ? <Preloader /> : Preloader;
+      return typeof Preloader === 'function' ? <Preloader /> : Preloader ?? null;
     }
 
-    const normalizedProps = composeProps(props, resolvedStore);
+    const normalizedProps = resolvedStore ? composeProps(props, resolvedStore) : void 0;
 
-    if (normalizedProps !== undefined) {
+    if (normalizedProps !== void 0) {
       if (resolvedApi) {
+        // @ts-expect-error don't know what is it
         normalizedProps.api = resolvedApi;
       }
       // eslint-disable-next-line react/jsx-props-no-spreading
@@ -164,7 +170,7 @@ export function Connector<
     }
 
     const Preloader = options.preLoader;
-    return typeof Preloader === 'function' ? <Preloader /> : options.preLoader;
+    return typeof Preloader === 'function' ? <Preloader /> : null;
   };
 
   WrapperComponent.displayName =
