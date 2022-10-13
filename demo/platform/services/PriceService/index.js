@@ -1,6 +1,6 @@
 // @flow
 import { observable, action, reaction } from 'mobx';
-import { ServiceConnector } from 'sources.js';
+import { ServiceConnector } from 'mobx-pack';
 import {
   PRICE_SERVICE,
   ASSET_SERVICE,

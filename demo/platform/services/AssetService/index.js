@@ -4,7 +4,7 @@ import { observable, action, computed } from 'mobx';
 import { ASSET_SERVICE } from 'demo/platform/constants/moduleNames.js';
 import context from 'demo/platform/helper/context.js';
 import { fetchAssets } from 'demo/platform/services/AssetService/client.js';
-import { ServiceConnector } from 'sources.js';
+import { ServiceConnector } from 'mobx-pack';
 import type { AssetType } from 'demo/platform/services/AssetService/typing/types.js';
 import type { AssetServiceInterface } from 'demo/platform/services/AssetService/typing/interfaces.js';
 

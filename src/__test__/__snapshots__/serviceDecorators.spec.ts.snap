@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`serviceDecorators test serviceDecorators config 1`] = `
+{
+  "bindAs": "test",
+  "onBind": [
+    [
+      "test1",
+      "test2",
+      "onBind",
+    ],
+    [
+      "test1",
+      "test2",
+      "onBindOnlyGarageService",
+    ],
+  ],
+  "onStart": [
+    "init",
+    "onStart",
+  ],
+  "onStop": "onStop",
+  "onUnbind": [
+    [
+      "test1",
+      "test2",
+      "onUnbind",
+    ],
+  ],
+}
+`;

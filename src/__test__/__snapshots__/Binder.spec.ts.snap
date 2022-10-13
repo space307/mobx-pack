@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Binder addService 1`] = `
+[
+  "s1",
+  {
+    "bindAs": "s1",
+    "onBind": [
+      [
+        "s2",
+        "s3",
+        "someMethod",
+      ],
+    ],
+    "onUnbind": [
+      [
+        "s2",
+        "someMethod",
+      ],
+    ],
+  },
+]
+`;
+
+exports[`Binder saveDeps 1`] = `
+{
+  "onBind": {
+    "s2": [
+      "s1",
+    ],
+    "s3": [
+      "s1",
+    ],
+  },
+  "onUnbind": {
+    "s3": [
+      "s1",
+    ],
+  },
+}
+`;
+
+exports[`Binder test addService 1`] = `
+[
+  "s1",
+  {
+    "bindAs": "s1",
+    "onBind": [
+      [
+        "s2",
+        "s3",
+        "someMethod",
+      ],
+    ],
+    "onUnbind": [
+      [
+        "s2",
+        "someMethod",
+      ],
+    ],
+  },
+]
+`;
+
+exports[`Binder test saveDeps 1`] = `
+{
+  "onBind": {
+    "s2": [
+      "s1",
+    ],
+    "s3": [
+      "s1",
+    ],
+  },
+  "onUnbind": {
+    "s3": [
+      "s1",
+    ],
+  },
+}
+`;
